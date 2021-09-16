@@ -34,3 +34,4 @@
 .vs
 *.vcxproj.filters
 *.vcxproj.user
+bin/

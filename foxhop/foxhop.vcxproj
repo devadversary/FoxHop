@@ -78,9 +78,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>../bin/debug/</OutDir>
+    <IntDir>../bin/debug/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>../bin/release/</OutDir>
+    <IntDir>../bin/release/</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -142,6 +146,33 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="component_motion.cpp" />
+    <ClCompile Include="d2dassist.cpp" />
+    <ClCompile Include="object_motion_box.cpp" />
+    <ClCompile Include="object_motion_line.cpp" />
+    <ClCompile Include="object_motion_text.cpp" />
+    <ClCompile Include="ui_button.cpp" />
+    <ClCompile Include="ui_divisionline.cpp" />
+    <ClCompile Include="ui_listview.cpp" />
+    <ClCompile Include="ui_panel.cpp" />
+    <ClCompile Include="ui_static.cpp" />
+    <ClCompile Include="ui_system.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\component_motion.hpp" />
+    <ClInclude Include="include\d2dassist.h" />
+    <ClInclude Include="include\object.hpp" />
+    <ClInclude Include="include\object_motion_box.hpp" />
+    <ClInclude Include="include\object_motion_line.hpp" />
+    <ClInclude Include="include\object_motion_text.hpp" />
+    <ClInclude Include="include\object_pool.hpp" />
+    <ClInclude Include="include\ui_base.hpp" />
+    <ClInclude Include="include\ui_button.hpp" />
+    <ClInclude Include="include\ui_divisionline.hpp" />
+    <ClInclude Include="include\ui_listview.hpp" />
+    <ClInclude Include="include\ui_panel.hpp" />
+    <ClInclude Include="include\ui_static.hpp" />
+    <ClInclude Include="include\ui_system.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
