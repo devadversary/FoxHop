@@ -1,5 +1,10 @@
 #include "./include/ui_system.hpp"
 
+#include "./include/ui_panel.hpp"
+#include "./include/ui_button.hpp"
+#include "./include/ui_divisionline.hpp"
+#include "./include/ui_static.hpp"
+
 UISystem::UISystem()
 {
     D2DA = { 0, };
@@ -26,8 +31,8 @@ void UISystem::Init(HWND hWnd, unsigned int nMaxUI)
     AddFontResourceW(szFontPath);
     /*D2D 환경 초기화 및 UI시스템 초기화*/
     D2DA_Init(&D2DA, hWnd); /*Direct X 개체들과 렌더타겟, 팩토리 등 초기화*/
-    TinyTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 7.9f, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-    SmallTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 9.f, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+    TinyTextForm   = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 7.9f, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+    SmallTextForm  = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 9.f, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     ButtonTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 12, DWRITE_TEXT_ALIGNMENT_CENTER,  DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     MediumTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 17, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     pUITbl = (UI**)calloc(nMaxUI, sizeof(UI*));
@@ -35,10 +40,12 @@ void UISystem::Init(HWND hWnd, unsigned int nMaxUI)
     /*D2D에서 렌더링될 때, 실수좌표계를 사용함으로 각 픽셀의 중심을 기준으로 렌더해야한다
       정수 좌표계가 아니므로, 픽셀의 중심 (0.5 픽셀씩 +) 기준이 아니면 상이 흐리다.*/
     D2DA.pRenTarget->SetTransform(D2D1::Matrix3x2F::Translation(0.5f, 0.5f));
-    //UIList.Init(nMaxUI);
     BoxPoolStorage.Init(200,50);
     LinePoolStorage.Init(200, 100);
     TextPoolStorage.Init(200, 50);
+
+    /*각 UI 팩토리 초기화*/
+    pUIButtonFactory = new UI_ButtonFactory; pUIButtonFactory->Init(this, D2DA.pRenTarget);
 }
  
 /**
@@ -49,7 +56,7 @@ void UISystem::Init(HWND hWnd, unsigned int nMaxUI)
     @remark 이 매서드가 UI를 생성할때는 각 UI마다 구현되어있는 preInit 매서드를 통해 기본 초기화를 진행한다
     @n      UI시스템 초기화시 지정했던 최대 UI 갯수가 200이라면 nID의 범위는 0-199 가 되어야한다.
 */
-UI* UISystem::CreateUI(UIType type, unsigned int nID, pfnUIHandler callback)
+UI* UISystem::CreateUI(UIType type, unsigned int nID, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback)
 {
     UI* pUI=0;
     UI_INFO* pInfo;
@@ -67,7 +74,8 @@ UI* UISystem::CreateUI(UIType type, unsigned int nID, pfnUIHandler callback)
     case UIType::eUI_Button:
         pUI = new UI_Button;
         pUI->uiType = UIType::eUI_Button;
-        ((UI_Button*)pUI)->preInit(this, D2DA.pRenTarget, nID, callback);
+        pUIButtonFactory->CreateUI(nID, pos, pText, nDelay, callback);
+        //((UI_Button*)pUI)->CreateUI(this, D2DA.pRenTarget, nID, callback);
         break;
 
     case UIType::eUI_DivLine : 
@@ -99,22 +107,22 @@ UI* UISystem::CreateUI(UIType type, unsigned int nID, pfnUIHandler callback)
 /**
     @brief 특정 UI에 메세지 보내기
 */
-void UISystem::SendUIMessage(UI* pUI, UINT Message, void* parm)
+void UISystem::SendUIMessage(UI* pUI, UINT Message, void* param)
 {
     if (!pUI || !pUI->DefaultHandler) return;
-    pUI->DefaultHandler(pUI, Message, parm);
+    pUI->DefaultHandler(pUI, Message, param);
 }
 
 /**
     @brief 특정 UI에 메세지 보내기 (ID값으로 보내기)
 */
-void UISystem::SendUIMessageByID(unsigned int nID, UINT Message, void* parm)
+void UISystem::SendUIMessageByID(unsigned int nID, UINT Message, void* param)
 {
     UI* pUI;
 
     pUI = pUITbl[nID];
     if (!pUI || !pUI->DefaultHandler) return;
-    pUI->DefaultHandler(pUI, Message, parm);
+    pUI->DefaultHandler(pUI, Message, param);
 }
 
 /**

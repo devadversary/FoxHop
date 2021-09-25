@@ -3,7 +3,8 @@
 #include "ui_base.hpp"
 #include "ui_system.hpp"
 
-class UISystem; /*UI시스템 클래스의 전방선언*/
+/*UI시스템 클래스의 전방선언*/
+class UISystem;
 
 class UI_Listview : public UI {
 private:
@@ -14,7 +15,7 @@ private:
     D2D1_COLOR_F                  FaceColor;      /**< 초기 버튼 전경색*/
     D2D1_COLOR_F                  HighlightColor; /**< 버튼 하이라이트 색*/
     D2D1_COLOR_F                  FontColor;      /**< 초기 텍스트 색*/
-    wchar_t                       szText[MAX_STATIC_TEXTLEN];
+    //wchar_t                       szText[MAX_STATIC_TEXTLEN];
     int                           nTextLen;
 
 public: /*반드시 있어야 되는 매서드*/

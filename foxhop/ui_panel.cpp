@@ -1,4 +1,10 @@
 #include "./include/ui_panel.hpp"
+#include "./include/ui_system.hpp"
+
+#include "./include/ui_button.hpp"
+#include "./include/ui_static.hpp"
+#include "./include/ui_divisionline.hpp"
+#include "./include/ui_listview.hpp"
 
 UI_Panel::UI_Panel() {}
 
@@ -155,12 +161,12 @@ void UI_Panel::render()
 /**
     @brief 해당 패널의 하위 UI를 생성하고 내부 리스트에 등록한다
 */
-UI* UI_Panel::CreateUI(UIType type, unsigned int nID, pfnUIHandler callback)
+UI* UI_Panel::CreateUI(UIType type, unsigned int nID, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback)
 {
     UI* pUI;
 
     /*UI 생성*/
-    pUI = uiSys->CreateUI(type, nID, callback);
+    pUI = uiSys->CreateUI(type, nID, pos, pText, nDelay, callback);
 
     /*패널 UI는 별도로 등록*/
     if (type == UIType::eUI_Panel) {

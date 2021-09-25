@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foxhop", "foxhop\foxhop.vcxproj", "{E954553C-77BC-476A-99E8-F2B6550249AB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foxhop_test", "foxhop_test\foxhop_test.vcxproj", "{513318EC-3B31-43ED-8BC7-51132F30810B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E954553C-77BC-476A-99E8-F2B6550249AB} = {E954553C-77BC-476A-99E8-F2B6550249AB}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

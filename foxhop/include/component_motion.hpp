@@ -67,7 +67,7 @@ class ComponentMotion {
 private:
     MOTION_PATTERN ChannelList[MAX_CHANNEL_CNT];
     int            nCntUsedChannel; /**< 현재 사용중인 채널 갯수*/
-    unsigned int   nTotalPlaytime;  /**< 채널 전체 재생시간*/
+    unsigned int   nTotalPlaytime;  /**< 채널 전n체 재생시간*/
     unsigned int   nRunTime;        /**< 총 진행시간*/
 
 public:

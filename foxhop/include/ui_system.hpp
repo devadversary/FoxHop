@@ -1,11 +1,14 @@
 #pragma once
 
+/*순환 참조를 방지하기 위해, UISystem 헤더에서 모든 하위 UI 을 포함 하도록 한다.*/
+
 #include "d2dassist.hpp"
 #include "ui_base.hpp"
 #include "ui_panel.hpp"
 #include "ui_button.hpp"
-#include "ui_divisionline.hpp"
+#include "ui_listview.hpp"
 #include "ui_static.hpp"
+#include "ui_divisionline.hpp"
 
 /*TODO : 추후에 폰트를 쉽게 변경 가능하도록 하드코딩을 제거할 수 있는 구조로 변경할것.*/
 #define UISYSTEM_FONTNAME_DEFAULT (L"monoMMM_5") /*UI시스템이 기본적으로 사용하는 폰트 이름*/
@@ -54,14 +57,15 @@ public:
 
 private:
     UI**                             pUITbl;          /**< UI 인스턴스를 모아둘 배열*/
-    int                              nUITblCnt;          /**< 배열의 길이 (UI의 ID를 배열의 인덱스로 사용)*/
+    int                              nUITblCnt;       /**< 배열의 길이 (UI의 ID를 배열의 인덱스로 사용)*/
+    UI_ButtonFactory*                pUIButtonFactory; /**< 버튼UI 팩토리*/
 
 public:
     UISystem();
     ~UISystem();
     void Init(HWND hWnd, unsigned int nMaxUI);
-    UI* CreateUI(UIType type, unsigned int nID, pfnUIHandler callback);
-    void SendUIMessage(UI* pUI, UINT Message, void* parm);
-    void SendUIMessageByID(unsigned int nID, UINT Message, void* parm);
+    UI*  CreateUI(UIType type, unsigned int nID, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback);
+    void SendUIMessage(UI* pUI, UINT Message, void* param);
+    void SendUIMessageByID(unsigned int nID, UINT Message, void* param);
     void ReleaseUI(unsigned int nID);
 };

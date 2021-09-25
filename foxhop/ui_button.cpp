@@ -1,31 +1,7 @@
 #include "./include/ui_button.hpp"
+#include "./include/ui_system.hpp"
 
 static void DefaultButtonProc(UI* pUI, UINT Message, void* parm);
-
-UI_Button::~UI_Button() {}
-
-UI_Button::UI_Button() {}
-
-UI_Button::UI_Button(UISystem* pUISys, ID2D1RenderTarget* pRT, int nID, pfnUIHandler pfnCallback)
-{
-    preInit(pUISys, pRT, nID, pfnCallback);
-}
-
-void UI_Button::preInit(UISystem* pUISys, ID2D1RenderTarget* pRT, int nID, pfnUIHandler pfnCallback)
-{
-    uiSys = pUISys;
-    ID = nID;
-    pRenderTarget = pRT;
-    DefaultHandler = DefaultButtonProc;
-    MessageHandler = pfnCallback;
-    PoolBox = pUISys->BoxPoolStorage.getPool();
-    PoolText = pUISys->TextPoolStorage.getPool();
-    szText[0] = 0;
-    nTextLen = 0;
-    MBoxFace = NULL;
-    MBoxHighlight = NULL;
-    MText = NULL;
-}
 
 void UI_Button::CreateUI(UISystem* pUISys, ID2D1RenderTarget* pRT,
                          BUTTON_MOTION_SET UIMotionSet, BUTTON_COLOR_SET UIColorSet,
@@ -49,29 +25,7 @@ void UI_Button::CreateUI(UISystem* pUISys, ID2D1RenderTarget* pRT,
     MBoxHighlight  = PoolBox->activateObject();
     MText          = PoolText->activateObject();
 
-    //InputMotion(Motion, nDelay);
-    uiMotionState = eUIMotionState::eUMS_PlayingVisible;
-    DefaultHandler(this, UIM_CREATE, NULL); /*UI생성 메세지 전송*/
-}
-
-/**
-    @brief 버튼UI가 사용할 박스와 텍스트에 대한 풀을 초기화한다.
-    @remark TODO : 버튼 스타일을 지정해서 좀 더 다양한 모션을 내부적으로 제공하도록 하자.
-*/
-void UI_Button::Init(int Motion, POSITION Pos, D2D1_COLOR_F Color, wchar_t* pText, D2D1_COLOR_F TextColor, int nDelay)
-{
-    if (!PoolBox || !PoolText) return;
-    uiPos = Pos;
-    uiMotion = Motion;
-    FaceColor = Color;
-    FontColor = TextColor;
-    nTextLen = (int)wcslen(pText);
-    wcscpy_s(szText, MAX_BUTTONNAME, pText);
-    /*Init을 해주기 전에는 업데이트, 렌더링을 할 필요가 없기때문에 여기서 오브젝트를 생성한다.*/
-    MBoxFace = PoolBox->activateObject();
-    MBoxHighlight = PoolBox->activateObject();
-    MText = PoolText->activateObject();
-    InputMotion(Motion, nDelay);
+    InputMotion(MotionSet.Init, nDelay);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
     DefaultHandler(this, UIM_CREATE, NULL); /*UI생성 메세지 전송*/
 }
@@ -81,15 +35,15 @@ void UI_Button::Init(int Motion, POSITION Pos, D2D1_COLOR_F Color, wchar_t* pTex
     @param Motion UI의 등장 모션
     @param nDelay UI의 등장 딜레이
 */
-void UI_Button::InputMotion(int Motion, int nDelay)
+void UI_Button::InputMotion(eButtonMotionInit Motion, int nDelay)
 {
     MOTION_INFO miMove, miColor;
     POSITION TmpStartPos, TmpEndPos;
     D2D1_COLOR_F TmpStartColor;
 
-    switch (uiMotion) {
-#if 0 /*TODO : 버튼의 모션 스타일을 지정하여 다양한 연출이 가능하도록 만들 예정*/
-    case UIBS_RELOADMOTION:
+    switch (Motion) {
+#if 1 /*TODO : 버튼의 모션 스타일을 지정하여 다양한 연출이 가능하도록 만들 예정*/
+    case eButtonMotionInit::eMotionReload :
         break;
 #endif /*우선은 한가지 모션만 제공*/
     default:
@@ -168,7 +122,7 @@ void UI_Button::pause(int nDelay)
 */
 void UI_Button::resume(int nDelay)
 {
-    InputMotion(uiMotion, nDelay);
+    InputMotion(MotionSet.Init, nDelay);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
 }
 
@@ -185,6 +139,8 @@ BOOL UI_Button::update(unsigned long time)
     nTrue += MBoxHighlight->update(time);
     nTrue += MText->update(time);
     if (!nTrue) return FALSE; /*Hide 완료, 또는 Init완료 해야댐*/
+    if (uiMotionState == eUIMotionState::eUMS_PlayingHide)
+        uiMotionState = eUIMotionState::eUMS_Hide;
     return TRUE;
 }
 
@@ -234,12 +190,18 @@ void UI_Button::setHighlightColor(D2D1_COLOR_F Color, MOTION_INFO miColor)
 */
 static void DefaultButtonProc(UI* pUI, UINT Message, void* param)
 {
-    UI_Button* pButton = (UI_Button*)pUI;
-    pfnUIHandler UserHandler = pUI->MessageHandler;
+    UI_Button*         pButton = (UI_Button*)pUI;
+    pfnUIHandler       UserHandler = pUI->MessageHandler;
+    BUTTON_MOTION_SET  MotionSet;
+    BUTTON_COLOR_SET   ColorSet;
+
+    MotionSet = pButton->MotionSet;
+    ColorSet = pButton->ColorSet;
 
     switch (Message) {
-#if 0 /* TODO : 버튼 마우스오버를 기본적으로 처리 할것인지, 사용자에게 맡길것인지 결정해야함.*/
+#if 1 /*2021.07.27 devadversary : UI들의 사용자 상호작용에따른 모션변경은 기본 핸들러가 처리하도록 결정함*/
     case UIM_MOUSEON:
+        //pButton->setHighlightColor( ColorSet.Highlight,  );
         break;
 
     case UIM_MOUSELEAVE:
@@ -248,4 +210,81 @@ static void DefaultButtonProc(UI* pUI, UINT Message, void* param)
     default: break;
     }
     if(UserHandler) UserHandler(pUI, Message, param);
+}
+
+/**
+    @brief 팩토리 초기화
+*/
+void UI_ButtonFactory::Init(UISystem* pUISystem, ID2D1RenderTarget* pRT)
+{
+    /*기본 환경 개체 초기화*/
+    pUISys = pUISystem;
+    pRenderTarget = pRT;
+
+    /*기본 모션 지정 (추후 변경 가능)*/
+    MotionSet.Init      = eButtonMotionInit::eMotionFlick;
+    MotionSet.Pause     = eButtonMotionPause::eMotionFlick;
+    MotionSet.Color     = eButtonMotionColor::eMotionFlash;
+    MotionSet.Text      = eButtonMotionText::eMotionDefault;
+    MotionSet.Click     = eButtonMotionClick::eMotionFlash;
+    MotionSet.MouseOver = eButtonMotionMouseover::eMotionFlick;
+
+    /*기본 모션진행시간 지정 (추후 변경 가능)*/
+    MotionSet.InitPitch      = 250;
+    MotionSet.PausePitch     = 250;
+    MotionSet.ColorPitch     = 200;
+    MotionSet.TextPitch      = 0;
+    MotionSet.ClickPitch     = 200;
+    MotionSet.MouseOverPitch = 200;
+
+    /*기본 컬러 지정 (추후 변경 가능) : R G B A (0.0f ~ 1.0f)*/
+    ColorSet.Face      = {0.8, 0.8, 0.8, 1};
+    ColorSet.Font      = {0,   0,   0,   1};
+    ColorSet.Frame     = {0,   0,   0,   0};
+    ColorSet.Highlight = {1,   1,   1,   1};
+}
+
+/**
+    @brief 모션 집합 가져오기
+*/
+void UI_ButtonFactory::GetCurrentMotionSet(BUTTON_MOTION_SET* pMotionSet)
+{
+    if (!pMotionSet) return;
+    *pMotionSet = MotionSet;
+}
+
+/**
+    @brief 모션 집합 적용하기
+*/
+void UI_ButtonFactory::SetCurrentMotionSet(BUTTON_MOTION_SET* pMotionSet)
+{
+    if (!pMotionSet) return;
+    MotionSet = *pMotionSet;
+}
+
+/**
+    @brief 컬러 집합 가져오기
+*/
+void UI_ButtonFactory::GetCurrentColorSet(BUTTON_COLOR_SET* pColorSet)
+{
+    if (!pColorSet) return;
+    *pColorSet = ColorSet;
+}
+
+/**
+    @brief 컬러 집합 적용하기
+*/
+void UI_ButtonFactory::SetCurrentColorSet(BUTTON_COLOR_SET* pColorSet)
+{
+    if (!pColorSet) return;
+    ColorSet = *pColorSet;
+}
+
+/**
+    @brief UI 생성
+    @remark 현재 팩토리의 지정 설정이 적용되어 생성된다 (모션, 색상 등)
+*/
+UI* UI_ButtonFactory::CreateUI(int nID, POSITION Pos, wchar_t* pText, int nDelay, pfnUIHandler pfnCallback)
+{
+    return NULL;
 }

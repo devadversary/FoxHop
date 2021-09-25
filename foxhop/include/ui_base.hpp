@@ -26,7 +26,7 @@
 #define UIM_MOUSELEAVE    117
 #define UIM_LIST_SELECT   300
 
-/*헤더 상호참조로 인한 전방선언*/
+/*필요 개체 전방선언*/
 class UI;
 class UISystem;
 enum class UIType;
@@ -38,7 +38,7 @@ enum class UIType;
     @param [OPT] parm   : 메세지에대한 추가정보. WndProc의 WPARAM, LPARAM과 비슷하다.
     @remark Win32API의 WndProc 콜백함수와 결이 같다.
 */
-typedef void (*pfnUIHandler)(UI* pUI, UINT Message, void* parm);
+typedef void (*pfnUIHandler)(UI* pUI, UINT Message, void* param);
 typedef void (*pfnUpdate)(unsigned long nTime);
 typedef void (*pfnRender)();
 
@@ -47,7 +47,7 @@ typedef void (*pfnRender)();
 */
 enum class eUIMotionState {
     eUMS_Null = 0,       /**< 빈 상태*/
-    eUMS_PlayingVisible, /**< 초기화 모션 진행중*/
+    eUMS_PlayingVisible, /**< 초기화 모션 진행중 (delay 대기도 포함)*/
     eUMS_Visible,        /**< 보임상태 (pause 종료, init 완료 등등)*/
     eUMS_PlayingHide,    /**< 숨김 모션 진행중*/
     eUMS_Hide            /**< 숨김상태 (pause 완료, init 이전 등등)*/
@@ -70,7 +70,7 @@ public :
     POINT              uiBasePoint;     /**< UI 베이스 위치*/
     POSITION           uiPos;           /**< 베이스로부터의 UI 포지션*/
     int                uiMotion;        /**< UI의 모션 타입 (UI종류마다 값이 다름)*/
-    int                ID;              /**< UI의 ID값*/
+    int                ID;              /**< UI의 ID값 (HWND 처럼)*/
     eUIMotionState     uiMotionState;   /**< UI의 모션상태 (적절하지 않은 이벤트를 무시 하기 위함 : ex-생성모션 진행중 마우스오버모션 재생 방지)*/
     pfnUIHandler       DefaultHandler;  /**< UI 마다 가질 기본메세지 핸들러*/
     pfnUIHandler       MessageHandler;  /**< UI 마다 가질 사용자메세지 핸들러*/

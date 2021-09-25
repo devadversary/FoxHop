@@ -1,4 +1,6 @@
 #include "./include/ui_static.hpp"
+#include "./include/ui_system.hpp"
+
 
 static void DefaultStaticProc(UI* pUI, UINT Message, void* parm);
 
