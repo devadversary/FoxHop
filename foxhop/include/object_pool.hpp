@@ -18,7 +18,6 @@ private:
     T*   pInactivate;      /**< 놀고있는 오브젝트 포인터*/
     T*   pActivate;        /**< 열일중인 오브젝트 포인터*/
     T*   pObject;          /**< 풀*/
-    BOOL bAssigned;        /**< 이 풀의 사용여부. (단독사용시 필요없음 이 풀의 상위 클래스가 사용)*/
     int  nAdditionalCnt;   /**< 최대용량 초과시 추가할당될 갯수 단위*/
     int  nCapacity;        /**< 풀링된 최대 오브젝트 갯수*/
     int  nUsingCnt;        /**< 현재 풀에서 사용중인 오브젝트 갯수*/
@@ -27,39 +26,16 @@ private:
 public:
     ObjectPool();
     ~ObjectPool();
-    BOOL Init(int nCnt = 250, int nAddCnt = 250);
+    BOOL Init(int nCnt = 1000, int nAddCnt = 500);
     void Release();
     void Reset();
     BOOL isAssigned();
-    void setAssigned(BOOL bFlag);
     int  getCapacity();
     int  getUsingCount();
     int  getUsingMemoryBytes();
     T*   getActiveHead();
     T*   activateObject();
     void deactivateObject(T* pObj);
-};
-
-/**
-    @brief  오브젝트풀을 미리 생성하여 발급해주는 일종의 매니저
-    @remark 풀이 필요하면 여기서 미리 초기화된 풀을 발급/반납한다.
-    @n      템플릿 T에는 오브젝트가 들어간다.
-    @n      ex) ObjectPoolList<ObjectMotionBox>
-*/
-template <typename T> class ObjectPoolList {
-
-private:
-    ObjectPool<T>** pPoolList;       /**< 스택으로 관리될 풀 리스트 (초기화 이래로 해제하지 않음)*/
-    int            nCapacity;        /**< 전체 풀 갯수*/
-    int            nUsingCnt;        /**< 현재 사용중인 풀 갯수*/
-    int            nTotalPoolsSize;  /**< 현재 풀 전체의 메모리 사용량*/
-    int            nTotalUsingSize;  /**< 현재 할당된 모든 오브젝트 크기 총합*/
-public:
-    ObjectPoolList();
-    ~ObjectPoolList();
-    BOOL           Init(int nPoolCnt, int nObjCnt);
-    ObjectPool<T>* getPool();
-    void           returnPool(ObjectPool<T>* pPool);
 };
 
 template <typename T> ObjectPool<T>::ObjectPool()
@@ -78,6 +54,8 @@ template <typename T> ObjectPool<T>::~ObjectPool() {}
 
 /**
     @brief 풀을 초기화 하고 빈칸 리스트를 이어놓는다.
+    @param nCnt    할당할 오브젝트 갯수 (기본값 1000 개)
+    @param nAddCnt 오브젝트 소진시 추가 할당할 갯수 (기본값 500 개 , 추후에 없어질 파라미터)
 */
 template <typename T> BOOL ObjectPool<T>::Init(int nCnt, int nAddCnt)
 {
@@ -154,17 +132,6 @@ template <typename T> BOOL ObjectPool<T>::isAssigned()
 {
     return bAssigned;
 }
-
-/**
-    @brief  현재 풀의 사용 여부를 설정한다
-    @remark 이 매서드는 이 풀을 이용하는 상위 클래스를 위한것임
-    @n      이 풀이 외부에서 따로 관리되고 있다면, 건들지 말것
-*/
-template <typename T> void ObjectPool<T>::setAssigned(BOOL bFlag)
-{
-    bAssigned = bFlag;
-}
-
 
 /**
     @brief 현재 풀의 최대 한도를 얻어온다
@@ -276,6 +243,29 @@ template <typename T> void ObjectPool<T>::deactivateObject(T* pObj)
     nUsingCnt--;
 }
 
+#if 0 /*2021.09.26 DevAdversary - 오브젝트 관리에 불필요한 최적화로인한 코드의 복잡성 문제로 제거*/
+/**
+    @brief  오브젝트풀을 미리 생성하여 발급해주는 일종의 매니저
+    @remark 풀이 필요하면 여기서 미리 초기화된 풀을 발급/반납한다.
+    @n      템플릿 T에는 오브젝트가 들어간다.
+    @n      ex) ObjectPoolList<ObjectMotionBox>
+*/
+template <typename T> class ObjectPoolList {
+
+private:
+    ObjectPool<T>** pPoolList;       /**< 스택으로 관리될 풀 리스트 (초기화 이래로 해제하지 않음)*/
+    int            nCapacity;        /**< 전체 풀 갯수*/
+    int            nUsingCnt;        /**< 현재 사용중인 풀 갯수*/
+    int            nTotalPoolsSize;  /**< 현재 풀 전체의 메모리 사용량*/
+    int            nTotalUsingSize;  /**< 현재 할당된 모든 오브젝트 크기 총합*/
+public:
+    ObjectPoolList();
+    ~ObjectPoolList();
+    BOOL           Init(int nPoolCnt, int nObjCnt);
+    ObjectPool<T>* getPool();
+    void           returnPool(ObjectPool<T>* pPool);
+};
+
 template <typename T> ObjectPoolList<T>::ObjectPoolList()
 {
     pPoolList = 0;
@@ -335,3 +325,4 @@ template <typename T> void ObjectPoolList<T>::returnPool(ObjectPool<T>* pPool)
     pPool->setAssigned(FALSE);        /*풀 사용 플래그 OFF*/
     pPoolList[nUsingCnt] = pPool;     /*풀 반환*/
 }
+#endif

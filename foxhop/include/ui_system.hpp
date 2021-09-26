@@ -46,19 +46,20 @@ enum class UIType {
 */
 class UISystem {
 public:
-    D2DA_CONTEXT                     D2DA;            /**< D2D 개체들의 컨텍스트 (이 안에 다 있다)*/
-    IDWriteTextFormat*               TinyTextForm;    /**< 작은 텍스트 폼*/
-    IDWriteTextFormat*               SmallTextForm;   /**< 작은 텍스트 폼*/
-    IDWriteTextFormat*               ButtonTextForm;  /**< 버튼 컨트롤들이 전역적으로 사용할 텍스트 폼. (winAPI 버튼도 텍스트 폼은 무조건 고정임)*/
-    IDWriteTextFormat*               MediumTextForm;  /**< 중간크기 텍스트 폼*/
-    ObjectPoolList<ObjectMotionBox>  BoxPoolStorage;  /**< 모션박스풀의 스토리지*/
-    ObjectPoolList<ObjectMotionLine> LinePoolStorage;
-    ObjectPoolList<ObjectMotionText> TextPoolStorage;
+    D2DA_CONTEXT                 D2DA;            /**< D2D 개체들의 컨텍스트 (이 안에 다 있다)*/
+    IDWriteTextFormat*           TinyTextForm;    /**< 작은 텍스트 폼*/
+    IDWriteTextFormat*           SmallTextForm;   /**< 작은 텍스트 폼*/
+    IDWriteTextFormat*           ButtonTextForm;  /**< 버튼 컨트롤들이 전역적으로 사용할 텍스트 폼. (winAPI 버튼도 텍스트 폼은 무조건 고정임)*/
+    IDWriteTextFormat*           MediumTextForm;  /**< 중간크기 텍스트 폼*/
+
+    ObjectPool<ObjectMotionBox>  ObjPoolBox;
+    ObjectPool<ObjectMotionLine> ObjPoolLine;
+    ObjectPool<ObjectMotionText> ObjPoolText;
 
 private:
-    UI**                             pUITbl;          /**< UI 인스턴스를 모아둘 배열*/
-    int                              nUITblCnt;       /**< 배열의 길이 (UI의 ID를 배열의 인덱스로 사용)*/
-    UI_ButtonFactory*                pUIButtonFactory; /**< 버튼UI 팩토리*/
+    UI**                         pUITbl;          /**< UI 인스턴스를 모아둘 배열*/
+    int                          nUITblCnt;       /**< 배열의 길이 (UI의 ID를 배열의 인덱스로 사용)*/
+    UI_ButtonFactory*            pUIButtonFactory; /**< 버튼UI 팩토리*/
 
 public:
     UISystem();

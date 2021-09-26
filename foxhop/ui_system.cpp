@@ -16,6 +16,11 @@ UISystem::~UISystem() {}
 
 /**
     @brief UI시스템을 초기화 한다.
+    @param hWnd UI 시스템을 사용할 메인윈도우 핸들
+    @param nMaxUI UI생성 한계치 갯수 지정 (256개 정도 권장하지만, 더 늘려도 상관없음)
+    @remark 내부적으로 모션오브젝트 갯수를 각각 5000~10000개정도만 생성하기 때문에
+    @n      nMaxUI 로 UI갯수 상한을 늘릴경우, 모션오브젝트의 갯수 상한에 걸릴 수 있음.
+    @n      추후에 UI갯수 상한에 따른 적절한 모션오브젝트 갯수를 지정해주어야 함.
 */
 void UISystem::Init(HWND hWnd, unsigned int nMaxUI)
 {
@@ -40,9 +45,10 @@ void UISystem::Init(HWND hWnd, unsigned int nMaxUI)
     /*D2D에서 렌더링될 때, 실수좌표계를 사용함으로 각 픽셀의 중심을 기준으로 렌더해야한다
       정수 좌표계가 아니므로, 픽셀의 중심 (0.5 픽셀씩 +) 기준이 아니면 상이 흐리다.*/
     D2DA.pRenTarget->SetTransform(D2D1::Matrix3x2F::Translation(0.5f, 0.5f));
-    BoxPoolStorage.Init(200,50);
-    LinePoolStorage.Init(200, 100);
-    TextPoolStorage.Init(200, 50);
+
+    ObjPoolBox.Init(5000, 0);
+    ObjPoolLine.Init(5000, 0);
+    ObjPoolText.Init(10000, 0);
 
     /*각 UI 팩토리 초기화*/
     pUIButtonFactory = new UI_ButtonFactory; pUIButtonFactory->Init(this, D2DA.pRenTarget);
