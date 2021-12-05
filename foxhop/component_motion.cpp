@@ -1,7 +1,7 @@
 /*2020.10.16 - AUTHOR : DevAdversary
 모션그래픽 처리를 위해 간소하게 오실레이터 매서드 등을 제공*/
 
-#include "component_motion.hpp"
+#include "./include/component_motion.hpp"
 
 /**
     @brief 모션제어값 체인 추가

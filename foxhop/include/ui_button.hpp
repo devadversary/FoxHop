@@ -8,49 +8,48 @@ class UISystem; /*UI시스템 클래스의 전방선언*/
     @brief 버튼 생성 모션 타입
 */
 enum class eButtonMotionInit {
-    eMotionReload = 0, /**< 장전 모션*/
-    eMotionFlick,      /**< 플리커링 모션*/
-    eMotionCustom
+    eMotionDefault = 0, /**< 모션 없음*/
+    eMotionReload,      /**< 장전 모션*/
+    eMotionFlick        /**< 플리커링 모션*/
 };
 
 /**
     @brief 버튼 소멸 모션 타입
 */
 enum class eButtonMotionPause {
-    eMotionFlick = 0, /**< 플리커링 모션*/
-    eMotionCustom
+    eMotionDefault = 0, /**< 모션 없음*/
+    eMotionFlick        /**< 플리커링 모션*/
 };
 
 /**
     @brief 버튼 마우스 오버 모션 타입
 */
 enum class eButtonMotionMouseover {
-    eMotionFlick = 0, /**< 플리커링 모션*/
-    eMotionCustom
+    eMotionDefault = 0, /**< 모션 없음*/
+    eMotionFlick        /**< 플리커링 모션*/
 };
 
 /**
     @brief 버튼 클릭 모션 타입
 */
 enum class eButtonMotionClick {
-    eMotionFlash = 0, /**< 점멸 모션*/
-    eMotionCustom
+    eMotionDefault = 0, /**< 모션 없음*/
+    eMotionFlash        /**< 점멸 모션*/
 };
 
 /**
     @brief 버튼 색상 변경 모션 타입
 */
 enum class eButtonMotionColor {
-    eMotionFlash = 0, /**< 점멸 모션*/
-    eMotionCustom
+    eMotionDefault = 0, /**< 모션 없음*/
+    eMotionFlash        /**< 점멸 모션*/
 };
 
 /**
     @brief 버튼 텍스트 모션 타입
 */
 enum class eButtonMotionText {
-    eMotionDefault = 0, /**< 모션 없음*/
-    eMotionCustom
+    eMotionDefault = 0 /**< 모션 없음*/
 };
 
 
@@ -61,14 +60,19 @@ enum class eButtonMotionText {
 typedef struct _stButtonMotionSet {
     eButtonMotionInit      Init;           /**< 시작모션*/
     unsigned int           InitPitch;      /**< 시작모션 피치*/
+
     eButtonMotionPause     Pause;          /**< 소멸모션*/
     unsigned int           PausePitch;     /**< 소멸모션 피치*/
+
     eButtonMotionMouseover MouseOver;      /**< 마우스오버 모션*/
     unsigned int           MouseOverPitch; /**< 마우스오버모션 피치*/
+
     eButtonMotionClick     Click;          /**< 클릭 모션*/
     unsigned int           ClickPitch;     /**< 클릭 피치*/
+
     eButtonMotionColor     Color;          /**< 색상 변경 모션*/
     unsigned int           ColorPitch;     /**< 색상 변경 피치*/
+
     eButtonMotionText      Text;           /**< 텍스트 변경 모션*/
     unsigned int           TextPitch;      /**< 텍스트 변경 피치*/
 }BUTTON_MOTION_SET;
@@ -86,10 +90,12 @@ typedef struct _stColorSet {
 
 #define MAX_BUTTONNAME 32 /*버튼의 최대 텍스트 길이*/
 
+/**
+    @brief 버튼 클래스
+    @remark 생성은 왠만하면 팩토리에서 해준다.
+*/
 class UI_Button : public UI {
 private:
-    ObjectPool<ObjectMotionBox>*  PoolBox;
-    ObjectPool<ObjectMotionText>* PoolText;
     ObjectMotionBox*              MBoxFace;       /**< 전경 모션 박스*/
     ObjectMotionBox*              MBoxHighlight;  /**< 하이라이트 모션 박스*/
     ObjectMotionText*             MText;          /**< 모션 박스 기본 텍스트*/
@@ -109,6 +115,7 @@ public: /*반드시 있어야 되는 매서드*/
     void CreateUI(UISystem* pUISys, ID2D1RenderTarget* pRT,
                   BUTTON_MOTION_SET UIMotionSet, BUTTON_COLOR_SET UIColorSet,
                   pfnUIHandler pfnCallback, POSITION Pos, int nID, wchar_t* pText, int nDelay);
+    
     void pause(int nDelay);
     void resume(int nDelay);
     void Destroy();

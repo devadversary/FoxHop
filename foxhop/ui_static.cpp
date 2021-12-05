@@ -4,54 +4,6 @@
 
 static void DefaultStaticProc(UI* pUI, UINT Message, void* parm);
 
-UI_Static::UI_Static() {}
-
-UI_Static::UI_Static(UISystem* pUISys, ID2D1RenderTarget* pRT, int nID, pfnUIHandler pfnCallback)
-{
-    preInit(pUISys, pRT, nID, pfnCallback);
-}
-
-UI_Static::~UI_Static() {}
-
-/**
-    @brief 생성자를 사용 할 수 없을때 직접 미리초기화를 할 수 있다.
-    @remark 대체로 UI시스템에서 UI를 생성할떄 호출해준다
-*/
-void UI_Static::preInit(UISystem* pUISys, ID2D1RenderTarget* pRT, int nID, pfnUIHandler pfnCallback)
-{
-    uiSys = pUISys;
-    ID = nID;
-    pRenderTarget = pRT;
-    DefaultHandler = DefaultStaticProc;
-    MessageHandler = pfnCallback;
-    PoolBox = pUISys->BoxPoolStorage.getPool();
-    PoolText = pUISys->TextPoolStorage.getPool();
-    szText[0] = 0;
-    nTextLen = 0;
-    MBox = NULL;
-    MText = NULL;
-}
-
-/**
-    @brief 버튼UI가 사용할 박스와 텍스트에대한 풀을 초기화한다.
-    @remark TODO : 버튼 스타일을 지정해서 좀 더 다양한 모션을 내부적으로 제공하도록 하자.
-*/
-void UI_Static::Init(int Motion, POSITION Pos, D2D1_COLOR_F Color, wchar_t* pText, D2D1_COLOR_F TextColor, int nDelay)
-{
-    if (!PoolBox || !PoolText) return;
-    uiPos = Pos;
-    uiMotion = Motion;
-    FaceColor = Color;
-    FontColor = TextColor;
-    nTextLen = (int)wcslen(pText);
-    wcscpy_s(szText, MAX_BUTTONNAME, pText);
-    /*Init을 해주기 전에는 업데이트, 렌더링을 할 필요가 없기떄문에 여기서 오브젝트를 생성한다.*/
-    MBox = PoolBox->activateObject();
-    MText = PoolText->activateObject();
-    InputMotion(Motion, nDelay);
-    DefaultHandler(this, UIM_CREATE, NULL); /*UI생성 메세지 전송*/
-}
-
 /**
     @brief 모션 기입
     @param Motion UI의 등장 모션

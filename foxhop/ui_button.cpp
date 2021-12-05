@@ -16,14 +16,11 @@ void UI_Button::CreateUI(UISystem* pUISys, ID2D1RenderTarget* pRT,
     MessageHandler = pfnCallback;
     ID             = nID;
 
-    PoolBox        = pUISys->BoxPoolStorage.getPool();
-    PoolText       = pUISys->TextPoolStorage.getPool();
-
     wcscpy_s(szText, MAX_BUTTONNAME, pText);
     nTextLen       = (int)wcslen(pText);
-    MBoxFace       = PoolBox->activateObject();
-    MBoxHighlight  = PoolBox->activateObject();
-    MText          = PoolText->activateObject();
+    MBoxFace       = uiSys->ObjPoolBox.activateObject();
+    MBoxHighlight  = uiSys->ObjPoolBox.activateObject();
+    MText          = uiSys->ObjPoolText.activateObject();
 
     InputMotion(MotionSet.Init, nDelay);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
@@ -31,8 +28,8 @@ void UI_Button::CreateUI(UISystem* pUISys, ID2D1RenderTarget* pRT,
 }
 
 /**
-    @brief 모션 기입
-    @param Motion UI의 등장 모션
+    @brief 지정한 모션 기입
+    @param Motion UI의 등장 모션타입
     @param nDelay UI의 등장 딜레이
 */
 void UI_Button::InputMotion(eButtonMotionInit Motion, int nDelay)
@@ -86,12 +83,12 @@ void UI_Button::InputMotion(eButtonMotionInit Motion, int nDelay)
 */
 void UI_Button::Destroy()
 {
-    PoolBox->deactivateObject(MBoxFace);
-    PoolText->deactivateObject(MText);
-    uiSys->BoxPoolStorage.returnPool(PoolBox);
-    uiSys->TextPoolStorage.returnPool(PoolText);
-    PoolBox = 0;
-    PoolText = 0;
+    uiSys->ObjPoolBox.deactivateObject(MBoxFace);
+    uiSys->ObjPoolBox.deactivateObject(MBoxHighlight);
+    uiSys->ObjPoolText.deactivateObject(MText);
+    MBoxFace      = 0;
+    MBoxHighlight = 0;
+    MText         = 0;
     uiSys->ReleaseUI(ID); /*스스로를 UI 시스템에 반환*/
 }
 

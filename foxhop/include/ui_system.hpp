@@ -12,6 +12,7 @@
 
 /*TODO : 추후에 폰트를 쉽게 변경 가능하도록 하드코딩을 제거할 수 있는 구조로 변경할것.*/
 #define UISYSTEM_FONTNAME_DEFAULT (L"monoMMM_5") /*UI시스템이 기본적으로 사용하는 폰트 이름*/
+#define DEFAULT_MAXUI (256) /*UISystem 초기화시, nMaxUI 를 0으로 설정시 적용할 기본 UI 갯수*/
 
 /**
     @brief ID별로 UI를 관리할 테이블.
@@ -46,27 +47,27 @@ enum class UIType {
 */
 class UISystem {
 public:
-    D2DA_CONTEXT                 D2DA;            /**< D2D 개체들의 컨텍스트 (이 안에 다 있다)*/
-    IDWriteTextFormat*           TinyTextForm;    /**< 작은 텍스트 폼*/
-    IDWriteTextFormat*           SmallTextForm;   /**< 작은 텍스트 폼*/
-    IDWriteTextFormat*           ButtonTextForm;  /**< 버튼 컨트롤들이 전역적으로 사용할 텍스트 폼. (winAPI 버튼도 텍스트 폼은 무조건 고정임)*/
-    IDWriteTextFormat*           MediumTextForm;  /**< 중간크기 텍스트 폼*/
+    D2DA_CONTEXT                 D2DA;             /**< D2D 개체들의 컨텍스트 (이 안에 다 있다)*/
+    IDWriteTextFormat*           TinyTextForm;     /**< 작은 텍스트 폼*/
+    IDWriteTextFormat*           SmallTextForm;    /**< 작은 텍스트 폼*/
+    IDWriteTextFormat*           ButtonTextForm;   /**< 버튼 컨트롤들이 전역적으로 사용할 텍스트 폼. (winAPI 버튼도 텍스트 폼은 무조건 고정임)*/
+    IDWriteTextFormat*           MediumTextForm;   /**< 중간크기 텍스트 폼*/
 
     ObjectPool<ObjectMotionBox>  ObjPoolBox;
     ObjectPool<ObjectMotionLine> ObjPoolLine;
     ObjectPool<ObjectMotionText> ObjPoolText;
 
 private:
-    UI**                         pUITbl;          /**< UI 인스턴스를 모아둘 배열*/
-    int                          nUITblCnt;       /**< 배열의 길이 (UI의 ID를 배열의 인덱스로 사용)*/
+    UI**                         pUIArray;         /**< UI 인스턴스를 모아둘 배열*/
+    int                          nMaxUICnt;        /**< 배열의 길이 (UI의 ID를 배열의 인덱스로 사용)*/
+    int                          nUICnt;           /**< 현재 할당된 UI 갯수*/
     UI_ButtonFactory*            pUIButtonFactory; /**< 버튼UI 팩토리*/
 
 public:
     UISystem();
     ~UISystem();
     void Init(HWND hWnd, unsigned int nMaxUI);
-    UI*  CreateUI(UIType type, unsigned int nID, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback);
-    void SendUIMessage(UI* pUI, UINT Message, void* param);
-    void SendUIMessageByID(unsigned int nID, UINT Message, void* param);
+    UI*  CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback);
+    BOOL SendUIMessage(UI* pUI, UINT Message, void* param);
     void ReleaseUI(unsigned int nID);
 };

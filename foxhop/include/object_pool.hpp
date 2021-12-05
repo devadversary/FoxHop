@@ -29,7 +29,6 @@ public:
     BOOL Init(int nCnt = 1000, int nAddCnt = 500);
     void Release();
     void Reset();
-    BOOL isAssigned();
     int  getCapacity();
     int  getUsingCount();
     int  getUsingMemoryBytes();
@@ -43,7 +42,6 @@ template <typename T> ObjectPool<T>::ObjectPool()
     pInactivate = 0;
     pActivate = 0;
     pObject = 0;
-    bAssigned = FALSE;
     nAdditionalCnt = 0;
     nCapacity = 0;
     nUsingCnt = 0;
@@ -93,7 +91,6 @@ template <typename T> BOOL ObjectPool<T>::Init(int nCnt, int nAddCnt)
     nAdditionalCnt = nAddCnt;               /*TODO : 나중에 없에도 될 것 같음*/
     nCapacity = nCnt;
     nUsingCnt = 0;
-    bAssigned = FALSE;                      /*아직 사용중이지 않은 풀*/
     return TRUE;
 }
 
@@ -121,16 +118,6 @@ template <typename T> void ObjectPool<T>::Reset()
     }
     pObject[0].pPrev = NULL;                /*맨 첫번째 원소는 이전노드를 비워줌*/
     pObject[i - 1].pNext = NULL;            /*맨 마지막 원소는 다음노드를 비워줌*/
-}
-
-/**
-    @brief  현재 풀의 사용 여부를 얻어온다
-    @remark 이 매서드는 이 풀을 이용하는 상위 클래스를 위한것임
-    @n      일반적으로는 사용 할 일이 없고, 사용해도 아무일이 없다.
-*/
-template <typename T> BOOL ObjectPool<T>::isAssigned()
-{
-    return bAssigned;
 }
 
 /**
@@ -227,10 +214,12 @@ template <typename T> void ObjectPool<T>::deactivateObject(T* pObj)
     if (!pObj->pPrev) /*비활성화 하려는 노드가 머리 노드인경우*/
         pActivate = pObj->pNext; /*다음 노드를 머리 노드로 등록*/
 
-    else if (!pObj->pNext) /*비활성화 하려는 노드가 끄트머리 노드인경우*/
+    /*비활성화 하려는 노드가 끄트머리 노드인경우*/
+    else if (!pObj->pNext)
         pObj->pPrev->pNext = NULL; /*이전 노드의 pNext 만 비워준다*/
 
-    else { /*비활성화 하려는 노드가 중간에 끼인 노드인 경우*/
+    /*비활성화 하려는 노드가 중간에 끼인 노드인 경우*/
+    else {
         pObj->pPrev->pNext = pObj->pNext;
         pObj->pNext->pPrev = pObj->pPrev; /*앞노드 뒷노드를 서로 체결*/
     }

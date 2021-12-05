@@ -11,18 +11,6 @@ UI_DivisionLine::UI_DivisionLine(UISystem* pUISys, ID2D1RenderTarget* pRT, int n
 UI_DivisionLine::~UI_DivisionLine() {}
 
 /**
-    @brief 생성자를 사용 할 수 없을때 직접 미리초기화를 할 수 있다.
-*/
-void UI_DivisionLine::preInit(UISystem* pUISys, ID2D1RenderTarget* pRT, int nID, pfnUIHandler pfnCallback)
-{
-    uiSys = pUISys;
-    pRenderTarget = pRT;
-    MessageHandler = pfnCallback;
-    ID = nID;
-    PoolLine = pUISys->LinePoolStorage.getPool();
-}
-
-/**
     @brief 구분선 UI를 초기화한다.
     @param nFragmentCnt 구분선을 몇등분에 나눠서 렌더링 할것인지 결정
 */
