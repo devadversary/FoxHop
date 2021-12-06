@@ -52,6 +52,17 @@ enum class eButtonMotionText {
     eMotionDefault = 0 /**< 모션 없음*/
 };
 
+/**
+    @brief 버튼 모션 타입
+*/
+enum class eButtonMotionType {
+    eMotionType_Init = 0,   /**< 초기화 모션*/
+    eMotionType_Pause,      /**< 소멸 모션*/
+    eMotionType_Mouseover,  /**< 마우스 오버 모션*/
+    eMotionType_Click,      /**< 클릭 모션*/
+    eMotionType_Color,      /**< 색상 변경 모션*/
+    eMotionType_Text        /**< 텍스트 모션*/
+};
 
 /**
     @brief 모션 집합

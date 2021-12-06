@@ -45,19 +45,12 @@ void UI_Button::InputMotion(eButtonMotionInit Motion, int nDelay)
 #endif /*우선은 한가지 모션만 제공*/
     default:
         /*버튼 생성모션 입력*/
-        miMove.formular = eMotionForm::eMotion_x3_2;
-        miMove.nDelay = nDelay;
-        miMove.nPitch = 250;
-        miColor.formular = eMotionForm::eMotion_x3_2;
-        miColor.nDelay = nDelay;
-        miColor.nPitch = 250;
-        TmpStartPos = uiPos;
-        TmpStartPos.x -= 30;
-        TmpStartPos.y -= 100;
-        TmpEndPos = uiPos;
-        TmpEndPos.x -= 30;
-        TmpStartColor = FaceColor;
-        TmpStartColor.a = 0;
+        miMove.formular = eMotionForm::eMotion_x3_2; miMove.nDelay = nDelay; miMove.nPitch = 250;
+        miColor.formular = eMotionForm::eMotion_x3_2; miColor.nDelay = nDelay; miColor.nPitch = 250;
+        TmpStartPos = uiPos; TmpStartPos.x -= 30; TmpStartPos.y -= 100;
+        TmpEndPos = uiPos; TmpEndPos.x -= 30;
+        TmpStartColor = FaceColor; TmpStartColor.a = 0;
+
         /*최종 위치로부터 -30, -100 위치 (좌상단) 에서부터 시작*/
         MBoxFace->Init(pRenderTarget, TmpStartPos, { 0.f,0.f,0.f,0.f });
         MBoxHighlight->Init(pRenderTarget, TmpStartPos, { 0.f,0.f,0.f,0.f });
