@@ -59,7 +59,6 @@ void UISystem::Init(HWND hWnd, unsigned int nMaxUI)
 /**
     @brief UI 컨트롤을 생성한다.
     @param type     생성할 UI의 타입 (버튼, 스태틱 등등)
-    @param nID      생성될 UI의 고유 ID를 지정 (이 ID는 핸들처럼 사용하여, 타 UI와 통신에 활용)
     @param callback 생성된 UI만의 콜백함수 지정 (이벤트 처리 등)
     @remark 이 매서드가 UI를 생성할때는 각 UI마다 구현되어있는 preInit 매서드를 통해 기본 초기화를 진행한다
     @n      UI시스템 초기화시 지정했던 최대 UI 갯수가 200이라면 nID의 범위는 0-199 가 되어야한다.

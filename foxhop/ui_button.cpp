@@ -32,12 +32,66 @@ void UI_Button::CreateUI(UISystem* pUISys, ID2D1RenderTarget* pRT,
     @param Motion UI의 등장 모션타입
     @param nDelay UI의 등장 딜레이
 */
-void UI_Button::InputMotion(eButtonMotionInit Motion, int nDelay)
+void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch)
 {
     MOTION_INFO miMove, miColor;
     POSITION TmpStartPos, TmpEndPos;
     D2D1_COLOR_F TmpStartColor;
 
+    switch (MotionType) {
+    case eButtonMotionType::eMotionType_Init:
+        switch (Pattern) {
+        case eButtonMotionPattern::eMotionInit_Default:
+            break;
+
+        case eButtonMotionPattern::eMotionInit_Reload:
+            /*버튼 생성모션 입력*/
+            miMove.formular = eMotionForm::eMotion_x3_2; miMove.nDelay = nDelay; miMove.nPitch = 250;
+            miColor.formular = eMotionForm::eMotion_x3_2; miColor.nDelay = nDelay; miColor.nPitch = 250;
+            TmpStartPos = uiPos; TmpStartPos.x -= 30; TmpStartPos.y -= 100;
+            TmpEndPos = uiPos; TmpEndPos.x -= 30;
+            TmpStartColor = FaceColor; TmpStartColor.a = 0;
+
+            /*최종 위치로부터 -30, -100 위치 (좌상단) 에서부터 시작*/
+            MBoxFace->Init(pRenderTarget, TmpStartPos, { 0.f,0.f,0.f,0.f });
+            MBoxHighlight->Init(pRenderTarget, TmpStartPos, { 0.f,0.f,0.f,0.f });
+            /*첫번째 이동 (아래로 내려오면서 서서히 나타나는 모션)*/
+            MBoxFace->addMovementMotion(miMove, FALSE, TmpStartPos, TmpEndPos);
+            MBoxFace->addColorMotion(miColor, FALSE, TmpStartColor, FaceColor);
+            MBoxHighlight->addMovementMotion(miMove, FALSE, TmpStartPos, TmpEndPos);
+            /*두번째 이동 (우측으로 이동하는 모션*/
+            MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, TmpEndPos, { 0.f, 0.f, 0.f, 0.f }, nTextLen);
+            miMove.nDelay += 250;
+            miColor.nDelay += 250;
+            MText->addMovementMotion(miMove, FALSE, TmpEndPos, uiPos);
+            MText->addColorMotion(miColor, FALSE, { 1.f, 1.f, 1.f, 1.f }, FontColor);
+            MBoxFace->addMovementMotion(miMove, TRUE, TmpEndPos, uiPos);
+            MBoxFace->addColorMotion(miColor, TRUE, { 1.f,1.f,1.f,1.f }, FaceColor);
+            MBoxHighlight->addMovementMotion(miMove, TRUE, TmpEndPos, uiPos);
+            break;
+
+        case eButtonMotionPattern::eMotionInit_Flick:
+            break;
+        }
+        break;
+
+    case eButtonMotionType::eMotionType_Pause:
+        break;
+
+    case eButtonMotionType::eMotionType_Mouseover:
+        break;
+
+    case eButtonMotionType::eMotionType_Click:
+        break;
+
+    case eButtonMotionType::eMotionType_Color:
+        break;
+
+    case eButtonMotionType::eMotionType_Text:
+        break;
+    }
+
+#if 0
     switch (Motion) {
 #if 1 /*TODO : 버튼의 모션 스타일을 지정하여 다양한 연출이 가능하도록 만들 예정*/
     case eButtonMotionInit::eMotionReload :
@@ -69,6 +123,7 @@ void UI_Button::InputMotion(eButtonMotionInit Motion, int nDelay)
         MBoxHighlight->addMovementMotion(miMove, TRUE, TmpEndPos, uiPos);
         break;
     }
+#endif
 }
 
 /**
@@ -212,14 +267,14 @@ void UI_ButtonFactory::Init(UISystem* pUISystem, ID2D1RenderTarget* pRT)
     pRenderTarget = pRT;
 
     /*기본 모션 지정 (추후 변경 가능)*/
-    MotionSet.Init      = eButtonMotionInit::eMotionFlick;
-    MotionSet.Pause     = eButtonMotionPause::eMotionFlick;
-    MotionSet.Color     = eButtonMotionColor::eMotionFlash;
-    MotionSet.Text      = eButtonMotionText::eMotionDefault;
-    MotionSet.Click     = eButtonMotionClick::eMotionFlash;
-    MotionSet.MouseOver = eButtonMotionMouseover::eMotionFlick;
+    MotionSet.Init      = eButtonMotionPattern::eMotionInit_Flick;
+    MotionSet.Pause     = eButtonMotionPattern::eMotionPause_Flick;
+    MotionSet.Color     = eButtonMotionPattern::eMotionColor_Flash;
+    MotionSet.Text      = eButtonMotionPattern::eMotionText_Default;
+    MotionSet.Click     = eButtonMotionPattern::eMotionClick_Flash;
+    MotionSet.MouseOver = eButtonMotionPattern::eMotionMouseover_Flick;
 
-    /*기본 모션진행시간 지정 (추후 변경 가능)*/
+    /*기본 모션진행시간 지정 (추후 변경 가능) ms단위*/
     MotionSet.InitPitch      = 250;
     MotionSet.PausePitch     = 250;
     MotionSet.ColorPitch     = 200;
@@ -276,5 +331,6 @@ void UI_ButtonFactory::SetCurrentColorSet(BUTTON_COLOR_SET* pColorSet)
 */
 UI* UI_ButtonFactory::CreateUI(int nID, POSITION Pos, wchar_t* pText, int nDelay, pfnUIHandler pfnCallback)
 {
+    UI_Button::CreateUI();
     return NULL;
 }

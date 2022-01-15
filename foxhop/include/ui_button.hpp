@@ -5,51 +5,26 @@
 class UISystem; /*UI시스템 클래스의 전방선언*/
 
 /**
-    @brief 버튼 생성 모션 타입
+    @brief 버튼 모션 타입 상수
 */
-enum class eButtonMotionInit {
-    eMotionDefault = 0, /**< 모션 없음*/
-    eMotionReload,      /**< 장전 모션*/
-    eMotionFlick        /**< 플리커링 모션*/
-};
+enum class eButtonMotionPattern {
+    eMotionInit_Default = 0,      /**< 생성: 모션 없음*/
+    eMotionInit_Reload,           /**< 생성: 장전 모션*/
+    eMotionInit_Flick,            /**< 생성: 플리커링 모션*/
 
-/**
-    @brief 버튼 소멸 모션 타입
-*/
-enum class eButtonMotionPause {
-    eMotionDefault = 0, /**< 모션 없음*/
-    eMotionFlick        /**< 플리커링 모션*/
-};
+    eMotionPause_Default = 0,     /**< 소멸: 모션 없음*/
+    eMotionPause_Flick,           /**< 소멸: 플리커링 모션*/
 
-/**
-    @brief 버튼 마우스 오버 모션 타입
-*/
-enum class eButtonMotionMouseover {
-    eMotionDefault = 0, /**< 모션 없음*/
-    eMotionFlick        /**< 플리커링 모션*/
-};
+    eMotionMouseover_Default = 0, /**< 마우스오버: 모션 없음*/
+    eMotionMouseover_Flick,       /**< 마우스오버: 플리커링 모션*/
 
-/**
-    @brief 버튼 클릭 모션 타입
-*/
-enum class eButtonMotionClick {
-    eMotionDefault = 0, /**< 모션 없음*/
-    eMotionFlash        /**< 점멸 모션*/
-};
+    eMotionClick_Default = 0,     /**< 클릭: 모션 없음*/
+    eMotionClick_Flash,           /**< 클릭: 점멸 모션*/
 
-/**
-    @brief 버튼 색상 변경 모션 타입
-*/
-enum class eButtonMotionColor {
-    eMotionDefault = 0, /**< 모션 없음*/
-    eMotionFlash        /**< 점멸 모션*/
-};
+    eMotionColor_Default = 0,     /**< 색상변경: 모션 없음*/
+    eMotionColor_Flash,           /**< 색상변경: 점멸 모션*/
 
-/**
-    @brief 버튼 텍스트 모션 타입
-*/
-enum class eButtonMotionText {
-    eMotionDefault = 0 /**< 모션 없음*/
+    eMotionText_Default = 0       /**< 텍스트: 모션 없음*/
 };
 
 /**
@@ -69,23 +44,23 @@ enum class eButtonMotionType {
     @remark 개체의 매서드를 통해 변경 될 수 있음
 */
 typedef struct _stButtonMotionSet {
-    eButtonMotionInit      Init;           /**< 시작모션*/
-    unsigned int           InitPitch;      /**< 시작모션 피치*/
+    eButtonMotionPattern Init;           /**< 시작모션*/
+    unsigned int         InitPitch;      /**< 시작모션 피치*/
 
-    eButtonMotionPause     Pause;          /**< 소멸모션*/
-    unsigned int           PausePitch;     /**< 소멸모션 피치*/
+    eButtonMotionPattern Pause;          /**< 소멸모션*/
+    unsigned int         PausePitch;     /**< 소멸모션 피치*/
 
-    eButtonMotionMouseover MouseOver;      /**< 마우스오버 모션*/
-    unsigned int           MouseOverPitch; /**< 마우스오버모션 피치*/
+    eButtonMotionPattern MouseOver;      /**< 마우스오버 모션*/
+    unsigned int         MouseOverPitch; /**< 마우스오버모션 피치*/
 
-    eButtonMotionClick     Click;          /**< 클릭 모션*/
-    unsigned int           ClickPitch;     /**< 클릭 피치*/
+    eButtonMotionPattern Click;          /**< 클릭 모션*/
+    unsigned int         ClickPitch;     /**< 클릭 피치*/
 
-    eButtonMotionColor     Color;          /**< 색상 변경 모션*/
-    unsigned int           ColorPitch;     /**< 색상 변경 피치*/
+    eButtonMotionPattern Color;          /**< 색상 변경 모션*/
+    unsigned int         ColorPitch;     /**< 색상 변경 피치*/
 
-    eButtonMotionText      Text;           /**< 텍스트 변경 모션*/
-    unsigned int           TextPitch;      /**< 텍스트 변경 피치*/
+    eButtonMotionPattern Text;           /**< 텍스트 변경 모션*/
+    unsigned int         TextPitch;      /**< 텍스트 변경 피치*/
 }BUTTON_MOTION_SET;
 
 /**
@@ -103,7 +78,7 @@ typedef struct _stColorSet {
 
 /**
     @brief 버튼 클래스
-    @remark 생성은 왠만하면 팩토리에서 해준다.
+    @remark 생성은 팩토리에서 해준다.
 */
 class UI_Button : public UI {
 private:
@@ -116,7 +91,7 @@ private:
     D2D1_COLOR_F                  HighlightColor; /**< 버튼 하이라이트 색*/
     D2D1_COLOR_F                  FontColor;      /**< 초기 텍스트 색*/
     wchar_t                       szText[MAX_BUTTONNAME];
-    void InputMotion(eButtonMotionInit Motion, int nDelay);
+    void InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch);
 
 public:
     BUTTON_MOTION_SET             MotionSet;      /**< 모션 집합*/
