@@ -47,3 +47,11 @@ public:
     virtual void render() = 0;
 #endif
 };
+
+/**
+    @biref 위치 구조체 초기화
+*/
+inline POSITION InitPosition(float x, float y, float width_or_x2, float height_or_y2)
+{
+    return {x, y, width_or_x2, height_or_y2};
+}

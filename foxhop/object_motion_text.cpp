@@ -26,7 +26,7 @@ void ObjectMotionText::addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, P
 {
     MOTION_PATTERN mc;
 
-    mc = SetMotionPattern(MotionInfo, NULL);
+    mc = InitMotionPattern(MotionInfo, NULL);
     AddChain(&mc, &CurPos.x, StartPos.x, EndPos.x);
     AddChain(&mc, &CurPos.y, StartPos.y, EndPos.y);
     AddChain(&mc, &CurPos.width, StartPos.width, EndPos.width);
@@ -39,7 +39,7 @@ void ObjectMotionText::addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1
 {
     MOTION_PATTERN mc;
 
-    mc = SetMotionPattern(MotionInfo, NULL);
+    mc = InitMotionPattern(MotionInfo, NULL);
     AddChain(&mc, &CurColor.r, StartColor.r, EndColor.r);
     AddChain(&mc, &CurColor.g, StartColor.g, EndColor.g);
     AddChain(&mc, &CurColor.b, StartColor.b, EndColor.b);
@@ -52,7 +52,7 @@ void ObjectMotionText::addLenMotion(MOTION_INFO MotionInfo, BOOL bAppend, int nS
 {
     MOTION_PATTERN mc;
 
-    mc = SetMotionPattern(MotionInfo, NULL);
+    mc = InitMotionPattern(MotionInfo, NULL);
     AddChain(&mc, &CurLen, nStartLen, nEndLen);
     if (bAppend) ComMotionStrLen.appendChannel(mc);
     else ComMotionStrLen.addChannel(mc);

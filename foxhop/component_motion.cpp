@@ -112,6 +112,7 @@ BOOL ComponentMotion::update(unsigned long ElapsedTime)
         x = nGapTime / (float)pCh->MotionInfo.nPitch; /*피치 조절*/
 
         switch (pCh->MotionInfo.formular) {
+        case eMotionForm::eMotion_None:      pCh->fCurrent = 1;                   break;
         case eMotionForm::eMotion_Pulse1:    pCh->fCurrent = Preset_Pulse1(x);    break;
         case eMotionForm::eMotion_Pulse2:    pCh->fCurrent = Preset_Pulse2(x);    break;
         case eMotionForm::eMotion_Linear1:   pCh->fCurrent = Preset_Linear1(x);   break;

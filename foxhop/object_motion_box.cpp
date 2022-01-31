@@ -41,7 +41,7 @@ void ObjectMotionBox::addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, PO
 {
     MOTION_PATTERN mc;
 
-    mc = SetMotionPattern(MotionInfo, NULL);
+    mc = InitMotionPattern(MotionInfo, NULL);
     AddChain(&mc, (float*)&CurPos.x, StartPos.x, EndPos.x);
     AddChain(&mc, (float*)&CurPos.y, StartPos.y, EndPos.y);
     AddChain(&mc, (float*)&CurPos.width, StartPos.width, EndPos.width);
@@ -61,7 +61,7 @@ void ObjectMotionBox::addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1_
 {
     MOTION_PATTERN mc;
 
-    mc = SetMotionPattern(MotionInfo, NULL);
+    mc = InitMotionPattern(MotionInfo, NULL);
     AddChain(&mc, &CurColor.r, StartColor.r, EndColor.r);
     AddChain(&mc, &CurColor.g, StartColor.g, EndColor.g);
     AddChain(&mc, &CurColor.b, StartColor.b, EndColor.b);

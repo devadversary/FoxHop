@@ -83,9 +83,17 @@ public:
 };
 
 /**
+    @brief 모션 정보 구조체 셋팅
+*/
+inline MOTION_INFO InitMotionInfo(eMotionForm formular, int nDelay, int nPitch)
+{
+    return {formular, nDelay, nPitch};
+}
+
+/**
     @brief 모션 패턴 구조체 셋팅
 */
-inline MOTION_PATTERN SetMotionPattern(MOTION_INFO MotionInfo, pfnFormula pfnForm)
+inline MOTION_PATTERN InitMotionPattern(MOTION_INFO MotionInfo, pfnFormula pfnForm)
 {
     MOTION_PATTERN patt;
 

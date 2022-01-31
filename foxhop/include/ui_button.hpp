@@ -98,9 +98,9 @@ public:
     BUTTON_COLOR_SET              ColorSet;       /**< 색상 집합*/
 
 public: /*반드시 있어야 되는 매서드*/
-    void CreateUI(UISystem* pUISys, ID2D1RenderTarget* pRT,
+    void CreateUI(UISystem* pUISys, int nID, ID2D1RenderTarget* pRT,
                   BUTTON_MOTION_SET UIMotionSet, BUTTON_COLOR_SET UIColorSet,
-                  pfnUIHandler pfnCallback, POSITION Pos, int nID, wchar_t* pText, int nDelay);
+                  pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay);
     
     void pause(int nDelay);
     void resume(int nDelay);

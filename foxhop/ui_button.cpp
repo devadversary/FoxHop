@@ -3,9 +3,9 @@
 
 static void DefaultButtonProc(UI* pUI, UINT Message, void* parm);
 
-void UI_Button::CreateUI(UISystem* pUISys, ID2D1RenderTarget* pRT,
+void UI_Button::CreateUI(UISystem* pUISys, int nID, ID2D1RenderTarget* pRT,
                          BUTTON_MOTION_SET UIMotionSet, BUTTON_COLOR_SET UIColorSet,
-                         pfnUIHandler pfnCallback, POSITION Pos, int nID, wchar_t* pText, int nDelay)
+                         pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay)
 {
     uiSys          = pUISys;
     pRenderTarget  = pRT;
@@ -39,15 +39,28 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
     D2D1_COLOR_F TmpStartColor;
 
     switch (MotionType) {
-    case eButtonMotionType::eMotionType_Init:
+    case eButtonMotionType::eMotionType_Init: /*나타나기*/
         switch (Pattern) {
-        case eButtonMotionPattern::eMotionInit_Default:
+        case eButtonMotionPattern::eMotionInit_Default: /*모션 없음*/
+            miMove  = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
+            miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
+            MBoxFace->Init(pRenderTarget, uiPos, FaceColor, TRUE);
+            MBoxHighlight->Init(pRenderTarget, uiPos, HighlightColor, TRUE);
+            MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, FontColor, nTextLen);
+
+            MBoxFace->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            MBoxHighlight->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            MText->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+
+            MBoxFace->addColorMotion(miColor, FALSE, FaceColor, FaceColor);
+            MBoxHighlight->addColorMotion(miColor, FALSE, HighlightColor, HighlightColor);
+            MText->addColorMotion(miColor, FALSE, FontColor, FontColor);
             break;
 
         case eButtonMotionPattern::eMotionInit_Reload:
             /*버튼 생성모션 입력*/
-            miMove.formular = eMotionForm::eMotion_x3_2; miMove.nDelay = nDelay; miMove.nPitch = 250;
-            miColor.formular = eMotionForm::eMotion_x3_2; miColor.nDelay = nDelay; miColor.nPitch = 250;
+            miMove = InitMotionInfo(eMotionForm::eMotion_x3_2, nDelay, 250);
+            miColor = InitMotionInfo(eMotionForm::eMotion_x3_2, nDelay, 250);
             TmpStartPos = uiPos; TmpStartPos.x -= 30; TmpStartPos.y -= 100;
             TmpEndPos = uiPos; TmpEndPos.x -= 30;
             TmpStartColor = FaceColor; TmpStartColor.a = 0;
@@ -66,7 +79,7 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
             MText->addMovementMotion(miMove, FALSE, TmpEndPos, uiPos);
             MText->addColorMotion(miColor, FALSE, { 1.f, 1.f, 1.f, 1.f }, FontColor);
             MBoxFace->addMovementMotion(miMove, TRUE, TmpEndPos, uiPos);
-            MBoxFace->addColorMotion(miColor, TRUE, { 1.f,1.f,1.f,1.f }, FaceColor);
+            MBoxFace->addColorMotion(miColor, TRUE, { 1.f, 1.f, 1.f, 1.f }, FaceColor);
             MBoxHighlight->addMovementMotion(miMove, TRUE, TmpEndPos, uiPos);
             break;
 
@@ -90,40 +103,6 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
     case eButtonMotionType::eMotionType_Text:
         break;
     }
-
-#if 0
-    switch (Motion) {
-#if 1 /*TODO : 버튼의 모션 스타일을 지정하여 다양한 연출이 가능하도록 만들 예정*/
-    case eButtonMotionInit::eMotionReload :
-        break;
-#endif /*우선은 한가지 모션만 제공*/
-    default:
-        /*버튼 생성모션 입력*/
-        miMove.formular = eMotionForm::eMotion_x3_2; miMove.nDelay = nDelay; miMove.nPitch = 250;
-        miColor.formular = eMotionForm::eMotion_x3_2; miColor.nDelay = nDelay; miColor.nPitch = 250;
-        TmpStartPos = uiPos; TmpStartPos.x -= 30; TmpStartPos.y -= 100;
-        TmpEndPos = uiPos; TmpEndPos.x -= 30;
-        TmpStartColor = FaceColor; TmpStartColor.a = 0;
-
-        /*최종 위치로부터 -30, -100 위치 (좌상단) 에서부터 시작*/
-        MBoxFace->Init(pRenderTarget, TmpStartPos, { 0.f,0.f,0.f,0.f });
-        MBoxHighlight->Init(pRenderTarget, TmpStartPos, { 0.f,0.f,0.f,0.f });
-        /*첫번째 이동 (아래로 내려오면서 서서히 나타나는 모션)*/
-        MBoxFace->addMovementMotion(miMove, FALSE, TmpStartPos, TmpEndPos);
-        MBoxFace->addColorMotion(miColor, FALSE, TmpStartColor, FaceColor);
-        MBoxHighlight->addMovementMotion(miMove, FALSE, TmpStartPos, TmpEndPos);
-        /*두번째 이동 (우측으로 이동하는 모션*/
-        MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, TmpEndPos, { 0.f, 0.f, 0.f, 0.f }, nTextLen);
-        miMove.nDelay += 250;
-        miColor.nDelay += 250;
-        MText->addMovementMotion(miMove, FALSE, TmpEndPos, uiPos);
-        MText->addColorMotion(miColor, FALSE, { 1.f, 1.f, 1.f, 1.f }, FontColor);
-        MBoxFace->addMovementMotion(miMove, TRUE, TmpEndPos, uiPos);
-        MBoxFace->addColorMotion(miColor, TRUE, { 1.f,1.f,1.f,1.f }, FaceColor);
-        MBoxHighlight->addMovementMotion(miMove, TRUE, TmpEndPos, uiPos);
-        break;
-    }
-#endif
 }
 
 /**
@@ -327,6 +306,7 @@ void UI_ButtonFactory::SetCurrentColorSet(BUTTON_COLOR_SET* pColorSet)
 
 /**
     @brief UI 생성
+    @param nID UI시스템이 생성해서 넘겨주는 ID값. (사용자에게 이 인자는 노출되지 않는다)
     @remark 현재 팩토리의 지정 설정이 적용되어 생성된다 (모션, 색상 등)
 */
 UI* UI_ButtonFactory::CreateUI(int nID, POSITION Pos, wchar_t* pText, int nDelay, pfnUIHandler pfnCallback)
