@@ -82,19 +82,12 @@ UI* UISystem::CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pf
         pUI = new UI_Button;
         pUI->uiType = UIType::eUI_Button;
         pUIButtonFactory->CreateUI(nID, pos, pText, nDelay, callback);
-        //((UI_Button*)pUI)->CreateUI(this, D2DA.pRenTarget, nID, callback);
         break;
 
     case UIType::eUI_DivLine : 
-        pUI = new UI_DivisionLine;
-        pUI->uiType = UIType::eUI_DivLine;
-        //((UI_DivisionLine*)pUI)->preInit(this, D2DA.pRenTarget, nID, callback);
         break;
 
     case UIType::eUI_Static: 
-        pUI = new UI_Static;
-        pUI->uiType = UIType::eUI_Static;
-        //((UI_Static*)pUI)->preInit(this, D2DA.pRenTarget, nID, callback);
         break;
 
     case UIType::eUI_List: break;

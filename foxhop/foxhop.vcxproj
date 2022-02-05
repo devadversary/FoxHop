@@ -153,7 +153,7 @@
     <ClCompile Include="object_motion_line.cpp" />
     <ClCompile Include="object_motion_text.cpp" />
     <ClCompile Include="ui_button.cpp" />
-    <ClCompile Include="ui_divisionline.cpp" />
+    <ClCompile Include="ui_fraggedline.cpp" />
     <ClCompile Include="ui_listview.cpp" />
     <ClCompile Include="ui_panel.cpp" />
     <ClCompile Include="ui_static.cpp" />
@@ -170,7 +170,7 @@
     <ClInclude Include="include\object_pool.hpp" />
     <ClInclude Include="include\ui_base.hpp" />
     <ClInclude Include="include\ui_button.hpp" />
-    <ClInclude Include="include\ui_divisionline.hpp" />
+    <ClInclude Include="include\ui_fraggedline.hpp" />
     <ClInclude Include="include\ui_listview.hpp" />
     <ClInclude Include="include\ui_panel.hpp" />
     <ClInclude Include="include\ui_static.hpp" />
