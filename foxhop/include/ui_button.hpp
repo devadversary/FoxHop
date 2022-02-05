@@ -86,17 +86,13 @@ private:
     ObjectMotionBox*              MBoxHighlight;  /**< 하이라이트 모션 박스*/
     ObjectMotionText*             MText;          /**< 모션 박스 기본 텍스트*/
     int                           nTextLen;
-    D2D1_COLOR_F                  FrameColor;     /**< 초기 테두리 색*/
-    D2D1_COLOR_F                  FaceColor;      /**< 초기 버튼 전경색*/
-    D2D1_COLOR_F                  HighlightColor; /**< 버튼 하이라이트 색*/
-    D2D1_COLOR_F                  FontColor;      /**< 초기 텍스트 색*/
     wchar_t                       szText[MAX_BUTTONNAME];
     void InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch);
 
-public:
     BUTTON_MOTION_SET             MotionSet;      /**< 모션 집합*/
     BUTTON_COLOR_SET              ColorSet;       /**< 색상 집합*/
 
+public:
 public: /*반드시 있어야 되는 매서드*/
     void CreateUI(UISystem* pUISys, int nID, ID2D1RenderTarget* pRT,
                   BUTTON_MOTION_SET UIMotionSet, BUTTON_COLOR_SET UIColorSet,
