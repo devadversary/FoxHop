@@ -3,7 +3,7 @@
 
 #include "./include/ui_button.hpp"
 #include "./include/ui_static.hpp"
-#include "./include/ui_divisionline.hpp"
+#include "./include/ui_fraggedline.hpp"
 #include "./include/ui_listview.hpp"
 
 UI_Panel::UI_Panel() {}
@@ -82,15 +82,12 @@ void UI_Panel::update(unsigned long time)
     for (i = 0; i < nCntUI; i++) {
         switch (UIList[i].type) {
         case UIType::eUI_Button:
-            ((UI_Button*)UIList[i].pUI)->update(time);
             break;
 
         case UIType::eUI_Static:
-            ((UI_Static*)UIList[i].pUI)->update(time);
             break;
 
-        case UIType::eUI_DivLine:
-            ((UI_DivisionLine*)UIList[i].pUI)->update(time);
+        case UIType::eUI_FragLine:
             break;
 
         case UIType::eUI_List:
@@ -131,11 +128,9 @@ void UI_Panel::render()
             break;
 
         case UIType::eUI_Static:
-            ((UI_Static*)UIList[i].pUI)->render();
             break;
 
-        case UIType::eUI_DivLine:
-            ((UI_DivisionLine*)UIList[i].pUI)->render();
+        case UIType::eUI_FragLine:
             break;
 
         case UIType::eUI_List:
@@ -166,7 +161,7 @@ UI* UI_Panel::CreateUI(UIType type, unsigned int nID, POSITION pos, wchar_t* pTe
     UI* pUI;
 
     /*UI 생성*/
-    pUI = uiSys->CreateUI(type, nID, pos, pText, nDelay, callback);
+    pUI = uiSys->CreateUI(type, pos, pText, nDelay, callback);
 
     /*패널 UI는 별도로 등록*/
     if (type == UIType::eUI_Panel) {
@@ -219,7 +214,7 @@ void UI_Panel::DefaultMouseHandler(POINT pt, UINT Message, void* param)
     for (i = 0; i < nCntUI; i++) {
         if (UIList[i].pUI->uiMotionState == eUIMotionState::eUMS_Hide) continue;
         /* 시작점-크기 쌍 대신 시작점-끝점 쌍을 사용하는 UI는 영역검사 X*/
-        if (UIList[i].pUI->uiType == UIType::eUI_DivLine) continue;
+        if (UIList[i].pUI->uiType == UIType::eUI_FragLine) continue;
         if (IsInRect(UIList[i].pUI->uiPos, pt)) {
             pTmpUI = UIList[i].pUI;
             uiSys->SendUIMessage(pTmpUI, UIM_MOUSEON, param);

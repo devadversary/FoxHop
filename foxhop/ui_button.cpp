@@ -22,7 +22,7 @@ void UI_Button::CreateUI(UISystem* pUISys, int nID, ID2D1RenderTarget* pRT,
     MBoxHighlight  = uiSys->ObjPoolBox.activateObject();
     MText          = uiSys->ObjPoolText.activateObject();
 
-    InputMotion(eButtonMotionType::eMotionType_Init, MotionSet.Init, nDelay, MotionSet.InitPitch);
+    InputMotion(eButtonMotionType::eType_Init, MotionSet.Init, nDelay, MotionSet.InitPitch);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
     DefaultHandler(this, UIM_CREATE, NULL); /*UI생성 메세지 전송*/
 }
@@ -39,9 +39,9 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
     D2D1_COLOR_F TmpStartColor;
 
     switch (MotionType) {
-    case eButtonMotionType::eMotionType_Init: /*나타나기*/
+    case eButtonMotionType::eType_Init: /*나타나기*/
         switch (Pattern) {
-        case eButtonMotionPattern::eMotionInit_Default: /*모션 없음*/
+        case eButtonMotionPattern::eInit_Default: /*모션 없음*/
             miMove  = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
             miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
             MBoxFace->Init(pRenderTarget, uiPos, ColorSet.Face, TRUE);
@@ -57,7 +57,7 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
             MText->addColorMotion(miColor, FALSE, ColorSet.Font, ColorSet.Font);
             break;
 
-        case eButtonMotionPattern::eMotionInit_Reload:
+        case eButtonMotionPattern::eInit_Reload:
             /*버튼 생성모션 입력*/
             miMove = InitMotionInfo(eMotionForm::eMotion_x3_2, nDelay, nPitch / 2);
             miColor = InitMotionInfo(eMotionForm::eMotion_x3_2, nDelay, nPitch / 2);
@@ -83,24 +83,72 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
             MBoxHighlight->addMovementMotion(miMove, TRUE, TmpEndPos, uiPos);
             break;
 
-        case eButtonMotionPattern::eMotionInit_Flick:
+        case eButtonMotionPattern::eInit_Flick:
             break;
         }
         break;
 
-    case eButtonMotionType::eMotionType_Pause:
+    case eButtonMotionType::eType_Pause:
+        switch (Pattern) {
+        case eButtonMotionPattern::ePause_Default:
+            miMove = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
+            miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
+            MBoxFace->Init(pRenderTarget, uiPos, ColorSet.Face, TRUE);
+            MBoxHighlight->Init(pRenderTarget, uiPos, ColorSet.Highlight, TRUE);
+            MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ColorSet.Font, nTextLen);
+
+            MBoxFace->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            MBoxHighlight->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            MText->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+
+            MBoxFace->addColorMotion(miColor, FALSE, ColorSet.Face, ColorSet.Face);
+            MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
+            MText->addColorMotion(miColor, FALSE, ColorSet.Font, ColorSet.Font);
+            break;
+
+        case eButtonMotionPattern::ePause_Flick:
+            break;
+        }
         break;
 
-    case eButtonMotionType::eMotionType_Mouseover:
+    case eButtonMotionType::eType_Mouseover:
+        switch (Pattern) {
+        case eButtonMotionPattern::eMouseover_Default:
+            break;
+
+        case eButtonMotionPattern::eMouseover_Flick:
+            break;
+        }
         break;
 
-    case eButtonMotionType::eMotionType_Click:
+    case eButtonMotionType::eType_Click:
+        switch (Pattern) {
+        case eButtonMotionPattern::eClick_Default:
+            break;
+
+        case eButtonMotionPattern::eClick_Flash:
+            break;
+        }
+
         break;
 
-    case eButtonMotionType::eMotionType_Color:
+    case eButtonMotionType::eType_Color:
+        switch (Pattern) {
+        case eButtonMotionPattern::eColor_Default:
+            break;
+
+        case eButtonMotionPattern::eColor_Flash:
+            break;
+        }
+
         break;
 
-    case eButtonMotionType::eMotionType_Text:
+    case eButtonMotionType::eType_Text:
+        switch (Pattern) {
+        case eButtonMotionPattern::eText_Default:
+            break;
+        }
+
         break;
     }
 }
@@ -146,7 +194,7 @@ void UI_Button::pause(int nDelay)
 */
 void UI_Button::resume(int nDelay)
 {
-    InputMotion(eButtonMotionType::eMotionType_Init, MotionSet.Init, nDelay, MotionSet.InitPitch);
+    InputMotion(eButtonMotionType::eType_Init, MotionSet.Init, nDelay, MotionSet.InitPitch);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
 }
 
@@ -214,7 +262,7 @@ void UI_Button::setHighlightColor(D2D1_COLOR_F Color, MOTION_INFO miColor)
 */
 static void DefaultButtonProc(UI* pUI, UINT Message, void* param)
 {
-    pfnUIHandler       UserHandler = pUI->MessageHandler;
+    pfnUIHandler UserHandler = pUI->MessageHandler;
 
     switch (Message) {
 #if 1 /*2021.07.27 devadversary : UI들의 사용자 상호작용에따른 모션변경은 기본 핸들러가 처리하도록 결정함*/
@@ -240,12 +288,12 @@ void UI_ButtonFactory::Init(UISystem* pUISystem, ID2D1RenderTarget* pRT)
     pRenderTarget = pRT;
 
     /*기본 모션 지정 (추후 변경 가능)*/
-    MotionSet.Init      = eButtonMotionPattern::eMotionInit_Default;
-    MotionSet.Pause     = eButtonMotionPattern::eMotionPause_Default;
-    MotionSet.Color     = eButtonMotionPattern::eMotionMouseover_Default;
-    MotionSet.Text      = eButtonMotionPattern::eMotionText_Default;
-    MotionSet.Click     = eButtonMotionPattern::eMotionColor_Default;
-    MotionSet.MouseOver = eButtonMotionPattern::eMotionText_Default;
+    MotionSet.Init      = eButtonMotionPattern::eInit_Default;
+    MotionSet.Pause     = eButtonMotionPattern::ePause_Default;
+    MotionSet.Color     = eButtonMotionPattern::eMouseover_Default;
+    MotionSet.Text      = eButtonMotionPattern::eText_Default;
+    MotionSet.Click     = eButtonMotionPattern::eColor_Default;
+    MotionSet.MouseOver = eButtonMotionPattern::eText_Default;
 
     /*기본 모션진행시간 지정 (추후 변경 가능) ms단위*/
     MotionSet.InitPitch      = 0;

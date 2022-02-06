@@ -2,7 +2,7 @@
 
 #include "./include/ui_panel.hpp"
 #include "./include/ui_button.hpp"
-#include "./include/ui_divisionline.hpp"
+#include "./include/ui_fraggedline.hpp"
 #include "./include/ui_static.hpp"
 
 UISystem::UISystem()
@@ -69,22 +69,14 @@ UI* UISystem::CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pf
     UI_INFO* pInfo;
 
     if (!pUIArray) return NULL;
-    if (nID >= nMaxUICnt) return NULL;
-    if (pUIArray[nID]) return NULL; /*이미 해당 ID에 UI가 매핑 되어있는 경우*/
     switch (type) {
     case UIType::eUI_Panel:
-        pUI = new UI_Panel;
-        pUI->uiType = UIType::eUI_Panel;
-        ((UI_Panel*)pUI)->preInit(this, D2DA.pRenTarget, nID, callback);
         break;
 
     case UIType::eUI_Button:
-        pUI = new UI_Button;
-        pUI->uiType = UIType::eUI_Button;
-        pUIButtonFactory->CreateUI(nID, pos, pText, nDelay, callback);
         break;
 
-    case UIType::eUI_DivLine : 
+    case UIType::eUI_FragLine : 
         break;
 
     case UIType::eUI_Static: 
@@ -97,7 +89,7 @@ UI* UISystem::CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pf
     case UIType::eUI_Graph: break;
     default: return NULL;
     }
-    pUIArray[nID] = pUI;
+    pUIArray[nUICnt] = pUI;
     if (!pUI) return NULL;
     /************************************************/
     //pUIID[nID].pUI = pUI;

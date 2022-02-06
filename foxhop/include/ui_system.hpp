@@ -30,7 +30,7 @@ enum class UIType {
     eUI_Panel = 1,    /**< 패널 컨트롤. 이 안에 다른 UI를 배치하여 한번에 관리할때 사용. (패널 안에 패널 가능)*/
     eUI_Button = 100, /**< winAPI의 버튼 컨트롤과 같은 용도*/
     eUI_Static,       /**< 스태틱 컨트롤*/
-    eUI_DivLine,      /**< 분리선*/
+    eUI_FragLine,      /**< 분리선*/
     eUI_List,         /**< 리스트뷰 컨트롤*/
     eUI_Edit,         /**< 에디트 컨트롤*/
     eUI_Scroll,       /**< 스크롤 바 (가로 세로)*/

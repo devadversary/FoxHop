@@ -8,8 +8,10 @@
 #include "../foxhop/include/ui_system.hpp"
 #include "../foxhop/include/ui_button.hpp"
 #include "../foxhop/include/ui_static.hpp"
-#include "../foxhop/include/ui_divisionline.hpp"
+#include "../foxhop/include/ui_fraggedline.hpp"
 #include "../foxhop/include/ui_panel.hpp"
+
+#pragma comment (lib, "../bin/Debug/foxhop.lib")
 
 #define CLASSNAME TEXT("Conspiracy")
 

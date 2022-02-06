@@ -8,35 +8,35 @@ class UISystem; /*UI시스템 클래스의 전방선언*/
     @brief 버튼 모션 타입 상수
 */
 enum class eButtonMotionPattern {
-    eMotionInit_Default = 0,      /**< 생성: 모션 없음*/
-    eMotionInit_Reload,           /**< 생성: 장전 모션*/
-    eMotionInit_Flick,            /**< 생성: 플리커링 모션*/
+    eInit_Default = 0,      /**< 생성: 모션 없음*/
+    eInit_Reload,           /**< 생성: 장전 모션*/
+    eInit_Flick,            /**< 생성: 플리커링 모션*/
 
-    eMotionPause_Default = 0,     /**< 소멸: 모션 없음*/
-    eMotionPause_Flick,           /**< 소멸: 플리커링 모션*/
+    ePause_Default = 0,     /**< 소멸: 모션 없음*/
+    ePause_Flick,           /**< 소멸: 플리커링 모션*/
 
-    eMotionMouseover_Default = 0, /**< 마우스오버: 모션 없음*/
-    eMotionMouseover_Flick,       /**< 마우스오버: 플리커링 모션*/
+    eMouseover_Default = 0, /**< 마우스오버: 모션 없음*/
+    eMouseover_Flick,       /**< 마우스오버: 플리커링 모션*/
 
-    eMotionClick_Default = 0,     /**< 클릭: 모션 없음*/
-    eMotionClick_Flash,           /**< 클릭: 점멸 모션*/
+    eClick_Default = 0,     /**< 클릭: 모션 없음*/
+    eClick_Flash,           /**< 클릭: 점멸 모션*/
 
-    eMotionColor_Default = 0,     /**< 색상변경: 모션 없음*/
-    eMotionColor_Flash,           /**< 색상변경: 점멸 모션*/
+    eColor_Default = 0,     /**< 색상변경: 모션 없음*/
+    eColor_Flash,           /**< 색상변경: 점멸 모션*/
 
-    eMotionText_Default = 0       /**< 텍스트: 모션 없음*/
+    eText_Default = 0       /**< 텍스트: 모션 없음*/
 };
 
 /**
     @brief 버튼 모션 타입
 */
 enum class eButtonMotionType {
-    eMotionType_Init = 0,   /**< 초기화 모션*/
-    eMotionType_Pause,      /**< 소멸 모션*/
-    eMotionType_Mouseover,  /**< 마우스 오버 모션*/
-    eMotionType_Click,      /**< 클릭 모션*/
-    eMotionType_Color,      /**< 색상 변경 모션*/
-    eMotionType_Text        /**< 텍스트 모션*/
+    eType_Init = 0,   /**< 초기화 모션*/
+    eType_Pause,      /**< 소멸 모션*/
+    eType_Mouseover,  /**< 마우스 오버 모션*/
+    eType_Click,      /**< 클릭 모션*/
+    eType_Color,      /**< 색상 변경 모션*/
+    eType_Text        /**< 텍스트 모션*/
 };
 
 /**

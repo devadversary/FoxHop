@@ -39,7 +39,7 @@ private:
     UI_Panel*            PanelList[MAX_SUB_PANEL_CNT]; /**< 패널이 가진 하위 패널의 리스트*/
     int                  nCntPanel;                    /**< 하위 패널 갯수*/
     UI_INFO              UIList[MAX_SUB_UI_CNT];       /**< 패널이 가진 하위 UI의 리스트*/
-    int                  nCntUI;                       /**< 하쉬 UI 갯수*/
+    int                  nCntUI;                       /**< 하위 UI 갯수*/
     D2D1::Matrix3x2F     transform;                    /**< 해당 패널의 변환행렬*/
     UI*                  pTmpUI;                       /**< 마우스 이벤트 핸들링을 위한 임시변수*/
 
