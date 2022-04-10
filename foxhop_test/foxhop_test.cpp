@@ -146,6 +146,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_SIZE:
+        OnSize(hWnd, Message, wParam, lParam);
         break;
 
     case WM_TIMER:
@@ -181,7 +182,7 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     wc.cbWndExtra = NULL;
     RegisterClass(&wc);
 
-    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP, 0, 0, 0, 0, NULL, NULL, hInst, NULL);
+    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP | WS_VISIBLE, 0, 0, 0, 0, NULL, NULL, hInst, NULL);
     AlphaWindow(hWnd, WINDOWMODE_BLURBEHIND);
 
     while (GetMessage(&Message, NULL, NULL, NULL)) {

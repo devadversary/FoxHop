@@ -44,16 +44,17 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
         case eButtonMotionPattern::eInit_Default: /*모션 없음*/
             miMove  = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
             miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
+
             MBoxFace->Init(pRenderTarget, uiPos, ColorSet.Face, TRUE);
-            MBoxHighlight->Init(pRenderTarget, uiPos, ColorSet.Highlight, TRUE);
-            MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ColorSet.Font, nTextLen);
-
             MBoxFace->addMovementMotion(miMove, FALSE, uiPos, uiPos);
-            MBoxHighlight->addMovementMotion(miMove, FALSE, uiPos, uiPos);
-            MText->addMovementMotion(miMove, FALSE, uiPos, uiPos);
-
             MBoxFace->addColorMotion(miColor, FALSE, ColorSet.Face, ColorSet.Face);
+
+            MBoxHighlight->Init(pRenderTarget, uiPos, ColorSet.Highlight, TRUE);
+            MBoxHighlight->addMovementMotion(miMove, FALSE, uiPos, uiPos);
             MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
+
+            MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ColorSet.Font, nTextLen);
+            MText->addMovementMotion(miMove, FALSE, uiPos, uiPos);
             MText->addColorMotion(miColor, FALSE, ColorSet.Font, ColorSet.Font);
             break;
 
@@ -107,6 +108,12 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
             break;
 
         case eButtonMotionPattern::ePause_Flick:
+            miColor = InitMotionInfo(eMotionForm::eMotion_Pulse2, nDelay, nPitch);
+            MBoxFace->Init(pRenderTarget, uiPos, ColorSet.Face, TRUE);
+            MBoxHighlight->Init(pRenderTarget, uiPos, ColorSet.Highlight, TRUE);
+            MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ColorSet.Font, nTextLen);
+
+            MBoxFace->addColorMotion(miColor, FALSE, ColorSet.Face, {0,0,0,0});
             break;
         }
         break;
@@ -114,6 +121,8 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
     case eButtonMotionType::eType_Mouseover:
         switch (Pattern) {
         case eButtonMotionPattern::eMouseover_Default:
+            miMove = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
+            miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
             break;
 
         case eButtonMotionPattern::eMouseover_Flick:
@@ -179,8 +188,8 @@ void UI_Button::pause(int nDelay)
     switch (0) {
     default:
         miColor.formular = eMotionForm::eMotion_Pulse1;
-        miColor.nDelay = nDelay;
-        miColor.nPitch = 200;
+        miColor.nDelay   = nDelay;
+        miColor.nPitch   =  200;
         MText->SetColor(miColor, TRUE, {0.f,0.f,0.f,0.f}, { 0.f,0.f,0.f,0.f });
         miColor.nDelay += 400;
         MBoxFace->SetColor(miColor, TRUE, { 0.f,0.f,0.f,0.f }, { 0.f,0.f,0.f,0.f });
@@ -206,13 +215,22 @@ BOOL UI_Button::update(unsigned long time)
 {
     int nTrue = 0;
 
+    /*UI 가 숨김 상태로 돌입하면 연산 중지*/
     if (uiMotionState == eUIMotionState::eUMS_Hide) return FALSE;
+
     nTrue += MBoxFace->update(time);
     nTrue += MBoxHighlight->update(time);
     nTrue += MText->update(time);
-    if (!nTrue) return FALSE; /*Hide 완료, 또는 Init완료 해야댐*/
-    if (uiMotionState == eUIMotionState::eUMS_PlayingHide)
-        uiMotionState = eUIMotionState::eUMS_Hide;
+
+    /*nTrue가 0이면 모션 연산이 종료된 것.*/
+    if (!nTrue) {
+        if (uiMotionState == eUIMotionState::eUMS_PlayingHide)
+            uiMotionState = eUIMotionState::eUMS_Hide;
+
+        else if (uiMotionState == eUIMotionState::eUMS_PlayingVisible)
+            uiMotionState = eUIMotionState::eUMS_Visible;
+        return FALSE;
+    }
     return TRUE;
 }
 
@@ -280,6 +298,7 @@ static void DefaultButtonProc(UI* pUI, UINT Message, void* param)
 
 /**
     @brief 팩토리 초기화
+    @remark UISystem::Init 에서 호출된다.
 */
 void UI_ButtonFactory::Init(UISystem* pUISystem, ID2D1RenderTarget* pRT)
 {

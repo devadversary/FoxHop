@@ -26,8 +26,8 @@ typedef struct _st_ValueChain {
 */
 enum class eMotionForm {
     eMotion_None = 0,    /**< 모션 없음*/
-    eMotion_Pulse1,      /**< 펄스 함수 (Preset_Pulse1)*/
-    eMotion_Pulse2,      /**< 펄스 함수 (Preset_Pulse2)*/
+    eMotion_Pulse1,      /**< 펄스 함수 (Preset_Pulse1) (0,1,0,1 순서)*/
+    eMotion_Pulse2,      /**< 펄스 함수 (Preset_Pulse2) (1,0,1,0 순서)*/
     eMotion_Linear1,     /**< 선형 함수 (Preset_Linear1)*/
     eMotion_Linear2,     /**< 선형 함수 (Preset_Linear2)*/
     eMotion_x3_1,        /**< x 3제곱   (Preset_x3_0to1_1)*/
@@ -115,25 +115,12 @@ void AddChain(MOTION_PATTERN* pPatt, float* pVal, float nStart, float nEnd);
 */
 inline float Preset_Pulse1(float x)
 {
-#if 0 /*스위칭 주기가 너무 짧아 프레임 스킵되는 현상이 있음*/
-    if (x > 0.9) return 1.f;
-    if (x > 0.8) return 0.f;
-    if (x > 0.7) return 1.f;
-    if (x > 0.6) return 0.f;
-    if (x > 0.5) return 1.f;
-    if (x > 0.4) return 0.f;
-    if (x > 0.3) return 1.f;
-    if (x > 0.2) return 0.f;
-    if (x > 0.1) return 1.f;
-    return 0.f;
-#else
     if (x > 0.8333) return 1.f;
     if (x > 0.6666) return 0.f;
     if (x > 0.5) return 1.f;
     if (x > 0.3333) return 0.f;
     if (x > 0.1666) return 1.f;
     return 0.f;
-#endif
 }
 
 /**
@@ -141,26 +128,12 @@ inline float Preset_Pulse1(float x)
 */
 inline float Preset_Pulse2(float x)
 {
-#if 0 /*스위칭 주기가 너무 짧아 프레임 스킵되는 현상이 있음*/
-    if (x > 0.9) return 0.f;
-    if (x > 0.8) return 1.f;
-    if (x > 0.7) return 0.f;
-    if (x > 0.6) return 1.f;
-    if (x > 0.5) return 0.f;
-    if (x > 0.4) return 1.f;
-    if (x > 0.3) return 0.f;
-    if (x > 0.2) return 1.f;
-    if (x > 0.1) return 0.f;
-    return 1.f;
-#else
     if (x > 0.8333) return 0.f;
     if (x > 0.6666) return 1.f;
     if (x > 0.5) return 0.f;
     if (x > 0.3333) return 1.f;
     if (x > 0.1666) return 0.f;
     return 1.f;
-
-#endif
 }
 
 inline float Preset_None(float x) { return 1; }
