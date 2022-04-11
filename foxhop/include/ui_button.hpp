@@ -33,7 +33,7 @@ enum class eButtonMotionPattern {
 enum class eButtonMotionType {
     eType_Init = 0,   /**< 초기화 모션*/
     eType_Pause,      /**< 소멸 모션*/
-    eType_Mouseover,  /**< 마우스 오버 모션*/
+    eType_Mouseover,  /**< 마우스 오버 모션 (커서가 떠났을때도 포함)*/
     eType_Click,      /**< 클릭 모션*/
     eType_Color,      /**< 색상 변경 모션*/
     eType_Text        /**< 텍스트 모션*/

@@ -37,6 +37,7 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
     MOTION_INFO miMove, miColor;
     POSITION TmpStartPos, TmpEndPos;
     D2D1_COLOR_F TmpStartColor;
+    int TmpPitch;
 
     switch (MotionType) {
     case eButtonMotionType::eType_Init: /*나타나기*/
@@ -46,15 +47,15 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
             miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
 
             MBoxFace->Init(pRenderTarget, uiPos, ColorSet.Face, TRUE);
-            MBoxFace->addMovementMotion(miMove, FALSE, uiPos, uiPos);
-            MBoxFace->addColorMotion(miColor, FALSE, ColorSet.Face, ColorSet.Face);
-
             MBoxHighlight->Init(pRenderTarget, uiPos, ColorSet.Highlight, TRUE);
-            MBoxHighlight->addMovementMotion(miMove, FALSE, uiPos, uiPos);
-            MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
-
             MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ColorSet.Font, nTextLen);
+
+            MBoxFace->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            MBoxHighlight->addMovementMotion(miMove, FALSE, uiPos, uiPos);
             MText->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            
+            MBoxFace->addColorMotion(miColor, FALSE, ColorSet.Face, ColorSet.Face);
+            MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
             MText->addColorMotion(miColor, FALSE, ColorSet.Font, ColorSet.Font);
             break;
 
@@ -97,32 +98,37 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
             MBoxFace->Init(pRenderTarget, uiPos, ColorSet.Face, TRUE);
             MBoxHighlight->Init(pRenderTarget, uiPos, ColorSet.Highlight, TRUE);
             MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ColorSet.Font, nTextLen);
-
-            MBoxFace->addMovementMotion(miMove, FALSE, uiPos, uiPos);
-            MBoxHighlight->addMovementMotion(miMove, FALSE, uiPos, uiPos);
-            MText->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+#if 1 /*모션은 없어도 딜레이는 줄 수 있음*/
+            //MBoxFace->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            //MBoxHighlight->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            //MText->addMovementMotion(miMove, FALSE, uiPos, uiPos);
 
             MBoxFace->addColorMotion(miColor, FALSE, ColorSet.Face, ColorSet.Face);
             MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
             MText->addColorMotion(miColor, FALSE, ColorSet.Font, ColorSet.Font);
+#endif
             break;
 
         case eButtonMotionPattern::ePause_Flick:
-            miColor = InitMotionInfo(eMotionForm::eMotion_Pulse2, nDelay, nPitch);
+            TmpPitch = nPitch / 2; /*동작이 두개이므로(텍스트가 사라진 후에 버튼이 사라져야함) 피치를 적절히 분할한다*/
+            miColor = InitMotionInfo(eMotionForm::eMotion_Pulse2, nDelay, TmpPitch);
             MBoxFace->Init(pRenderTarget, uiPos, ColorSet.Face, TRUE);
-            MBoxHighlight->Init(pRenderTarget, uiPos, ColorSet.Highlight, TRUE);
+            MBoxHighlight->Init(pRenderTarget, uiPos, {0,0,0,0}, TRUE); /*사라지기전 하이라이트는 먼저 제거*/
             MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ColorSet.Font, nTextLen);
 
-            MBoxFace->addColorMotion(miColor, FALSE, ColorSet.Face, {0,0,0,0});
+            MText->addColorMotion(miColor, FALSE, ColorSet.Font, { 0,0,0,0 }); /*텍스트 사라짐*/
+            miColor.nDelay += TmpPitch; /*텍스트가 사라진 후에 버튼사라짐 모션 진행*/
+            MBoxFace->addColorMotion(miColor, FALSE, ColorSet.Face, {0,0,0,0}); /*버튼 사라짐*/
             break;
         }
         break;
 
-    case eButtonMotionType::eType_Mouseover:
+    case eButtonMotionType::eType_Mouseover: /*마우스가 들어왔을때와 떠났을때 구분이 되지 않음. 대책 필요.*/
         switch (Pattern) {
         case eButtonMotionPattern::eMouseover_Default:
-            miMove = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
             miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
+            MBoxHighlight->Init(pRenderTarget, uiPos, {0,0,0,0}, TRUE);
+            MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
             break;
 
         case eButtonMotionPattern::eMouseover_Flick:
