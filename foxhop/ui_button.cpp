@@ -66,7 +66,7 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
             TmpStartPos = uiPos; TmpStartPos.x -= 30; TmpStartPos.y -= 100;
             TmpEndPos = uiPos; TmpEndPos.x -= 30;
             TmpStartColor = ColorSet.Face; TmpStartColor.a = 0;
-
+            TmpPitch = nPitch / 2; /*동작이 두개이므로(아래로 이동 후 옆으로 이동) 피치를 적절히 분할한다*/
             /*최종 위치로부터 -30, -100 위치 (좌상단) 에서부터 시작*/
             MBoxFace->Init(pRenderTarget, TmpStartPos, { 0.f,0.f,0.f,0.f });
             MBoxHighlight->Init(pRenderTarget, TmpStartPos, { 0.f,0.f,0.f,0.f });
@@ -76,8 +76,8 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
             MBoxHighlight->addMovementMotion(miMove, FALSE, TmpStartPos, TmpEndPos);
             /*두번째 이동 (우측으로 이동하는 모션*/
             MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, TmpEndPos, { 0.f, 0.f, 0.f, 0.f }, nTextLen);
-            miMove.nDelay += nPitch / 2;
-            miColor.nDelay += nPitch / 2;
+            miMove.nDelay += TmpPitch;
+            miColor.nDelay += TmpPitch;
             MText->addMovementMotion(miMove, FALSE, TmpEndPos, uiPos);
             MText->addColorMotion(miColor, FALSE, ColorSet.Font, ColorSet.Font);
             MBoxFace->addMovementMotion(miMove, TRUE, TmpEndPos, uiPos);
