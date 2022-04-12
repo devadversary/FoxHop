@@ -31,7 +31,7 @@ void ObjectMotionBox::Init(ID2D1RenderTarget* pRT, POSITION StartPos, D2D1_COLOR
 }
 
 /**
-    @brief  이동 모션을 채널에 추가한다.
+    @brief  이동 모션을 채널에 추가한다. (여러 모션을 넣을때 활용)
     @remark 채널들을 일종의 대기열로 사용할 수 있다.
     @n      어떤 모션이 진행되고 난 후. 이어서 다른 모션을 진행하는 식으로
     @n      복합적인 애니메이션을 구현 할 수 있다.
@@ -51,7 +51,7 @@ void ObjectMotionBox::addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, PO
 }
 
 /**
-    @brief  컬러 모션을 채널에 추가한다.
+    @brief  컬러 모션을 채널에 추가한다. (여러 모션을 넣을때 활용)
     @remark 채널들을 일종의 대기열로 사용할 수 있다.
     @n      어떤 모션이 진행되고 난 후. 이어서 다른 모션을 진행하는 식으로
     @n      복합적인 애니메이션을 구현 할 수 있다.
@@ -71,7 +71,7 @@ void ObjectMotionBox::addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1_
 }
 
 /**
-    @brief 이미 생성된 오브젝트를 지정 위치로 이동
+    @brief 이미 생성된 오브젝트를 지정 위치로 이동 (단일 모션일때 활용)
     @param bCurrent 이 값이 TRUE 이면 StartPos를 무시하고 현재 위치부터 EndPos로 이동한다.
 */
 void ObjectMotionBox::SetPos(MOTION_INFO MotionInfo, BOOL bCurrent, POSITION StartPos, POSITION EndPos)
@@ -85,7 +85,7 @@ void ObjectMotionBox::SetPos(MOTION_INFO MotionInfo, BOOL bCurrent, POSITION Sta
 }
 
 /**
-    @brief 이미 생성된 오브젝트를 지정 색상으로 변경
+    @brief 이미 생성된 오브젝트를 지정 색상으로 변경 (단일 모션일때 활용)
     @param bCurrent 이 값이 TRUE 이면 StartPos를 무시하고 현재 위치부터 EndPos로 이동한다.
 */
 void ObjectMotionBox::SetColor(MOTION_INFO MotionInfo, BOOL bCurrent, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor)

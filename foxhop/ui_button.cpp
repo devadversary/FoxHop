@@ -287,6 +287,7 @@ void UI_Button::setHighlightColor(D2D1_COLOR_F Color, MOTION_INFO miColor)
 static void DefaultButtonProc(UI* pUI, UINT Message, void* param)
 {
     pfnUIHandler UserHandler = pUI->MessageHandler;
+    UI_Button* pButton = (UI_Button*)pUI;
 
     switch (Message) {
 #if 1 /*2021.07.27 devadversary : UI들의 사용자 상호작용에따른 모션변경은 기본 핸들러가 처리하도록 결정함*/
@@ -329,10 +330,11 @@ void UI_ButtonFactory::Init(UISystem* pUISystem, ID2D1RenderTarget* pRT)
     MotionSet.MouseOverPitch = 0;
 
     /*기본 컬러 지정 (추후 변경 가능) : R G B A (0.0f ~ 1.0f)*/
-    ColorSet.Face      = {0.8, 0.8, 0.8, 1};
-    ColorSet.Font      = {0,   0,   0,   1};
-    ColorSet.Frame     = {0,   0,   0,   0};
-    ColorSet.Highlight = {1,   1,   1,   1};
+    ColorSet.Face      = {0.8f, 0.8f, 0.8f, 1.f};  /*밝은 회색*/
+    ColorSet.Font      = {0.f,  0.f,  0.f,  1.f};
+    ColorSet.Frame     = {0.f,  0.f,  0.f,  0.f};
+    ColorSet.Mouseover = {1.f,  1.f,  1.f,  0.5f}; /*반투명 흰색*/
+    ColorSet.Highlight = {1.f,  1.f,  1.f,  1.f};
 }
 
 /**

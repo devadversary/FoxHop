@@ -70,6 +70,7 @@ typedef struct _stButtonMotionSet {
 typedef struct _stColorSet {
     D2D1_COLOR_F Frame;     /**< 초기 테두리 색*/
     D2D1_COLOR_F Face;      /**< 초기 버튼 전경색*/
+    D2D1_COLOR_F Mouseover; /**< 마우스 오버 색*/
     D2D1_COLOR_F Highlight; /**< 버튼 하이라이트 색*/
     D2D1_COLOR_F Font;      /**< 초기 텍스트 색*/
 }BUTTON_COLOR_SET;
