@@ -31,12 +31,12 @@ enum class eButtonMotionPattern {
     @brief 버튼 모션 타입
 */
 enum class eButtonMotionType {
-    eType_Init = 0,   /**< 초기화 모션*/
-    eType_Pause,      /**< 소멸 모션*/
-    eType_Mouseover,  /**< 마우스 오버 모션 (커서가 떠났을때도 포함)*/
-    eType_Click,      /**< 클릭 모션*/
-    eType_Color,      /**< 색상 변경 모션*/
-    eType_Text        /**< 텍스트 모션*/
+    eType_Init = 0,  /**< 초기화 모션*/
+    eType_Pause,     /**< 소멸 모션*/
+    eType_Mouseover, /**< 마우스 오버 모션 (커서가 떠났을때도 포함)*/
+    eType_Click,     /**< 클릭 모션*/
+    eType_Color,     /**< 색상 변경 모션*/
+    eType_Text       /**< 텍스트 모션*/
 };
 
 /**
@@ -92,7 +92,7 @@ private:
     BUTTON_COLOR_SET              ColorSet;       /**< 색상 집합*/
     
 private:
-    void InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch);
+    void InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch, void* param);
 
 public: /*반드시 있어야 되는 매서드*/
     void CreateUI(UISystem* pUISys, int nID, ID2D1RenderTarget* pRT,

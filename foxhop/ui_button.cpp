@@ -22,17 +22,20 @@ void UI_Button::CreateUI(UISystem* pUISys, int nID, ID2D1RenderTarget* pRT,
     MBoxHighlight  = uiSys->ObjPoolBox.activateObject();
     MText          = uiSys->ObjPoolText.activateObject();
 
-    InputMotion(eButtonMotionType::eType_Init, MotionSet.Init, nDelay, MotionSet.InitPitch);
+    InputMotion(eButtonMotionType::eType_Init, MotionSet.Init, nDelay, MotionSet.InitPitch, NULL);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
     DefaultHandler(this, UIM_CREATE, NULL); /*UI생성 메세지 전송*/
 }
 
 /**
     @brief 지정한 모션 기입
-    @param Motion UI의 등장 모션타입
-    @param nDelay UI의 등장 딜레이
+    @param MotionType 기입할 모션의 타입
+    @param Pattern    기입할 모션의 패턴
+    @param Motion     UI의 등장 모션타입
+    @param nDelay     UI의 등장 딜레이
+    @param param      사용자 파라미터 (없으면 NULL / ex : 패턴이 eType_Mouseover 일때, BOOL 타입으로사용 - 마우스 진입, 퇴장을 구분)
 */
-void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch)
+void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch, void* param)
 {
     MOTION_INFO miMove, miColor;
     POSITION TmpStartPos, TmpEndPos;
@@ -125,13 +128,25 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
 
     case eButtonMotionType::eType_Mouseover: /*마우스가 들어왔을때와 떠났을때 구분이 되지 않음. 대책 필요.*/
         switch (Pattern) {
+
         case eButtonMotionPattern::eMouseover_Default:
             miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
             MBoxHighlight->Init(pRenderTarget, uiPos, {0,0,0,0}, TRUE);
-            MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
+            if(param) MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
+            else      MBoxHighlight->addColorMotion(miColor, FALSE, {0,0,0,0},{0,0,0,0});
             break;
 
         case eButtonMotionPattern::eMouseover_Flick:
+            if (param) {
+                miColor = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, nPitch);
+                MBoxHighlight->Init(pRenderTarget, uiPos, { 0,0,0,0 }, TRUE);
+                MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
+            }
+            else {
+                miColor = InitMotionInfo(eMotionForm::eMotion_Pulse2, nDelay, nPitch);
+                MBoxHighlight->Init(pRenderTarget, uiPos, ColorSet.Highlight, TRUE);
+                MBoxHighlight->addColorMotion(miColor, FALSE, { 0,0,0,0 }, { 0,0,0,0 });
+            }
             break;
         }
         break;
@@ -209,7 +224,7 @@ void UI_Button::pause(int nDelay)
 */
 void UI_Button::resume(int nDelay)
 {
-    InputMotion(eButtonMotionType::eType_Init, MotionSet.Init, nDelay, MotionSet.InitPitch);
+    InputMotion(eButtonMotionType::eType_Init, MotionSet.Init, nDelay, MotionSet.InitPitch, NULL);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
 }
 
