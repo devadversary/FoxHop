@@ -89,6 +89,9 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
             break;
 
         case eButtonMotionPattern::eInit_Flick:
+            TmpPitch = nPitch / 2;
+            //miMove = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, TmpPitch);
+            miColor = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, TmpPitch);
             break;
         }
         break;
@@ -205,7 +208,7 @@ void UI_Button::pause(int nDelay)
     MOTION_INFO miColor;
 
     uiMotionState = eUIMotionState::eUMS_PlayingHide;
-    /*TODO : 소멸 모션도 지정할 수 있도록 할 예정*/
+    /*TODO : 소멸 모션도 지정할 수 있도록 할 예정
     switch (0) {
     default:
         miColor.formular = eMotionForm::eMotion_Pulse1;
@@ -217,6 +220,7 @@ void UI_Button::pause(int nDelay)
         MBoxHighlight->SetColor(miColor, TRUE, { 0.f,0.f,0.f,0.f }, { 0.f,0.f,0.f,0.f });
         break;
     }
+    */
 }
 
 /**
@@ -243,7 +247,7 @@ BOOL UI_Button::update(unsigned long time)
     nTrue += MBoxHighlight->update(time);
     nTrue += MText->update(time);
 
-    /*nTrue가 0이면 모션 연산이 종료된 것.*/
+    /*nTrue가 0이면 모션 연산이 종료된 것. ~ing 상태를 확정시킨다.*/
     if (!nTrue) {
         if (uiMotionState == eUIMotionState::eUMS_PlayingHide)
             uiMotionState = eUIMotionState::eUMS_Hide;
@@ -299,17 +303,24 @@ void UI_Button::setHighlightColor(D2D1_COLOR_F Color, MOTION_INFO miColor)
     @brief 기본 버튼 메세지 핸들러
     @remark 사용자 지정 프로시저는 기본 핸들러 실행 후 호출된다.
 */
-static void DefaultButtonProc(UI* pUI, UINT Message, void* param)
+void UI_Button::DefaultButtonProc(UI* pUI, UINT Message, void* param)
 {
     pfnUIHandler UserHandler = pUI->MessageHandler;
-    UI_Button* pButton = (UI_Button*)pUI;
+    UI_Button* pButton = static_cast<UI_Button*>(pUI);
+
+    if (!pUI) return;
 
     switch (Message) {
 #if 1 /*2021.07.27 devadversary : UI들의 사용자 상호작용에따른 모션변경은 기본 핸들러가 처리하도록 결정함*/
     case UIM_MOUSEON:
+        pButton->InputMotion(eButtonMotionType::eType_Mouseover, pButton->MotionSet.MouseOver, 0, pButton->MotionSet.MouseOverPitch, (void*)FALSE);
         break;
 
     case UIM_MOUSELEAVE:
+        pButton->InputMotion(eButtonMotionType::eType_Mouseover, pButton->MotionSet.MouseOver, 0, pButton->MotionSet.MouseOverPitch, (void*)TRUE);
+        break;
+
+    case UIM_CLICK:
         break;
 #endif
     default: break;

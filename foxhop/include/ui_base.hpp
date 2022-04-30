@@ -8,7 +8,7 @@
 
 #define UIM_CREATE        100
 #define UIM_DELETE        101
-#define UIM_CLICK         102
+#define UIM_CLICK         102 /*클릭 이벤트*/
 #define UIM_DOUBLECLICK   103
 #define UIM_UPSCROLL      104
 #define UIM_DOWNSCROLL    105

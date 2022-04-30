@@ -91,8 +91,9 @@ private:
     BUTTON_MOTION_SET             MotionSet;      /**< 모션 집합*/
     BUTTON_COLOR_SET              ColorSet;       /**< 색상 집합*/
     
-private:
+private: /*2022.04.30 : Devadversary - InputMotion 은 기본적으로 Private 함수여야하지만 그렇게 되면, DefaultButtonProc 함수에서 접근을 못함.*/
     void InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch, void* param);
+    static void DefaultButtonProc(UI* pUI, UINT Message, void* param);
 
 public: /*반드시 있어야 되는 매서드*/
     void CreateUI(UISystem* pUISys, int nID, ID2D1RenderTarget* pRT,
