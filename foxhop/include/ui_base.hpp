@@ -8,23 +8,26 @@
 
 #define UIM_CREATE        100
 #define UIM_DELETE        101
-#define UIM_CLICK         102 /*클릭 이벤트*/
-#define UIM_DOUBLECLICK   103
-#define UIM_UPSCROLL      104
-#define UIM_DOWNSCROLL    105
-#define UIM_KEYDOWN       106
-#define UIM_KEYUP         107
-#define UIM_FOCUS         108
-#define UIM_UNFOCUS       109
-#define UIM_SETPOS        110
-#define UIM_SETCOLOR      111
-#define UIM_SETTEXT       112
-#define UIM_PAUSE         113 /*UI 임시 소멸*/
-#define UIM_RESUME        114 /*UI 재개*/
-#define UIM_MOUSEMOVE     115
-#define UIM_MOUSEON       116
-#define UIM_MOUSELEAVE    117
+#define UIM_LBUTTONDOWN   102 /*클릭 이벤트*/
+#define UIM_LBUTTONUP     103 /*클릭 이벤트*/
+#define UIM_DOUBLECLICK   104
+#define UIM_UPSCROLL      105
+#define UIM_DOWNSCROLL    106
+#define UIM_KEYDOWN       107
+#define UIM_KEYUP         108
+#define UIM_FOCUS         109
+#define UIM_UNFOCUS       110
+#define UIM_SETPOS        111
+#define UIM_SETCOLOR      112
+#define UIM_SETTEXT       113
+#define UIM_PAUSE         114 /*UI 임시 소멸*/
+#define UIM_RESUME        115 /*UI 재개*/
+#define UIM_MOUSEMOVE     116
+#define UIM_MOUSEON       117
+#define UIM_MOUSELEAVE    118
 #define UIM_LIST_SELECT   300
+
+#define ALL_ZERO { 0,0,0,0 }
 
 /*필요 개체 전방선언*/
 class UI;
@@ -33,13 +36,22 @@ enum class UIType;
 
 /**
     @brief UI들의 메세지 핸들러
-    @param [IN] UI      : 메세지를 받은 UI. WndProc의 HWND인자와 비슷하다.
-    @param [IN] Message : 전달된 메세지
-    @param [OPT] parm   : 메세지에대한 추가정보. WndProc의 WPARAM, LPARAM과 비슷하다.
+    @param [IN] UI       메세지를 받은 UI. WndProc의 HWND인자와 비슷하다.
+    @param [IN] Message  전달된 메세지
+    @param [OPT] parm    메세지에대한 추가정보. WndProc의 WPARAM, LPARAM과 비슷하다.
     @remark Win32API의 WndProc 콜백함수와 결이 같다.
 */
 typedef void (*pfnUIHandler)(UI* pUI, UINT Message, void* param);
+
+/**
+    @brief 개체별 업데이트 핸들러
+    @param [IN] nTime ms단위 진행시간
+*/
 typedef void (*pfnUpdate)(unsigned long nTime);
+
+/**
+    @brief 개체별 렌더링 핸들러
+*/
 typedef void (*pfnRender)();
 
 /**

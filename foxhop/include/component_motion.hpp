@@ -30,10 +30,10 @@ enum class eMotionForm {
     eMotion_Pulse2,      /**< 펄스 함수 (Preset_Pulse2) (1,0,1,0 순서)*/
     eMotion_Linear1,     /**< 선형 함수 (Preset_Linear1)*/
     eMotion_Linear2,     /**< 선형 함수 (Preset_Linear2)*/
-    eMotion_x3_1,        /**< x 3제곱   (Preset_x3_0to1_1)*/
-    eMotion_x3_2,        /**< x 3제곱   (Preset_x3_0to1_2)*/
-    eMotion_x3_1to0_1,   /**< x 3제곱   (Preset_x3_1to0_1)*/
-    eMotion_x3_1to0_2,   /**< x 3제곱   (Preset_x3_1to0_2)*/
+    eMotion_x3_1,        /**< x 3제곱   (Preset_x3_0to1_1) (초반이 느림)*/
+    eMotion_x3_2,        /**< x 3제곱   (Preset_x3_0to1_2) (초반이 빠름)*/
+    eMotion_x3_1to0_1,   /**< x 3제곱   (Preset_x3_1to0_1) (초반이 느림)*/
+    eMotion_x3_1to0_2,   /**< x 3제곱   (Preset_x3_1to0_2) (초반이 빠름)*/
     eMotion_Custom = 255 /**< 커스텀 모션 (모션함수 직접정의)*/
 };
 

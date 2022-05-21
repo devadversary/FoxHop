@@ -5,6 +5,10 @@
 
 /**
     @brief 모션제어값 체인 추가
+    @param [OUT] pPatt  정보가 기입될 채널구조체
+    @param [OUT] pVal   모션 진행 현재값 (모션 공식과 시작값~끝값에 따라 모션이 진행됨)
+    @param [IN]  nStart 모션 진행 시작값
+    @param [IN]  nEnd   모션 진행 종료값
 */
 void AddChain(MOTION_PATTERN* pPatt, float* pVal, float nStart, float nEnd)
 {
