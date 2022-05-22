@@ -82,7 +82,7 @@ public :
     POINT              uiBasePoint;     /**< UI 베이스 위치*/
     POSITION           uiPos;           /**< 베이스로부터의 UI 포지션*/
     int                uiMotion;        /**< UI의 모션 타입 (UI종류마다 값이 다름)*/
-    int                ID;              /**< UI의 ID값 (HWND 처럼)*/
+    //int                ID;              /**< UI의 ID값 (HWND 처럼)*/
     eUIMotionState     uiMotionState;   /**< UI의 모션상태 (적절하지 않은 이벤트를 무시 하기 위함 : ex-생성모션 진행중 마우스오버모션 재생 방지)*/
     pfnUIHandler       DefaultHandler;  /**< UI 마다 가질 기본메세지 핸들러*/
     pfnUIHandler       MessageHandler;  /**< UI 마다 가질 사용자메세지 핸들러*/

@@ -5,15 +5,6 @@
 #include "./include/ui_fraggedline.hpp"
 #include "./include/ui_static.hpp"
 
-UISystem::UISystem()
-{
-    D2DA = { 0, };
-    /*PanelList = xxx;*/
-    ButtonTextForm = NULL;
-}
-
-UISystem::~UISystem() {}
-
 /**
     @brief UI시스템을 초기화 한다.
     @param hWnd UI 시스템을 사용할 메인윈도우 핸들
@@ -22,9 +13,8 @@ UISystem::~UISystem() {}
     @n      nMaxUI 로 UI갯수 상한을 늘릴경우, 모션오브젝트의 갯수 상한에 걸릴 수 있음.
     @n      추후에 UI갯수 상한에 따른 적절한 모션오브젝트 갯수를 지정해주어야 함.
 */
-void UISystem::Init(HWND hWnd)
+UISystem::UISystem(HWND hWnd)
 {
-    int   nTmpMaxUI;
     WCHAR szProgramPath[MAX_PATH];
     WCHAR szFontPath[MAX_PATH];
     WCHAR szDir[MAX_PATH];
@@ -39,7 +29,7 @@ void UISystem::Init(HWND hWnd)
     D2DA_Init(&D2DA, hWnd); /*Direct X 개체들과 렌더타겟, 팩토리 등 초기화*/
     TinyTextForm   = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 7.9f, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     SmallTextForm  = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 9.f, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-    ButtonTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 12, DWRITE_TEXT_ALIGNMENT_CENTER,  DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+    ButtonTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 12, DWRITE_TEXT_ALIGNMENT_CENTER, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     MediumTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 17, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     //nTmpMaxUI = nMaxUI ? nMaxUI : DEFAULT_MAXUI; /*nMaxUI가 0이면 기본값 256으로 설정*/
     /*PanelList = (UI**)calloc(nMaxUI, sizeof(UI*));*/
@@ -53,26 +43,10 @@ void UISystem::Init(HWND hWnd)
     ObjPoolText.Init(10000, 0);
 
     /*각 UI 팩토리 초기화*/
-    pUIButtonFactory = new UI_ButtonFactory(this, D2DA.pRenTarget);
+    pUIButtonFactory = UI_ButtonFactory(this, D2DA.pRenTarget);
 }
- 
-/**
-    @brief UI 패널을 생성한다. (일반 UI는 패널에서 생성한다)
-    @param callback 생성된 UI만의 콜백함수 지정 (이벤트 처리 등)
-    @remark 이 매서드가 UI를 생성할때는 각 UI마다 구현되어있는 preInit 매서드를 통해 기본 초기화를 진행한다
-    @n      UI시스템 초기화시 지정했던 최대 UI 갯수가 200이라면 nID의 범위는 0-199 가 되어야한다.
-*/
-UI* UISystem::CreatePanel(POSITION pos, int nDelay, pfnUIHandler callback)
-{
-    UI* pUI = 0;
-    UI_INFO* pInfo;
 
-    //PanelList.push_back(new UI_Panel(this, D2DA.pRenTarget, ));
-    if (!pUI) return NULL;
-    /************************************************/
-    //pUIID[nID].pUI = pUI;
-    return pUI;
-}
+UISystem::~UISystem() {}
 
 /**
     @brief 특정 UI에 메세지 보내기

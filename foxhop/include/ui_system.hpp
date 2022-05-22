@@ -59,16 +59,13 @@ public:
     ObjectPool<ObjectMotionText> ObjPoolText;
 
 private:
-    std::list<UI_Panel>          PanelList;        /**< UI_Panel 인스턴스를 모아둘 리스트*/
-    //int                          nMaxUICnt;        /**< 배열의 길이 (UI의 ID를 배열의 인덱스로 사용)*/
-    //int                          nUICnt;           /**< 현재 할당된 UI 갯수*/
-    UI_ButtonFactory*            pUIButtonFactory; /**< 버튼UI 팩토리*/
+    UI_Panel                     MainPanel;        /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
+    UI_ButtonFactory             pUIButtonFactory; /**< 버튼UI 팩토리*/
 
 public:
-    UISystem();
+    UISystem(){}
+    UISystem(HWND hWnd);
     ~UISystem();
-    void Init(HWND hWnd);
-    UI*  CreatePanel(POSITION pos, int nDelay, pfnUIHandler callback);
     BOOL SendUIMessage(UI* pUI, UINT Message, void* param);
     void ReleaseUI(unsigned int nID);
 };

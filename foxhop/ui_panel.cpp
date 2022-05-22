@@ -6,30 +6,19 @@
 #include "./include/ui_fraggedline.hpp"
 #include "./include/ui_listview.hpp"
 
-UI_Panel::UI_Panel() {}
-
 UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, int nID, pfnUIHandler pfnCallback)
-{
-    preInit(pUISys, pRT, nID, pfnCallback);
-}
-
-UI_Panel::~UI_Panel() {}
-
-static void DefaultPanelHandler(UI* pUI, UINT Message, void* param);
-
-/**
-    @brief 생성자를 사용 할 수 없을때 직접 미리초기화를 할 수 있다.
-*/
-void UI_Panel::preInit(UISystem* pUISys, ID2D1RenderTarget* pRT, int nID, pfnUIHandler pfnCallback)
 {
     void* pTmp;
     char p[32];
     uiSys = pUISys;
     pRenderTarget = pRT;
-    ID = nID;
     MessageHandler = pfnCallback;
     DefaultHandler = DefaultPanelHandler;
 }
+
+UI_Panel::~UI_Panel() {}
+
+static void DefaultPanelHandler(UI* pUI, UINT Message, void* param);
 
 void UI_Panel::Init(POSITION Pos, int nDelay)
 {
@@ -155,28 +144,11 @@ void UI_Panel::render()
 
 /**
     @brief 해당 패널의 하위 UI를 생성하고 내부 리스트에 등록한다
+    @return 생성된 UI 객체
 */
 UI* UI_Panel::CreateUI(UIType type, unsigned int nID, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback)
 {
-    UI* pUI;
 
-    /*UI 생성*/
-    pUI = uiSys->CreatePanel(pos, nDelay, callback);
-
-    /*패널 UI는 별도로 등록*/
-    if (type == UIType::eUI_Panel) {
-        //PanelList (UI_Panel*)pUI;
-        //nCntPanel++;
-    }
-
-    /*나머지 UI 처리*/
-    else {
-        UIList[nCntUI].pUI = pUI;
-        UIList[nCntUI].type = type;
-        nCntUI++;
-    }
-
-    return pUI;
 }
 
 /**

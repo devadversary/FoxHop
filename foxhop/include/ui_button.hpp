@@ -123,6 +123,7 @@ private:
     ID2D1RenderTarget* pRenderTarget; /**< ·»´õ¸µ Å¸°Ù*/
 
 public:
+    UI_ButtonFactory() {}
     UI_ButtonFactory(UISystem* pUISystem, ID2D1RenderTarget* pRT);
     ~UI_ButtonFactory();
     //void Init(UISystem* pUISystem, ID2D1RenderTarget* pRT);

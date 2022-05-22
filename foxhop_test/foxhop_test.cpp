@@ -24,7 +24,7 @@
 */
 typedef struct _stCONSPIRACY_APP
 {
-    UISystem               UISys;                   /**< UI 매니지먼트 시스템 객체*/
+    UISystem*              UISys;                   /**< UI 매니지먼트 시스템 객체*/
     ID2D1HwndRenderTarget* pRenTarget;              /**< 렌더타겟*/
     WCHAR                  szProgramPath[MAX_PATH]; /**< 프로그램의 실행 경로*/
     int                    nWindowedState;          /**< 윈도우 창 상태. 0=숨김 1=사이드바 2=윈도우화면 3=전체화면 */
@@ -76,8 +76,8 @@ static void AppSettingInit(CONSPIRACY_APP* pApp, HWND hWnd)
     pApp->nWindowedState = 1; /*첫 실행시 사이드바 형태로 표시*/
     /*현재 실행중인 파일 경로 얻기*/
     GetModuleFileNameW(NULL, pApp->szProgramPath, MAX_PATH);
-    pApp->UISys.Init(hWnd); /*UI시스템이 관리할 최대 UI갯수는 200개만*/
-    pApp->pRenTarget = pApp->UISys.D2DA.pRenTarget;
+    pApp->UISys = new UISystem(hWnd); /*UI시스템이 관리할 최대 UI갯수는 200개만*/
+    pApp->pRenTarget = pApp->UISys->D2DA.pRenTarget;
 }
 
 /**
@@ -132,7 +132,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
         AppSettingInit(pApp, hWnd);
         SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pApp);
 
-        pUISys = &pApp->UISys;
+        pUISys = pApp->UISys;
 
         /*생성만 한다고 지정한 프로시저가 호출되지는 않음 Init을 별도로 해줄때 호출됨*/
         //pMainPanel = (UI_Panel*)pUISys->CreateUI(UIType::eUI_Panel, 0, UIHandler_MainPanel);
