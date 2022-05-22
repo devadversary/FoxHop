@@ -9,6 +9,7 @@
 #include "ui_listview.hpp"
 #include "ui_static.hpp"
 #include "ui_fraggedline.hpp"
+#include <list>
 
 /*TODO : 추후에 폰트를 쉽게 변경 가능하도록 하드코딩을 제거할 수 있는 구조로 변경할것.*/
 #define UISYSTEM_FONTNAME_DEFAULT (L"monoMMM_5") /*UI시스템이 기본적으로 사용하는 폰트 이름*/
@@ -58,16 +59,16 @@ public:
     ObjectPool<ObjectMotionText> ObjPoolText;
 
 private:
-    UI**                         pUIArray;         /**< UI 인스턴스를 모아둘 배열*/
-    int                          nMaxUICnt;        /**< 배열의 길이 (UI의 ID를 배열의 인덱스로 사용)*/
-    int                          nUICnt;           /**< 현재 할당된 UI 갯수*/
+    std::list<UI_Panel>          PanelList;        /**< UI_Panel 인스턴스를 모아둘 리스트*/
+    //int                          nMaxUICnt;        /**< 배열의 길이 (UI의 ID를 배열의 인덱스로 사용)*/
+    //int                          nUICnt;           /**< 현재 할당된 UI 갯수*/
     UI_ButtonFactory*            pUIButtonFactory; /**< 버튼UI 팩토리*/
 
 public:
     UISystem();
     ~UISystem();
-    void Init(HWND hWnd, unsigned int nMaxUI);
-    UI*  CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback);
+    void Init(HWND hWnd);
+    UI*  CreatePanel(POSITION pos, int nDelay, pfnUIHandler callback);
     BOOL SendUIMessage(UI* pUI, UINT Message, void* param);
     void ReleaseUI(unsigned int nID);
 };

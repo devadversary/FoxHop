@@ -68,7 +68,7 @@ void OnSize(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 }
 
 /**
-    @brief CONSPIRACY_APP객체를 초기화 한다.
+    @brief APP객체를 초기화 한다.
 */
 static void AppSettingInit(CONSPIRACY_APP* pApp, HWND hWnd)
 {
@@ -76,7 +76,7 @@ static void AppSettingInit(CONSPIRACY_APP* pApp, HWND hWnd)
     pApp->nWindowedState = 1; /*첫 실행시 사이드바 형태로 표시*/
     /*현재 실행중인 파일 경로 얻기*/
     GetModuleFileNameW(NULL, pApp->szProgramPath, MAX_PATH);
-    pApp->UISys.Init(hWnd, 256); /*UI시스템이 관리할 최대 UI갯수는 200개만*/
+    pApp->UISys.Init(hWnd); /*UI시스템이 관리할 최대 UI갯수는 200개만*/
     pApp->pRenTarget = pApp->UISys.D2DA.pRenTarget;
 }
 

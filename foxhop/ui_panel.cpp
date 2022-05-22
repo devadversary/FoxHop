@@ -161,12 +161,12 @@ UI* UI_Panel::CreateUI(UIType type, unsigned int nID, POSITION pos, wchar_t* pTe
     UI* pUI;
 
     /*UI 생성*/
-    pUI = uiSys->CreateUI(type, pos, pText, nDelay, callback);
+    pUI = uiSys->CreatePanel(pos, nDelay, callback);
 
     /*패널 UI는 별도로 등록*/
     if (type == UIType::eUI_Panel) {
-        PanelList[nCntPanel] = (UI_Panel*)pUI;
-        nCntPanel++;
+        //PanelList (UI_Panel*)pUI;
+        //nCntPanel++;
     }
 
     /*나머지 UI 처리*/

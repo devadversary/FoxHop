@@ -8,7 +8,7 @@
 UISystem::UISystem()
 {
     D2DA = { 0, };
-    pUIArray = NULL;
+    /*PanelList = xxx;*/
     ButtonTextForm = NULL;
 }
 
@@ -22,7 +22,7 @@ UISystem::~UISystem() {}
     @n      nMaxUI 로 UI갯수 상한을 늘릴경우, 모션오브젝트의 갯수 상한에 걸릴 수 있음.
     @n      추후에 UI갯수 상한에 따른 적절한 모션오브젝트 갯수를 지정해주어야 함.
 */
-void UISystem::Init(HWND hWnd, unsigned int nMaxUI)
+void UISystem::Init(HWND hWnd)
 {
     int   nTmpMaxUI;
     WCHAR szProgramPath[MAX_PATH];
@@ -41,9 +41,9 @@ void UISystem::Init(HWND hWnd, unsigned int nMaxUI)
     SmallTextForm  = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 9.f, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     ButtonTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 12, DWRITE_TEXT_ALIGNMENT_CENTER,  DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     MediumTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 17, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-    nTmpMaxUI = nMaxUI ? nMaxUI : DEFAULT_MAXUI; /*nMaxUI가 0이면 기본값 256으로 설정*/
-    pUIArray = (UI**)calloc(nMaxUI, sizeof(UI*));
-    nMaxUICnt = nMaxUI;
+    //nTmpMaxUI = nMaxUI ? nMaxUI : DEFAULT_MAXUI; /*nMaxUI가 0이면 기본값 256으로 설정*/
+    /*PanelList = (UI**)calloc(nMaxUI, sizeof(UI*));*/
+    //nMaxUICnt = nMaxUI;
     /*D2D에서 렌더링될 때, 실수좌표계를 사용함으로 각 픽셀의 중심을 기준으로 렌더해야한다
       정수 좌표계가 아니므로, 픽셀의 중심 (0.5 픽셀씩 +) 기준이 아니면 상이 흐리다.*/
     D2DA.pRenTarget->SetTransform(D2D1::Matrix3x2F::Translation(0.5f, 0.5f));
@@ -53,43 +53,21 @@ void UISystem::Init(HWND hWnd, unsigned int nMaxUI)
     ObjPoolText.Init(10000, 0);
 
     /*각 UI 팩토리 초기화*/
-    pUIButtonFactory = new UI_ButtonFactory; pUIButtonFactory->Init(this, D2DA.pRenTarget);
+    pUIButtonFactory = new UI_ButtonFactory(this, D2DA.pRenTarget);
 }
  
 /**
-    @brief UI 컨트롤을 생성한다.
-    @param type     생성할 UI의 타입 (버튼, 스태틱 등등)
+    @brief UI 패널을 생성한다. (일반 UI는 패널에서 생성한다)
     @param callback 생성된 UI만의 콜백함수 지정 (이벤트 처리 등)
     @remark 이 매서드가 UI를 생성할때는 각 UI마다 구현되어있는 preInit 매서드를 통해 기본 초기화를 진행한다
     @n      UI시스템 초기화시 지정했던 최대 UI 갯수가 200이라면 nID의 범위는 0-199 가 되어야한다.
 */
-UI* UISystem::CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback)
+UI* UISystem::CreatePanel(POSITION pos, int nDelay, pfnUIHandler callback)
 {
     UI* pUI = 0;
     UI_INFO* pInfo;
 
-    if (!pUIArray) return NULL;
-    switch (type) {
-    case UIType::eUI_Panel:
-        break;
-
-    case UIType::eUI_Button:
-        break;
-
-    case UIType::eUI_FragLine : 
-        break;
-
-    case UIType::eUI_Static: 
-        break;
-
-    case UIType::eUI_List: break;
-    case UIType::eUI_Edit: break;
-    case UIType::eUI_Scroll: break;
-    case UIType::eUI_Progress: break;
-    case UIType::eUI_Graph: break;
-    default: return NULL;
-    }
-    pUIArray[nUICnt] = pUI;
+    //PanelList.push_back(new UI_Panel(this, D2DA.pRenTarget, ));
     if (!pUI) return NULL;
     /************************************************/
     //pUIID[nID].pUI = pUI;
@@ -111,9 +89,5 @@ BOOL UISystem::SendUIMessage(UI* pUI, UINT Message, void* param)
 */
 void UISystem::ReleaseUI(unsigned int nID)
 {
-    UI* pUI;
 
-    pUI = pUIArray[nID];
-    /*반환 작업 미구현. delete 꼭 해주자*/
-    pUIArray[nID] = NULL;
 }

@@ -123,7 +123,9 @@ private:
     ID2D1RenderTarget* pRenderTarget; /**< ·»´õ¸µ Å¸°Ù*/
 
 public:
-    void Init(UISystem* pUISystem, ID2D1RenderTarget* pRT);
+    UI_ButtonFactory(UISystem* pUISystem, ID2D1RenderTarget* pRT);
+    ~UI_ButtonFactory();
+    //void Init(UISystem* pUISystem, ID2D1RenderTarget* pRT);
     void GetCurrentMotionSet(BUTTON_MOTION_SET* pMotionSet);
     void SetCurrentMotionSet(BUTTON_MOTION_SET* pMotionSet);
     void GetCurrentColorSet(BUTTON_COLOR_SET* pColorSet);

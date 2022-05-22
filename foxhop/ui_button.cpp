@@ -1,8 +1,6 @@
 #include "./include/ui_button.hpp"
 #include "./include/ui_system.hpp"
 
-static void DefaultButtonProc(UI* pUI, UINT Message, void* parm);
-
 void UI_Button::CreateUI(UISystem* pUISys, int nID, ID2D1RenderTarget* pRT,
                          BUTTON_MOTION_SET UIMotionSet, BUTTON_COLOR_SET UIColorSet,
                          pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay)
@@ -329,9 +327,9 @@ void UI_Button::DefaultButtonProc(UI* pUI, UINT Message, void* param)
 
     if (!pUI) return;
 
+    /*2021.07.27 devadversary : UI들의 사용자 상호작용에따른 모션변경은 기본 핸들러가 처리하도록 결정함*/
     switch (Message) {
-#if 1 /*2021.07.27 devadversary : UI들의 사용자 상호작용에따른 모션변경은 기본 핸들러가 처리하도록 결정함*/
-    case UIM_MOUSEON:
+    case UIM_MOUSEON: /*ON / LEAVE 메세지는 UI_Panel 로 부터 SendMessage 로 전달된다 */
         pButton->InputMotion(eButtonMotionType::eType_Mouseover, pButton->MotionSet.MouseOver, 0, pButton->MotionSet.MouseOverPitch, (void*)FALSE);
         break;
 
@@ -344,7 +342,7 @@ void UI_Button::DefaultButtonProc(UI* pUI, UINT Message, void* param)
     
     case UIM_LBUTTONUP:
         break;
-#endif
+
     default: break;
     }
 
@@ -355,7 +353,7 @@ void UI_Button::DefaultButtonProc(UI* pUI, UINT Message, void* param)
     @brief 팩토리 초기화
     @remark UISystem::Init 에서 호출된다.
 */
-void UI_ButtonFactory::Init(UISystem* pUISystem, ID2D1RenderTarget* pRT)
+UI_ButtonFactory::UI_ButtonFactory(UISystem* pUISystem, ID2D1RenderTarget* pRT)
 {
     /*기본 환경 개체 초기화*/
     pUISys = pUISystem;
