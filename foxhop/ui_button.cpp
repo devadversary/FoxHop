@@ -1,9 +1,9 @@
 #include "./include/ui_button.hpp"
 #include "./include/ui_system.hpp"
 
-void UI_Button::CreateUI(UISystem* pUISys, int nID, ID2D1RenderTarget* pRT,
-                         BUTTON_MOTION_SET UIMotionSet, BUTTON_COLOR_SET UIColorSet,
-                         pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay)
+UI_Button::UI_Button(UISystem* pUISys, ID2D1RenderTarget* pRT,
+                     BUTTON_MOTION_SET UIMotionSet, BUTTON_COLOR_SET UIColorSet,
+                     pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay)
 {
     uiSys          = pUISys;
     pRenderTarget  = pRT;
@@ -12,7 +12,6 @@ void UI_Button::CreateUI(UISystem* pUISys, int nID, ID2D1RenderTarget* pRT,
 
     DefaultHandler = DefaultButtonProc;
     MessageHandler = pfnCallback;
-    ID             = nID;
 
     wcscpy_s(szText, MAX_BUTTONNAME, pText);
     nTextLen       = (int)wcslen(pText);
@@ -214,7 +213,7 @@ void UI_Button::Destroy()
     MBoxFace      = 0;
     MBoxHighlight = 0;
     MText         = 0;
-    uiSys->ReleaseUI(ID); /*스스로를 UI 시스템에 반환*/
+    uiSys->ReleaseUI(); /*스스로를 UI 시스템에 반환*/
 }
 
 /**
@@ -426,10 +425,5 @@ void UI_ButtonFactory::SetCurrentColorSet(BUTTON_COLOR_SET* pColorSet)
 */
 UI* UI_ButtonFactory::CreateUI(int nID, POSITION Pos, wchar_t* pText, int nDelay, pfnUIHandler pfnCallback)
 {
-    UI_Button* pUI = new UI_Button;
-
-    if (!pUI) return NULL;
-
-    pUI->CreateUI(pUISys, nID, pRenderTarget, MotionSet, ColorSet, pfnCallback, Pos, pText, nDelay);
-    return pUI;
+    return new UI_Button(pUISys, pRenderTarget, MotionSet, ColorSet, pfnCallback, Pos, pText, nDelay);
 }

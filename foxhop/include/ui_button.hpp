@@ -95,11 +95,12 @@ private: /*2022.04.30 : Devadversary - InputMotion 은 기본적으로 Private 함수여�
     void InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch, void* param);
     static void DefaultButtonProc(UI* pUI, UINT Message, void* param);
 
-public: /*반드시 있어야 되는 매서드*/
-    void CreateUI(UISystem* pUISys, int nID, ID2D1RenderTarget* pRT,
-                  BUTTON_MOTION_SET UIMotionSet, BUTTON_COLOR_SET UIColorSet,
-                  pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay);
-    
+public:
+    UI_Button(UISystem* pUISys, ID2D1RenderTarget* pRT,
+              BUTTON_MOTION_SET UIMotionSet, BUTTON_COLOR_SET UIColorSet,
+              pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay);
+    ~UI_Button() {};
+
     void pause(int nDelay);
     void resume(int nDelay);
     void Destroy();
@@ -123,10 +124,9 @@ private:
     ID2D1RenderTarget* pRenderTarget; /**< 렌더링 타겟*/
 
 public:
-    UI_ButtonFactory() {}
     UI_ButtonFactory(UISystem* pUISystem, ID2D1RenderTarget* pRT);
-    ~UI_ButtonFactory();
-    //void Init(UISystem* pUISystem, ID2D1RenderTarget* pRT);
+    ~UI_ButtonFactory() {};
+
     void GetCurrentMotionSet(BUTTON_MOTION_SET* pMotionSet);
     void SetCurrentMotionSet(BUTTON_MOTION_SET* pMotionSet);
     void GetCurrentColorSet(BUTTON_COLOR_SET* pColorSet);

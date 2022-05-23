@@ -61,7 +61,7 @@ BOOL UISystem::SendUIMessage(UI* pUI, UINT Message, void* param)
 /**
     @brief UI 반환처리 (미구현)
 */
-void UISystem::ReleaseUI(unsigned int nID)
+void UISystem::ReleaseUI()
 {
 
 }

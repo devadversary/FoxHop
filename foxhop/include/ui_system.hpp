@@ -67,5 +67,5 @@ public:
     UISystem(HWND hWnd);
     ~UISystem();
     BOOL SendUIMessage(UI* pUI, UINT Message, void* param);
-    void ReleaseUI(unsigned int nID);
+    void ReleaseUI();
 };

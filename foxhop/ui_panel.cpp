@@ -6,6 +6,7 @@
 #include "./include/ui_fraggedline.hpp"
 #include "./include/ui_listview.hpp"
 
+#if 0
 UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, int nID, pfnUIHandler pfnCallback)
 {
     void* pTmp;
@@ -209,3 +210,5 @@ static void DefaultPanelHandler(UI* pUI, UINT Message, void* param)
     }
     if (UserHandler) UserHandler(pUI, Message, param);
 }
+
+#endif
