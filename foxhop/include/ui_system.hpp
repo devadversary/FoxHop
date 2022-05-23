@@ -59,11 +59,10 @@ public:
     ObjectPool<ObjectMotionText> ObjPoolText;
 
 private:
-    UI_Panel                     MainPanel;        /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
-    UI_ButtonFactory             pUIButtonFactory; /**< 버튼UI 팩토리*/
+    UI_Panel*                    pMainPanel;       /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
+    UI_ButtonFactory*            pUIButtonFactory; /**< 버튼UI 팩토리*/
 
 public:
-    UISystem(){}
     UISystem(HWND hWnd);
     ~UISystem();
     BOOL SendUIMessage(UI* pUI, UINT Message, void* param);

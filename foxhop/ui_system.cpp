@@ -43,7 +43,7 @@ UISystem::UISystem(HWND hWnd)
     ObjPoolText.Init(10000, 0);
 
     /*각 UI 팩토리 초기화*/
-    pUIButtonFactory = UI_ButtonFactory(this, D2DA.pRenTarget);
+    pUIButtonFactory = new UI_ButtonFactory(this, D2DA.pRenTarget);
 }
 
 UISystem::~UISystem() {}

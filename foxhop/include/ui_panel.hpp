@@ -1,13 +1,17 @@
 #pragma once
 
 #include "ui_base.hpp"
+#include <list>
 
 class UISystem; /*UI시스템 클래스의 전방선언*/
 enum class UIType;
 
-#define MAX_SUB_PANEL_CNT 32 /*최대 하위 패널 갯수 (휴면 상태 패널 포함)*/
-#define MAX_SUB_UI_CNT    32 /*최대 하위 UI 갯수 (휴면 상태 UI 포함)*/
-
+/**
+    @brief 생성된 UI에 대한 정보 (어떤 UI인지)
+    @todo 과연 진짜 필요한 구조체일까? UI별 update / render 는 이제 추상매서드이다.
+    @n    따라서 이제부터는 UI의 타입을 신경 쓸 필요 없이 그대로 update / render 를 호출하면 된다.
+    @n    어차피 UI 타입을 구분했어야 하는 이유도 update / render 가 추상매서드가 아니었기 때문이다.
+*/
 typedef struct _st_ui_info
 {
     UIType type; /**< 이 UI의 실제 타입 (버튼인지 리스트인지 등)*/
@@ -28,21 +32,19 @@ class UI_Panel : public UI {
 private:
     POSITION             PanelPos;                     /**< 패널의 절대 좌표*/
     int                  PanelDelay;                   /**< 패널의 업데이트 딜레이*/
-    int                  nTimeSum;                     /**< 총 지난 시간. 상황에 따라서 이 값은 스스로 바꿀수 있다*/
     std::list<UI_Panel>  PanelList;                    /**< 패널이 가진 하위 패널의 리스트*/
     std::list<UI>        UIList;                       /**< 패널이 가진 하위 UI의 리스트*/
     D2D1::Matrix3x2F     transform;                    /**< 해당 패널의 변환행렬*/
     UI* pTmpUI;                       /**< 마우스 이벤트 핸들링을 위한 임시변수*/
 
 public:
-    UI_Panel() {};
     UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, int nID, pfnUIHandler pfnCallback);
     ~UI_Panel();
     void Init(POSITION Pos, int nDelay = 0);
     void pause(int nDelay);
     void resume(int nDelay);
     void Destroy();
-    void update(unsigned long time);
+    BOOL update(unsigned long time);
     void render();
 
 public: /*UI별 옵션 매서드*/
