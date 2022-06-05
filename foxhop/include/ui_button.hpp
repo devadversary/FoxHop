@@ -40,8 +40,8 @@ enum class eButtonMotionType {
 };
 
 /**
-    @brief 모션 집합
-    @remark 개체의 매서드를 통해 변경 될 수 있음
+    @brief 버튼 모션 집합
+    @remark 팩토리 개체의 매서드를 통해 변경 될 수 있음
 */
 typedef struct _stButtonMotionSet {
     eButtonMotionPattern Init;           /**< 시작모션*/
@@ -131,5 +131,5 @@ public:
     void SetCurrentMotionSet(BUTTON_MOTION_SET* pMotionSet);
     void GetCurrentColorSet(BUTTON_COLOR_SET* pColorSet);
     void SetCurrentColorSet(BUTTON_COLOR_SET* pColorSet);
-    UI*  CreateUI(int nID, POSITION Pos, wchar_t* pText, int nDelay, pfnUIHandler pfnCallback);
+    UI_Button* CreateUI(POSITION Pos, wchar_t* pText, int nDelay, pfnUIHandler pfnCallback);
 };

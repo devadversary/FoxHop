@@ -223,20 +223,9 @@ void UI_Button::pause(int nDelay)
 {
     MOTION_INFO miColor;
 
+    InputMotion(eButtonMotionType::eType_Pause, MotionSet.Pause, nDelay, MotionSet.PausePitch, NULL);
     uiMotionState = eUIMotionState::eUMS_PlayingHide;
-    /*TODO : 소멸 모션도 지정할 수 있도록 할 예정
-    switch (0) {
-    default:
-        miColor.formular = eMotionForm::eMotion_Pulse1;
-        miColor.nDelay   = nDelay;
-        miColor.nPitch   =  200;
-        MText->SetColor(miColor, TRUE, {0.f,0.f,0.f,0.f}, { 0.f,0.f,0.f,0.f });
-        miColor.nDelay += 400;
-        MBoxFace->SetColor(miColor, TRUE, { 0.f,0.f,0.f,0.f }, { 0.f,0.f,0.f,0.f });
-        MBoxHighlight->SetColor(miColor, TRUE, { 0.f,0.f,0.f,0.f }, { 0.f,0.f,0.f,0.f });
-        break;
-    }
-    */
+    
 }
 
 /**
@@ -419,11 +408,11 @@ void UI_ButtonFactory::SetCurrentColorSet(BUTTON_COLOR_SET* pColorSet)
 }
 
 /**
-    @brief UI 생성
+    @brief 버튼 생성
     @param nID UI시스템이 생성해서 넘겨주는 ID값. (사용자에게 이 인자는 노출되지 않는다)
     @remark 현재 팩토리의 지정 설정이 적용되어 생성된다 (모션, 색상 등)
 */
-UI* UI_ButtonFactory::CreateUI(int nID, POSITION Pos, wchar_t* pText, int nDelay, pfnUIHandler pfnCallback)
+UI_Button* UI_ButtonFactory::CreateUI(POSITION Pos, wchar_t* pText, int nDelay, pfnUIHandler pfnCallback)
 {
     return new UI_Button(pUISys, pRenderTarget, MotionSet, ColorSet, pfnCallback, Pos, pText, nDelay);
 }
