@@ -31,19 +31,19 @@ UISystem::UISystem(HWND hWnd)
     SmallTextForm  = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 9.f, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     ButtonTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 12, DWRITE_TEXT_ALIGNMENT_CENTER, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     MediumTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 17, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-    //nTmpMaxUI = nMaxUI ? nMaxUI : DEFAULT_MAXUI; /*nMaxUI가 0이면 기본값 256으로 설정*/
-    /*PanelList = (UI**)calloc(nMaxUI, sizeof(UI*));*/
-    //nMaxUICnt = nMaxUI;
     /*D2D에서 렌더링될 때, 실수좌표계를 사용함으로 각 픽셀의 중심을 기준으로 렌더해야한다
       정수 좌표계가 아니므로, 픽셀의 중심 (0.5 픽셀씩 +) 기준이 아니면 상이 흐리다.*/
     D2DA.pRenTarget->SetTransform(D2D1::Matrix3x2F::Translation(0.5f, 0.5f));
 
+    /*2022.06.04 - TODO : 오브젝트 리스트를 UISystem 에서 생성/관리 하지 않고
+    각자 UI마다 스스로 필요한 만큼만 만들어서 사용하도록 변경 예정*/
     ObjPoolBox.Init(5000, 0);
     ObjPoolLine.Init(5000, 0);
     ObjPoolText.Init(10000, 0);
 
     /*각 UI 팩토리 초기화*/
     pUIButtonFactory = new UI_ButtonFactory(this, D2DA.pRenTarget);
+    pUIPanelFactory  = new UI_PanelFactory(this, D2DA.pRenTarget);
 }
 
 UISystem::~UISystem() {}

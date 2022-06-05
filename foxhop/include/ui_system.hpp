@@ -60,6 +60,7 @@ public:
 
 private:
     UI_Panel*                    pMainPanel;       /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
+    UI_PanelFactory*             pUIPanelFactory;  /**< 패널UI 팩토리*/
     UI_ButtonFactory*            pUIButtonFactory; /**< 버튼UI 팩토리*/
 
 public:

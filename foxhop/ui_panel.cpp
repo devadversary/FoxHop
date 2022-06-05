@@ -7,7 +7,7 @@
 #include "./include/ui_listview.hpp"
 
 #if 0
-UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, int nID, pfnUIHandler pfnCallback)
+UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback)
 {
     void* pTmp;
     char p[32];
@@ -15,24 +15,23 @@ UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, int nID, pfnUIHandl
     pRenderTarget = pRT;
     MessageHandler = pfnCallback;
     DefaultHandler = DefaultPanelHandler;
+    PanelPos = Pos;
+    PanelDelay = nDelay;
 }
-
-UI_Panel::~UI_Panel() {}
-
-static void DefaultPanelHandler(UI* pUI, UINT Message, void* param);
 
 void UI_Panel::Init(POSITION Pos, int nDelay)
 {
-    memset(PanelList, 0, sizeof(PanelList)); /*패널 하나당 가질 수 있는 최대 하위패널 갯수 셋팅*/
-    memset(UIList, 0, sizeof(UIList)); /*패널 하나당 가질 수 있는 최대 하위UI 갯수 셋팅*/
-    PanelPos = Pos;
-    PanelDelay = nDelay;
     nTimeSum = 0;
     nCntPanel = 0;
     nCntUI = 0;
     transform = D2D1::Matrix3x2F::Translation(PanelPos.x+0.5f, PanelPos.y+0.5f);
     if (MessageHandler) MessageHandler(this, UIM_CREATE, NULL); /*UI생성 메세지 전송*/
 }
+
+UI_Panel::~UI_Panel() {}
+
+static void DefaultPanelHandler(UI* pUI, UINT Message, void* param);
+
 
 #if 0 /*필요 없을 듯 함*/
 void UI_Panel::InputMotion(int Motion, int nDelay)
@@ -197,6 +196,11 @@ void UI_Panel::DefaultMouseHandler(POINT pt, UINT Message, void* param)
     }
 }
 
+/**
+    @brief 패널의 기본 핸들러.
+    @remark 마우스 움직임은 기본 핸들러에서 처리되고,
+    @n      그 이후 사용자 지정 핸들러가 실행된다.
+*/
 static void DefaultPanelHandler(UI* pUI, UINT Message, void* param)
 {
     UI_Panel* pPanel = (UI_Panel*)pUI;

@@ -7,18 +7,6 @@ class UISystem; /*UI시스템 클래스의 전방선언*/
 enum class UIType;
 
 /**
-    @brief 생성된 UI에 대한 정보 (어떤 UI인지)
-    @todo 과연 진짜 필요한 구조체일까? UI별 update / render 는 이제 추상매서드이다.
-    @n    따라서 이제부터는 UI의 타입을 신경 쓸 필요 없이 그대로 update / render 를 호출하면 된다.
-    @n    어차피 UI 타입을 구분했어야 하는 이유도 update / render 가 추상매서드가 아니었기 때문이다.
-*/
-typedef struct _st_ui_info
-{
-    UIType type; /**< 이 UI의 실제 타입 (버튼인지 리스트인지 등)*/
-    UI*    pUI;  /**< UI의 인스턴스*/
-} UI_INFO;
-
-/**
     @brief 패널 UI 클래스
     @remark 패널 UI는 타 컨트롤 클래스와는 다르게
     @n      자신이 가지고있는 하위 패널의 리스트와
@@ -30,15 +18,15 @@ typedef struct _st_ui_info
 */
 class UI_Panel : public UI {
 private:
-    POSITION             PanelPos;                     /**< 패널의 절대 좌표*/
-    int                  PanelDelay;                   /**< 패널의 업데이트 딜레이*/
-    std::list<UI_Panel>  PanelList;                    /**< 패널이 가진 하위 패널의 리스트*/
-    std::list<UI>        UIList;                       /**< 패널이 가진 하위 UI의 리스트*/
-    D2D1::Matrix3x2F     transform;                    /**< 해당 패널의 변환행렬*/
-    UI* pTmpUI;                       /**< 마우스 이벤트 핸들링을 위한 임시변수*/
+    POSITION            PanelPos;    /**< 패널의 절대 좌표*/
+    int                 PanelDelay;  /**< 패널의 업데이트 딜레이*/
+    std::list<UI_Panel> PanelList;   /**< 패널이 가진 하위 패널의 리스트*/
+    std::list<UI>       UIList;      /**< 패널이 가진 하위 UI의 리스트*/
+    D2D1::Matrix3x2F    transform;   /**< 해당 패널의 변환행렬*/
+    UI* pTmpUI;                      /**< 마우스 이벤트 핸들링을 위한 임시변수*/
 
 public:
-    UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, int nID, pfnUIHandler pfnCallback);
+    UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback);
     ~UI_Panel();
     void Init(POSITION Pos, int nDelay = 0);
     void pause(int nDelay);
@@ -50,4 +38,19 @@ public:
 public: /*UI별 옵션 매서드*/
     UI*  CreateUI(UIType type, unsigned int nID, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback);
     void DefaultMouseHandler(POINT pt, UINT Message, void* param);
+};
+
+/**
+    @brief 패널 생성 팩토리
+*/
+class UI_PanelFactory {
+private:
+    UISystem*          pUISys;        /**< UI시스템 인스턴스*/
+    ID2D1RenderTarget* pRenderTarget; /**< 렌더링 타겟*/
+
+public:
+    UI_PanelFactory(UISystem* pUISystem, ID2D1RenderTarget* pRT) {};
+    ~UI_PanelFactory(){};
+
+    UI*  CreateUI(POSITION Pos, wchar_t* pText, int nDelay, pfnUIHandler pfnCallback);
 };
