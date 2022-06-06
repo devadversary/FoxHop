@@ -25,11 +25,11 @@ UI_Button::UI_Button(UISystem* pUISys, ID2D1RenderTarget* pRT,
 }
 
 /**
-    @brief 지정한 모션 기입
-    @param MotionType 기입할 모션의 타입
-    @param Pattern    기입할 모션의 패턴
-    @param Motion     UI의 등장 모션타입
-    @param nDelay     UI의 등장 딜레이
+    @brief 모션 기입
+    @param MotionType 기입할 모션의 타입 (생성, 소멸, 기타 조작모션)
+    @param Pattern    기입할 모션의 패턴 (깜빡임, 슬라이딩 등등)
+    @param nDelay     모션 재생 딜레이
+    @param nPitch     모션 재생 진행시간
     @param param      사용자 파라미터 (없으면 NULL / ex : 패턴이 eType_Mouseover 일때, BOOL 타입으로사용 - 마우스 진입, 퇴장을 구분)
 */
 void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch, void* param)

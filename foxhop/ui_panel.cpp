@@ -7,25 +7,17 @@
 #include "./include/ui_listview.hpp"
 
 #if 0
-UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback)
+UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback, POSITION Pos, int nDelay = 0)
 {
-    void* pTmp;
-    char p[32];
     uiSys = pUISys;
     pRenderTarget = pRT;
     MessageHandler = pfnCallback;
     DefaultHandler = DefaultPanelHandler;
     PanelPos = Pos;
     PanelDelay = nDelay;
-}
-
-void UI_Panel::Init(POSITION Pos, int nDelay)
-{
-    nTimeSum = 0;
-    nCntPanel = 0;
-    nCntUI = 0;
-    transform = D2D1::Matrix3x2F::Translation(PanelPos.x+0.5f, PanelPos.y+0.5f);
+    //transform = D2D1::Matrix3x2F::Translation(PanelPos.x + 0.5f, PanelPos.y + 0.5f);
     if (MessageHandler) MessageHandler(this, UIM_CREATE, NULL); /*UI생성 메세지 전송*/
+
 }
 
 UI_Panel::~UI_Panel() {}
@@ -61,42 +53,9 @@ void UI_Panel::Destroy()
 /**
     @brief 패널이 가진 전체 UI 업데이트 (하위 패널 포함)
 */
-void UI_Panel::update(unsigned long time)
+BOOL UI_Panel::update(unsigned long time)
 {
-    int i;
 
-    for (i = 0; i < nCntPanel; i++) PanelList[i]->update(time);
-
-    /*UI 타입별로 렌더링*/
-    for (i = 0; i < nCntUI; i++) {
-        switch (UIList[i].type) {
-        case UIType::eUI_Button:
-            break;
-
-        case UIType::eUI_Static:
-            break;
-
-        case UIType::eUI_FragLine:
-            break;
-
-        case UIType::eUI_List:
-            break;
-
-        case UIType::eUI_Edit:
-            break;
-
-        case UIType::eUI_Graph:
-            break;
-
-        case UIType::eUI_Progress:
-            break;
-
-        case UIType::eUI_Scroll:
-            break;
-
-        default:break;
-        }
-    }
 }
 
 /**
@@ -104,42 +63,7 @@ void UI_Panel::update(unsigned long time)
 */
 void UI_Panel::render()
 {
-    int i;
-    pRenderTarget->SetTransform(transform);
-    /*패널은 패널대로 렌더링*/
-    for (i = 0; i < nCntPanel; i++) PanelList[i]->render();
 
-    /*UI 타입별로 렌더링*/
-    for (i = 0; i < nCntUI; i++) {
-        switch (UIList[i].type) {
-        case UIType::eUI_Button:
-            ((UI_Button*)UIList[i].pUI)->render();
-            break;
-
-        case UIType::eUI_Static:
-            break;
-
-        case UIType::eUI_FragLine:
-            break;
-
-        case UIType::eUI_List:
-            break;
-
-        case UIType::eUI_Edit:
-            break;
-
-        case UIType::eUI_Graph:
-            break;
-
-        case UIType::eUI_Progress:
-            break;
-
-        case UIType::eUI_Scroll:
-            break;
-
-        default:break;
-        }
-    }
 }
 
 /**
@@ -153,6 +77,7 @@ UI* UI_Panel::CreateUI(UIType type, unsigned int nID, POSITION pos, wchar_t* pTe
 
 /**
     @brief 기본 마우스 이벤트 핸들러
+    @remark 대상UI에 마우스 진입 / 퇴장 이벤트만 전달한다.
 */
 void UI_Panel::DefaultMouseHandler(POINT pt, UINT Message, void* param)
 {

@@ -118,9 +118,9 @@ public: /*UI별 옵션 매서드*/
 */
 class UI_ButtonFactory {
 private:
+    UISystem*          pUISys;        /**< UI시스템 인스턴스*/
     BUTTON_MOTION_SET  MotionSet;     /**< 모션 집합*/
     BUTTON_COLOR_SET   ColorSet;      /**< 색상 집합*/
-    UISystem*          pUISys;        /**< UI시스템 인스턴스*/
     ID2D1RenderTarget* pRenderTarget; /**< 렌더링 타겟*/
 
 public:
