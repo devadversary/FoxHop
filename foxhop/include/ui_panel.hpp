@@ -20,8 +20,8 @@ class UI_Panel : public UI {
 private:
     POSITION            PanelPos;    /**< 패널의 절대 좌표*/
     int                 PanelDelay;  /**< 패널의 업데이트 딜레이*/
-    std::list<UI_Panel> PanelList;   /**< 패널이 가진 하위 패널의 리스트*/
-    std::list<UI>       UIList;      /**< 패널이 가진 하위 UI의 리스트*/
+    std::list<UI_Panel*> PanelList;   /**< 패널이 가진 하위 패널의 리스트*/
+    std::list<UI*>       UIList;      /**< 패널이 가진 하위 UI의 리스트*/
     //D2D1::Matrix3x2F    transform;   /**< 해당 패널의 변환행렬*/
     UI* pTmpUI;                      /**< 마우스 이벤트 핸들링을 위한 임시변수*/
 
