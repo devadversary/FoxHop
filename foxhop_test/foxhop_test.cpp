@@ -146,14 +146,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_SIZE:
-        OnSize(hWnd, Message, wParam, lParam);
+        //OnSize(hWnd, Message, wParam, lParam);
         break;
 
     case WM_TIMER:
         InvalidateRect(hWnd, NULL, FALSE);
         break;
 
-    case WM_PAINT:
+    case WM_MOUSEMOVE:
+    {
+        int x = GET_X_LPARAM(lParam);
+        int y = GET_Y_LPARAM(lParam);
+        HDC hDC = GetDC(hWnd);
+        char buffer[32];
+
+        sprintf(buffer, "%d, %d", x, y);
+        TextOutA(hDC, 10, 10, buffer, strlen(buffer));
+        DeleteDC(hDC);
+    }
         break;
 
     case WM_DESTROY:
@@ -182,7 +192,8 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     wc.cbWndExtra = NULL;
     RegisterClass(&wc);
 
-    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP | WS_VISIBLE, 0, 0, 0, 0, NULL, NULL, hInst, NULL);
+    //hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP | WS_VISIBLE, 0, 0, 0, 0, NULL, NULL, hInst, NULL);
+    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0,600, 400, NULL, NULL, hInst, NULL);
     AlphaWindow(hWnd, WINDOWMODE_BLURBEHIND);
 
     while (GetMessage(&Message, NULL, NULL, NULL)) {

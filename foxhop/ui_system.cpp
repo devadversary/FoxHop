@@ -36,17 +36,31 @@ UISystem::UISystem(HWND hWnd)
     D2DA.pRenTarget->SetTransform(D2D1::Matrix3x2F::Translation(0.5f, 0.5f));
 
     /*2022.06.04 - TODO : 오브젝트 리스트를 UISystem 에서 생성/관리 하지 않고
-    각자 UI마다 스스로 필요한 만큼만 만들어서 사용하도록 변경 예정*/
+      각자 UI마다 스스로 필요한 만큼만 만들어서 사용하도록 변경 예정*/
     ObjPoolBox.Init(5000, 0);
     ObjPoolLine.Init(5000, 0);
     ObjPoolText.Init(10000, 0);
 
     /*각 UI 팩토리 초기화*/
-    pUIButtonFactory = new UI_ButtonFactory(this, D2DA.pRenTarget);
     pUIPanelFactory  = new UI_PanelFactory(this, D2DA.pRenTarget);
+    pUIButtonFactory = new UI_ButtonFactory(this, D2DA.pRenTarget);
 }
 
 UISystem::~UISystem() {}
+
+/**
+    @brief WndProc 에서 UISystem으로 메세지 라우팅
+    @remark WndProc으로 전달되는 WINAPI 본연의 메세지를 전달한다.
+*/
+void UISystem::MainPanelProc(UINT Message, WPARAM wParam, LPARAM lParam)
+{
+    switch (Message) {
+    case WM_MOUSEMOVE:
+        //SendUIMessage(pMainPanel, UIM_MOUSEMOVE, );
+        break;
+    }
+    return;
+}
 
 /**
     @brief 특정 UI에 메세지 보내기

@@ -7,6 +7,7 @@ UI_Button::UI_Button(UISystem* pUISys, ID2D1RenderTarget* pRT,
 {
     uiSys          = pUISys;
     pRenderTarget  = pRT;
+    Focusable      = FALSE;
     MotionSet      = UIMotionSet;
     ColorSet       = UIColorSet;
 

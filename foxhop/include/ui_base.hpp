@@ -78,8 +78,8 @@ class UI {
 public :
     UISystem*          uiSys;
     ID2D1RenderTarget* pRenderTarget;
+    BOOL               Focusable;       /**< 포커스를 가질 수 있는 UI인가?*/
     UIType             uiType;          /**< UI타입*/
-    POINT              uiBasePoint;     /**< UI 베이스 위치*/
     POSITION           uiPos;           /**< 베이스로부터의 UI 포지션*/
     int                uiMotion;        /**< UI의 모션 타입 (UI종류마다 값이 다름)*/
     eUIMotionState     uiMotionState;   /**< UI의 모션상태 (적절하지 않은 이벤트를 무시 하기 위함 : ex-생성모션 진행중 마우스오버모션 재생 방지)*/

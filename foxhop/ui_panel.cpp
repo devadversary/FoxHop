@@ -9,12 +9,13 @@
 #if 0
 UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback, POSITION Pos, int nDelay = 0)
 {
-    uiSys = pUISys;
-    pRenderTarget = pRT;
+    uiSys          = pUISys;
+    pRenderTarget  = pRT;
+    Focusable      = TRUE;
     MessageHandler = pfnCallback;
     DefaultHandler = DefaultPanelHandler;
-    PanelPos = Pos;
-    PanelDelay = nDelay;
+    PanelPos       = Pos;
+    PanelDelay     = nDelay;
     //transform = D2D1::Matrix3x2F::Translation(PanelPos.x + 0.5f, PanelPos.y + 0.5f);
     if (MessageHandler) MessageHandler(this, UIM_CREATE, NULL); /*UI생성 메세지 전송*/
 
@@ -63,14 +64,14 @@ BOOL UI_Panel::update(unsigned long time)
 */
 void UI_Panel::render()
 {
-
+    pRenderTarget->SetTransform(D2D1::Matrix3x2F::Translation(0.5f + uiPos.x, 0.5f + uiPos.y));
 }
 
 /**
     @brief 해당 패널의 하위 UI를 생성하고 내부 리스트에 등록한다
     @return 생성된 UI 객체
 */
-UI* UI_Panel::CreateUI(UIType type, unsigned int nID, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback)
+UI* UI_Panel::CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback)
 {
 
 }
@@ -135,7 +136,7 @@ static void DefaultPanelHandler(UI* pUI, UINT Message, void* param)
     switch (Message) {
     case UIM_MOUSEMOVE:
         pt = *(POINT*)param;
-        //pPanel->DefaultMouseHandler(pt,  );
+        pPanel->DefaultMouseHandler(pt,  );
     }
     if (UserHandler) UserHandler(pUI, Message, param);
 }

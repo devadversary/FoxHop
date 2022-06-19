@@ -83,13 +83,13 @@ typedef struct _stColorSet {
 */
 class UI_Button : public UI {
 private:
-    ObjectMotionBox*              MBoxFace;       /**< 전경 모션 박스*/
-    ObjectMotionBox*              MBoxHighlight;  /**< 하이라이트 모션 박스*/
-    ObjectMotionText*             MText;          /**< 모션 박스 기본 텍스트*/
-    int                           nTextLen;
-    wchar_t                       szText[MAX_BUTTONNAME];
-    BUTTON_MOTION_SET             MotionSet;      /**< 모션 집합*/
-    BUTTON_COLOR_SET              ColorSet;       /**< 색상 집합*/
+    ObjectMotionBox*  MBoxFace;       /**< 전경 모션 박스*/
+    ObjectMotionBox*  MBoxHighlight;  /**< 하이라이트 모션 박스*/
+    ObjectMotionText* MText;          /**< 모션 박스 기본 텍스트*/
+    int               nTextLen;
+    wchar_t           szText[MAX_BUTTONNAME];
+    BUTTON_MOTION_SET MotionSet;      /**< 모션 집합*/
+    BUTTON_COLOR_SET  ColorSet;       /**< 색상 집합*/
     
 private: /*2022.04.30 : Devadversary - InputMotion 은 기본적으로 Private 함수여야하지만 그렇게 되면, DefaultButtonProc 함수에서 접근을 못함.*/
     void InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch, void* param);
