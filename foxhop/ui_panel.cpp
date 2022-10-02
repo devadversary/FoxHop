@@ -6,15 +6,17 @@
 #include "./include/ui_fraggedline.hpp"
 #include "./include/ui_listview.hpp"
 
-#if 0
-UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback, POSITION Pos, int nDelay = 0)
+static void DefaultPanelHandler(UI* pUI, UINT Message, void* param);
+
+#if 1
+UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback, POSITION Pos, int nDelay)
 {
     uiSys          = pUISys;
     pRenderTarget  = pRT;
     Focusable      = TRUE;
     MessageHandler = pfnCallback;
     DefaultHandler = DefaultPanelHandler;
-    PanelPos       = Pos;
+    uiPos          = Pos;
     PanelDelay     = nDelay;
     //transform = D2D1::Matrix3x2F::Translation(PanelPos.x + 0.5f, PanelPos.y + 0.5f);
     if (MessageHandler) MessageHandler(this, UIM_CREATE, NULL); /*UI생성 메세지 전송*/
@@ -23,15 +25,7 @@ UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCal
 
 UI_Panel::~UI_Panel() {}
 
-static void DefaultPanelHandler(UI* pUI, UINT Message, void* param);
 
-
-#if 0 /*필요 없을 듯 함*/
-void UI_Panel::InputMotion(int Motion, int nDelay)
-{
-
-}
-#endif
 
 /**
     @brief 해당 패널을 잠시 비활성화하고 UI소멸. 업데이트, 렌더링 리스트에서 제외
@@ -56,7 +50,7 @@ void UI_Panel::Destroy()
 */
 BOOL UI_Panel::update(unsigned long time)
 {
-
+    return FALSE;
 }
 
 /**
@@ -73,7 +67,7 @@ void UI_Panel::render()
 */
 UI* UI_Panel::CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback)
 {
-
+    return NULL;
 }
 
 /**
@@ -86,37 +80,37 @@ void UI_Panel::DefaultMouseHandler(POINT pt, UINT Message, void* param)
     UI* pTargetUI = NULL;
 
     /*이전에 영역안에 있던 컨트롤이 있었다면 걔 먼저 검사*/
-    if (pTmpUI) {
+    if (pMouseOverUI) {
         /*이전 컨트롤부터 영역검사*/
-        if (IsInRect(pTmpUI->uiPos, pt)) {
-            uiSys->SendUIMessage(pTmpUI, Message, param);
+        if (IsInRect(pMouseOverUI->uiPos, pt)) {
+            uiSys->SendUIMessage(pMouseOverUI, Message, param);
             return;
         }
         else {
-            uiSys->SendUIMessage(pTmpUI, UIM_MOUSELEAVE, param);
-            pTmpUI = NULL;
+            uiSys->SendUIMessage(pMouseOverUI, UIM_MOUSELEAVE, param);
+            pMouseOverUI = NULL;
         }
     }
     /*이전 컨트롤이 아닌 다른 영역일때*/
     /*패널 UI부터 체크*/
-    for (i = 0; i < nCntPanel; i++) {
-        if (PanelList[i]->uiMotionState == eUIMotionState::eUMS_Hide) continue;
-        if (IsInRect(PanelList[i]->uiPos, pt)) {
-            pTmpUI = PanelList[i];
-            uiSys->SendUIMessage(pTmpUI, UIM_MOUSEON, param);
-            uiSys->SendUIMessage(pTmpUI, Message, param);
+    for (UI_Panel* pPanel : PanelList) {
+        if (pPanel->uiMotionState == eUIMotionState::eUMS_Hide) continue;
+        if (IsInRect(pPanel->uiPos, pt)) {
+            pMouseOverUI = pPanel;
+            uiSys->SendUIMessage(pPanel, UIM_MOUSEON, param);
+            uiSys->SendUIMessage(pPanel, Message, param);
             return;
         }
     }
     /*UI 리스트 체크*/
-    for (i = 0; i < nCntUI; i++) {
-        if (UIList[i].pUI->uiMotionState == eUIMotionState::eUMS_Hide) continue;
+    for (UI* pUI : UIList) {
+        if (pUI->uiMotionState == eUIMotionState::eUMS_Hide) continue;
         /* 시작점-크기 쌍 대신 시작점-끝점 쌍을 사용하는 UI는 영역검사 X*/
-        if (UIList[i].pUI->uiType == UIType::eUI_FragLine) continue;
-        if (IsInRect(UIList[i].pUI->uiPos, pt)) {
-            pTmpUI = UIList[i].pUI;
-            uiSys->SendUIMessage(pTmpUI, UIM_MOUSEON, param);
-            uiSys->SendUIMessage(pTmpUI, Message, param);
+        if (pUI->uiType == UIType::eUI_FragLine) continue;
+        if (IsInRect(pUI->uiPos, pt)) {
+            pMouseOverUI = pUI;
+            uiSys->SendUIMessage(pMouseOverUI, UIM_MOUSEON, param);
+            uiSys->SendUIMessage(pMouseOverUI, Message, param);
             return;
         }
     }
@@ -136,7 +130,7 @@ static void DefaultPanelHandler(UI* pUI, UINT Message, void* param)
     switch (Message) {
     case UIM_MOUSEMOVE:
         pt = *(POINT*)param;
-        pPanel->DefaultMouseHandler(pt,  );
+        //pPanel->DefaultMouseHandler(pt,  );
     }
     if (UserHandler) UserHandler(pUI, Message, param);
 }

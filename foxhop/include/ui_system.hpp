@@ -28,15 +28,16 @@ typedef struct _st_UI_TABLE
     @brief UI 종류 열거자
 */
 enum class UIType {
-    eUI_Panel = 1,    /**< 패널 컨트롤. 이 안에 다른 UI를 배치하여 한번에 관리할때 사용. (패널 안에 패널 가능)*/
-    eUI_Button = 100, /**< winAPI의 버튼 컨트롤과 같은 용도*/
-    eUI_Static,       /**< 스태틱 컨트롤*/
-    eUI_FragLine,     /**< 분리선*/
-    eUI_List,         /**< 리스트뷰 컨트롤*/
-    eUI_Edit,         /**< 에디트 컨트롤*/
-    eUI_Scroll,       /**< 스크롤 바 (가로 세로)*/
-    eUI_Progress,     /**< 프로그래스 바*/
-    eUI_Graph         /**< 그래프 뷰(가로 세로 원형 등등..)*/
+    eUI_Undefined = 0, /**< 아직 정의되지 않은 UI 개체 (일종의NULL)*/
+    eUI_Panel,         /**< 패널 컨트롤. 이 안에 다른 UI를 배치하여 한번에 관리할때 사용. (패널 안에 패널 가능)*/
+    eUI_Button,        /**< winAPI의 버튼 컨트롤과 같은 용도*/
+    eUI_Static,        /**< 스태틱 컨트롤*/
+    eUI_FragLine,      /**< 분리선*/
+    eUI_List,          /**< 리스트뷰 컨트롤*/
+    eUI_Edit,          /**< 에디트 컨트롤*/
+    eUI_Scroll,        /**< 스크롤 바 (가로 세로)*/
+    eUI_Progress,      /**< 프로그래스 바*/
+    eUI_Graph          /**< 그래프 뷰(가로 세로 원형 등등..)*/
 };
 
 /**
@@ -61,7 +62,7 @@ public:
 private:
     UI_Panel*                    pMainPanel;       /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
     UI*                          pFocusedUI;       /**< 포커스된 UI*/
-    UI_PanelFactory*             pUIPanelFactory;  /**< 패널UI 팩토리*/
+    // UI_PanelFactory* pUIPanelFactory;  /**< 패널UI 팩토리*/
     UI_ButtonFactory*            pUIButtonFactory; /**< 버튼UI 팩토리*/
 
 public:

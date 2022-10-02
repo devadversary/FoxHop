@@ -119,6 +119,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
     RECT rt; POINT pt;
     static UI_Panel* pMainPanel;
     UISystem* pUISys;
+    static ID2D1SolidColorBrush* Brush;
+    static D2D1::Matrix3x2F Mat;
+    static HWND Child;
 
     switch (Message) {
     case WM_CREATE:
@@ -131,14 +134,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
         }
         AppSettingInit(pApp, hWnd);
         SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pApp);
-
         pUISys = pApp->UISys;
-
-        /*생성만 한다고 지정한 프로시저가 호출되지는 않음 Init을 별도로 해줄때 호출됨*/
-        //pMainPanel = (UI_Panel*)pUISys->CreateUI(UIType::eUI_Panel, 0, UIHandler_MainPanel);
-        //rt = { 0, 0, 1920, 1080 };
-        //pMainPanel->Init({ (float)rt.left, (float)rt.top, (float)rt.right, (float)rt.bottom }, 0);
         SetTimer(hWnd, 123123, 1, NULL);
+
+        //
+        pApp->pRenTarget->CreateSolidColorBrush({1.f, 0.5f, 0.5f, 0.5f}, &Brush);
+        Mat = D2D1::Matrix3x2F::Translation(100,100);
+        pApp->pRenTarget->SetTransform(&Mat);
+        //
+
         break;
 
     case WM_HOTKEY:
@@ -147,10 +151,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 
     case WM_SIZE:
         //OnSize(hWnd, Message, wParam, lParam);
+    {
+        D2D1_SIZE_U size = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+        pApp->pRenTarget->Resize(size);
+    }
         break;
 
     case WM_TIMER:
         InvalidateRect(hWnd, NULL, FALSE);
+        break;
+
+    case WM_PAINT: {
+        pApp->pRenTarget->BeginDraw();
+        pApp->pRenTarget->Clear({ 0.f,0.f,0.f,0.0f });
+        Brush->SetColor({ 1.f,0.f,0.f,0.33f});
+        pApp->pRenTarget->FillEllipse({ {0.f,0.f}, 50.f,50.f }, Brush);
+        Brush->SetColor({ 0.f,1.f,0.f,0.33f });
+        pApp->pRenTarget->FillEllipse({ {50.f,0.f}, 50.f,50.f }, Brush);
+        Brush->SetColor({ 0.f,0.f,1.f,0.33f });
+        pApp->pRenTarget->FillEllipse({ {25.f,42.f}, 50.f,50.f }, Brush);
+        pApp->pRenTarget->EndDraw();
+    }
         break;
 
     case WM_MOUSEMOVE:
@@ -163,7 +184,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
         sprintf(buffer, "%d, %d", x, y);
         TextOutA(hDC, 10, 10, buffer, strlen(buffer));
         DeleteDC(hDC);
+        Mat = D2D1::Matrix3x2F::Translation(x, y);
+
+        pApp->pRenTarget->SetTransform(&Mat);
+
     }
+        break;
+
+    case WM_LBUTTONUP:
+        //Child = CreateWindowW(CLASSNAME, CLASSNAME, WS_VISIBLE | WS_POPUP, 0, 0, 200, 130, hWnd, NULL, NULL, NULL);
         break;
 
     case WM_DESTROY:
@@ -172,6 +201,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return DefWindowProc(hWnd, Message, wParam, lParam);
+}
+
+LRESULT CALLBACK WndProcChild()
+{
+    return 0;
 }
 
 int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nShowCmd)
@@ -191,6 +225,7 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     wc.cbClsExtra = NULL;
     wc.cbWndExtra = NULL;
     RegisterClass(&wc);
+
 
     //hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP | WS_VISIBLE, 0, 0, 0, 0, NULL, NULL, hInst, NULL);
     hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0,600, 400, NULL, NULL, hInst, NULL);

@@ -6,26 +6,21 @@
 #include "object_motion_line.hpp"
 #include "object_motion_text.hpp"
 
-#define UIM_CREATE        100
-#define UIM_DELETE        101
-#define UIM_LBUTTONDOWN   102 /*클릭 이벤트*/
-#define UIM_LBUTTONUP     103 /*클릭 이벤트*/
-#define UIM_DOUBLECLICK   104
-#define UIM_UPSCROLL      105
-#define UIM_DOWNSCROLL    106
-#define UIM_KEYDOWN       107
-#define UIM_KEYUP         108
-#define UIM_FOCUS         109
-#define UIM_UNFOCUS       110
-#define UIM_SETPOS        111
-#define UIM_SETCOLOR      112
-#define UIM_SETTEXT       113
-#define UIM_PAUSE         114 /*UI 임시 소멸*/
-#define UIM_RESUME        115 /*UI 재개*/
-#define UIM_MOUSEMOVE     116
-#define UIM_MOUSEON       117
-#define UIM_MOUSELEAVE    118
-#define UIM_LIST_SELECT   300
+/*기본적으로 WM_XXX 메세지를 사용하되,
+  별도로 필요한 UI메세지는 여기서 정의한다.*/
+#define UIM_CREATE        WM_USER + 100
+#define UIM_DELETE        WM_USER + 101
+#define UIM_FOCUS         WM_USER + 109
+#define UIM_UNFOCUS       WM_USER + 110
+#define UIM_SETPOS        WM_USER + 111
+#define UIM_SETCOLOR      WM_USER + 112
+#define UIM_SETTEXT       WM_USER + 113
+#define UIM_PAUSE         WM_USER + 114 /*UI 임시 소멸*/
+#define UIM_RESUME        WM_USER + 115 /*UI 재개*/
+#define UIM_MOUSEMOVE     WM_USER + 116
+#define UIM_MOUSEON       WM_USER + 117
+#define UIM_MOUSELEAVE    WM_USER + 118
+#define UIM_LIST_SELECT   WM_USER + 300
 
 #define ALL_ZERO { 0,0,0,0 }
 
@@ -81,12 +76,23 @@ public :
     BOOL               Focusable;       /**< 포커스를 가질 수 있는 UI인가?*/
     UIType             uiType;          /**< UI타입*/
     POSITION           uiPos;           /**< 베이스로부터의 UI 포지션*/
-    int                uiMotion;        /**< UI의 모션 타입 (UI종류마다 값이 다름)*/
     eUIMotionState     uiMotionState;   /**< UI의 모션상태 (적절하지 않은 이벤트를 무시 하기 위함 : ex-생성모션 진행중 마우스오버모션 재생 방지)*/
     pfnUIHandler       DefaultHandler;  /**< UI 마다 가질 기본메세지 핸들러*/
     pfnUIHandler       MessageHandler;  /**< UI 마다 가질 사용자메세지 핸들러*/
 
 public:
+    UI() {
+        uiSys          = 0;
+        pRenderTarget  = 0;
+        Focusable      = FALSE;
+        uiType         = (UIType)0; /* UIType::eUI_Undefined */
+        uiPos          = {0,0,0,0};
+        uiMotionState  = eUIMotionState::eUMS_Null;
+        DefaultHandler = NULL;
+        MessageHandler = NULL;
+    }
+
+    ~UI() {}
     virtual BOOL update(unsigned long time) = 0;
     virtual void render() = 0;
 };

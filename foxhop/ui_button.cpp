@@ -154,7 +154,7 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
     case eButtonMotionType::eType_Click: /* 마우스 왼쪽버튼이 눌렸을때와 떼어졌을때가 param으로 구분 (UIM 메세지)*/
         switch (Pattern) {
         case eButtonMotionPattern::eClick_Default:
-            if ((int)param == UIM_LBUTTONDOWN) {
+            if ((int)param == WM_LBUTTONDOWN) {
                 miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
                 MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
                 MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
@@ -167,7 +167,7 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
             break;
 
         case eButtonMotionPattern::eClick_Flash:
-            if ((int)param != UIM_LBUTTONDOWN) break; /*점멸 효과의 경우 버튼이 떼어졌을땐 반응X*/
+            if ((int)param != WM_LBUTTONDOWN) break; /*점멸 효과의 경우 버튼이 떼어졌을땐 반응X*/
 
             miColor = InitMotionInfo(eMotionForm::eMotion_x3_1to0_2, nDelay, nPitch);
             MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
@@ -326,10 +326,10 @@ void UI_Button::DefaultButtonProc(UI* pUI, UINT Message, void* param)
         pButton->InputMotion(eButtonMotionType::eType_Mouseover, pButton->MotionSet.MouseOver, 0, pButton->MotionSet.MouseOverPitch, (void*)TRUE);
         break;
 
-    case UIM_LBUTTONDOWN:
+    case WM_LBUTTONDOWN:
         break;
     
-    case UIM_LBUTTONUP:
+    case WM_LBUTTONUP:
         break;
 
     default: break;
