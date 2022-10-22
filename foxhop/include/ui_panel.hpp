@@ -36,22 +36,5 @@ public:
 public: /*UI별 옵션 매서드*/
     UI_Panel* CreatePanel() {};
     UI*       CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback);
-    void      DefaultMouseHandler(POINT pt, UINT Message, void* param);
+    void      DefaultMouseHandler(POINT pt, UINT Message, WPARAM wParam, LPARAM lParam);
 };
-
-#if 0 /*Panel 에는 팩토리가 따로 필요 없을것으로 보임.*/
-/**
-    @brief 패널 생성 팩토리
-*/
-class UI_PanelFactory {
-private:
-    UISystem*          pUISys;        /**< UI시스템 인스턴스*/
-    ID2D1RenderTarget* pRenderTarget; /**< 렌더링 타겟*/
-
-public:
-    UI_PanelFactory(UISystem* pUISystem, ID2D1RenderTarget* pRT) {};
-    ~UI_PanelFactory(){};
-
-    UI*  CreateUI(POSITION Pos, wchar_t* pText, int nDelay, pfnUIHandler pfnCallback);
-};
-#endif

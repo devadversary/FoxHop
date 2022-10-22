@@ -22,7 +22,7 @@ UI_Button::UI_Button(UISystem* pUISys, ID2D1RenderTarget* pRT,
 
     InputMotion(eButtonMotionType::eType_Init, MotionSet.Init, nDelay, MotionSet.InitPitch, NULL);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
-    DefaultHandler(this, UIM_CREATE, NULL); /*UI생성 메세지 전송*/
+    DefaultHandler(this, UIM_CREATE, NULL, NULL); /*UI생성 메세지 전송*/
 }
 
 /**
@@ -309,7 +309,7 @@ void UI_Button::setHighlightColor(D2D1_COLOR_F Color, MOTION_INFO miColor)
     @brief 기본 버튼 메세지 핸들러
     @remark 사용자 지정 프로시저는 기본 핸들러 실행 후 호출된다.
 */
-void UI_Button::DefaultButtonProc(UI* pUI, UINT Message, void* param)
+void UI_Button::DefaultButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     pfnUIHandler UserHandler = pUI->MessageHandler;
     UI_Button* pButton = static_cast<UI_Button*>(pUI);
@@ -335,7 +335,7 @@ void UI_Button::DefaultButtonProc(UI* pUI, UINT Message, void* param)
     default: break;
     }
 
-    if(UserHandler) UserHandler(pUI, Message, param);
+    if(UserHandler) UserHandler(pUI, Message, wParam, lParam);
 }
 
 /**

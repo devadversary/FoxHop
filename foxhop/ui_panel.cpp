@@ -6,7 +6,7 @@
 #include "./include/ui_fraggedline.hpp"
 #include "./include/ui_listview.hpp"
 
-static void DefaultPanelHandler(UI* pUI, UINT Message, void* param);
+static void DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
 #if 1
 UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback, POSITION Pos, int nDelay)
@@ -19,7 +19,7 @@ UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCal
     uiPos          = Pos;
     PanelDelay     = nDelay;
     //transform = D2D1::Matrix3x2F::Translation(PanelPos.x + 0.5f, PanelPos.y + 0.5f);
-    if (MessageHandler) MessageHandler(this, UIM_CREATE, NULL); /*UI생성 메세지 전송*/
+    if (MessageHandler) MessageHandler(this, UIM_CREATE, NULL, NULL); /*UI생성 메세지 전송*/
 
 }
 
@@ -32,17 +32,17 @@ UI_Panel::~UI_Panel() {}
 */
 void UI_Panel::pause(int nDelay)
 {
-    uiSys->SendUIMessage(this, UIM_PAUSE, &nDelay);
+    uiSys->SendUIMessage(this, UIM_PAUSE, nDelay, NULL);
 }
 
 void UI_Panel::resume(int nDelay)
 {
-    uiSys->SendUIMessage(this, UIM_RESUME, &nDelay);
+    uiSys->SendUIMessage(this, UIM_RESUME, nDelay, NULL);
 }
 
 void UI_Panel::Destroy()
 {
-    uiSys->SendUIMessage(this, UIM_DELETE, NULL);
+    uiSys->SendUIMessage(this, UIM_DELETE, NULL, NULL);
 }
 
 /**
@@ -74,7 +74,7 @@ UI* UI_Panel::CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pf
     @brief 기본 마우스 이벤트 핸들러
     @remark 대상UI에 마우스 진입 / 퇴장 이벤트만 전달한다.
 */
-void UI_Panel::DefaultMouseHandler(POINT pt, UINT Message, void* param)
+void UI_Panel::DefaultMouseHandler(POINT pt, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     int i;
     UI* pTargetUI = NULL;
@@ -83,11 +83,11 @@ void UI_Panel::DefaultMouseHandler(POINT pt, UINT Message, void* param)
     if (pMouseOverUI) {
         /*이전 컨트롤부터 영역검사*/
         if (IsInRect(pMouseOverUI->uiPos, pt)) {
-            uiSys->SendUIMessage(pMouseOverUI, Message, param);
+            uiSys->SendUIMessage(pMouseOverUI, Message, wParam, lParam);
             return;
         }
         else {
-            uiSys->SendUIMessage(pMouseOverUI, UIM_MOUSELEAVE, param);
+            uiSys->SendUIMessage(pMouseOverUI, UIM_MOUSELEAVE, wParam, lParam);
             pMouseOverUI = NULL;
         }
     }
@@ -97,8 +97,8 @@ void UI_Panel::DefaultMouseHandler(POINT pt, UINT Message, void* param)
         if (pPanel->uiMotionState == eUIMotionState::eUMS_Hide) continue;
         if (IsInRect(pPanel->uiPos, pt)) {
             pMouseOverUI = pPanel;
-            uiSys->SendUIMessage(pPanel, UIM_MOUSEON, param);
-            uiSys->SendUIMessage(pPanel, Message, param);
+            uiSys->SendUIMessage(pPanel, UIM_MOUSEON, wParam, lParam);
+            uiSys->SendUIMessage(pPanel, Message, wParam, lParam);
             return;
         }
     }
@@ -109,8 +109,8 @@ void UI_Panel::DefaultMouseHandler(POINT pt, UINT Message, void* param)
         if (pUI->uiType == UIType::eUI_FragLine) continue;
         if (IsInRect(pUI->uiPos, pt)) {
             pMouseOverUI = pUI;
-            uiSys->SendUIMessage(pMouseOverUI, UIM_MOUSEON, param);
-            uiSys->SendUIMessage(pMouseOverUI, Message, param);
+            uiSys->SendUIMessage(pMouseOverUI, UIM_MOUSEON, wParam, lParam);
+            uiSys->SendUIMessage(pMouseOverUI, Message, wParam, lParam);
             return;
         }
     }
@@ -121,7 +121,7 @@ void UI_Panel::DefaultMouseHandler(POINT pt, UINT Message, void* param)
     @remark 마우스 움직임은 기본 핸들러에서 처리되고,
     @n      그 이후 사용자 지정 핸들러가 실행된다.
 */
-static void DefaultPanelHandler(UI* pUI, UINT Message, void* param)
+static void DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     UI_Panel* pPanel = (UI_Panel*)pUI;
     pfnUIHandler UserHandler = pUI->MessageHandler;
@@ -129,10 +129,10 @@ static void DefaultPanelHandler(UI* pUI, UINT Message, void* param)
 
     switch (Message) {
     case UIM_MOUSEMOVE:
-        pt = *(POINT*)param;
+        pt = *(POINT*)wParam;
         //pPanel->DefaultMouseHandler(pt,  );
     }
-    if (UserHandler) UserHandler(pUI, Message, param);
+    if (UserHandler) UserHandler(pUI, Message, wParam, lParam);
 }
 
 #endif

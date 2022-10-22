@@ -36,7 +36,7 @@ enum class UIType;
     @param [OPT] parm    메세지에대한 추가정보. WndProc의 WPARAM, LPARAM과 비슷하다.
     @remark Win32API의 WndProc 콜백함수와 결이 같다.
 */
-typedef void (*pfnUIHandler)(UI* pUI, UINT Message, void* param);
+typedef void (*pfnUIHandler)(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
 /**
     @brief 개체별 업데이트 핸들러

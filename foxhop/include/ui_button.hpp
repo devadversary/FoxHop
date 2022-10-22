@@ -93,7 +93,7 @@ private:
     
 private: /*2022.04.30 : Devadversary - InputMotion 은 기본적으로 Private 함수여야하지만 그렇게 되면, DefaultButtonProc 함수에서 접근을 못함.*/
     void InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch, void* param);
-    static void DefaultButtonProc(UI* pUI, UINT Message, void* param);
+    static void DefaultButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
 public:
     UI_Button(UISystem* pUISys, ID2D1RenderTarget* pRT,

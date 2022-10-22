@@ -29,6 +29,7 @@ typedef struct _st_UI_TABLE
 */
 enum class UIType {
     eUI_Undefined = 0, /**< 아직 정의되지 않은 UI 개체 (일종의NULL)*/
+    eUI_Custom,        /**< 유저 커스텀 UI*/
     eUI_Panel,         /**< 패널 컨트롤. 이 안에 다른 UI를 배치하여 한번에 관리할때 사용. (패널 안에 패널 가능)*/
     eUI_Button,        /**< winAPI의 버튼 컨트롤과 같은 용도*/
     eUI_Static,        /**< 스태틱 컨트롤*/
@@ -68,7 +69,8 @@ private:
 public:
     UISystem(HWND hWnd);
     ~UISystem();
-    void MainPanelProc(UINT Message, WPARAM wParam, LPARAM lParam);
-    BOOL SendUIMessage(UI* pUI, UINT Message, void* param);
+    //void MainPanelProc(UINT Message, WPARAM wParam, LPARAM lParam);
+    UI_Panel* InitMainPanel(HWND hWnd, pfnUIHandler MainPanelProc);
+    BOOL SendUIMessage(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
     void ReleaseUI();
 };

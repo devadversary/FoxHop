@@ -49,6 +49,7 @@ UISystem::UISystem(HWND hWnd)
 
 UISystem::~UISystem() {}
 
+#if 0
 /**
     @brief WndProc 에서 UISystem으로 메세지 라우팅
     @remark WndProc으로 전달되는 WINAPI 본연의 메세지를 전달한다.
@@ -62,14 +63,14 @@ void UISystem::MainPanelProc(UINT Message, WPARAM wParam, LPARAM lParam)
     }
     return;
 }
-
+#endif
 /**
     @brief 특정 UI에 메세지 보내기
 */
-BOOL UISystem::SendUIMessage(UI* pUI, UINT Message, void* param)
+BOOL UISystem::SendUIMessage(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     if (!pUI || !pUI->DefaultHandler) return FALSE;
-    pUI->DefaultHandler(pUI, Message, param);
+    pUI->DefaultHandler(pUI, Message, wParam, lParam);
     return TRUE;
 }
 
