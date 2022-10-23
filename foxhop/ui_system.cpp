@@ -20,6 +20,9 @@ UISystem::UISystem(HWND hWnd)
     WCHAR szDir[MAX_PATH];
     WCHAR szDrive[8];
 
+    pFocusedUI = NULL;
+    pMainPanel = NULL;
+
     /*프로그램과 같은 경로에 있는 특정 폰트를 로드한다.*/
     GetModuleFileNameW(NULL, szProgramPath, MAX_PATH);
     _wsplitpath_s(szProgramPath, szDrive, 8, szDir, MAX_PATH, NULL, 0, NULL, 0);
@@ -49,7 +52,7 @@ UISystem::UISystem(HWND hWnd)
 
 UISystem::~UISystem() {}
 
-#if 0
+#if 1
 /**
     @brief WndProc 에서 UISystem으로 메세지 라우팅
     @remark WndProc으로 전달되는 WINAPI 본연의 메세지를 전달한다.
@@ -58,12 +61,14 @@ void UISystem::MainPanelProc(UINT Message, WPARAM wParam, LPARAM lParam)
 {
     switch (Message) {
     case WM_MOUSEMOVE:
+        /*패널에 대한 마우스포인터 상대좌표를 구해 메인패널에 던져준다.*/
         //SendUIMessage(pMainPanel, UIM_MOUSEMOVE, );
         break;
     }
     return;
 }
 #endif
+
 /**
     @brief 특정 UI에 메세지 보내기
 */

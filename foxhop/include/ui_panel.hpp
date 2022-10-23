@@ -24,6 +24,10 @@ private:
     D2D1::Matrix3x2F     TransMat;     /**< 해당 패널의 변환행렬*/
     UI*                  pMouseOverUI; /**< 마우스 이벤트 핸들링을 위한 임시변수*/
     UI*                  pFocusedUI;   /**< 포커싱된 UI*/
+
+private:
+    static void DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
+
 public:
     UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback, POSITION Pos, int nDelay = 0);
     ~UI_Panel();

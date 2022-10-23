@@ -410,7 +410,10 @@ void UI_ButtonFactory::SetCurrentColorSet(BUTTON_COLOR_SET* pColorSet)
 
 /**
     @brief 버튼 생성
-    @param nID UI시스템이 생성해서 넘겨주는 ID값. (사용자에게 이 인자는 노출되지 않는다)
+    @param Pos 생성할 UI의 위치와 크기
+    @param pText 생성할 UI가 가질 텍스트 (필요 없는 UI들은 알아서 이 인자를 무시함)
+    @param nDelay 생성할 UI의 모션 딜레이
+    @param pfnCallback 생성할 UI가 가질 이벤트 핸들러
     @remark 현재 팩토리의 지정 설정이 적용되어 생성된다 (모션, 색상 등)
 */
 UI_Button* UI_ButtonFactory::CreateUI(POSITION Pos, wchar_t* pText, int nDelay, pfnUIHandler pfnCallback)
