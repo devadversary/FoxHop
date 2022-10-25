@@ -6,6 +6,25 @@
 #include "./include/ui_fraggedline.hpp"
 #include "./include/ui_listview.hpp"
 
+/**
+    @brief 패널의 기본 핸들러.
+    @remark 마우스 움직임은 기본 핸들러에서 처리되고,
+    @n      그 이후 사용자 지정 핸들러가 실행된다.
+*/
+void UI_Panel::DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+    UI_Panel* pPanel = (UI_Panel*)pUI;
+    pfnUIHandler UserHandler = pUI->MessageHandler;
+    POINT pt;
+
+    switch (Message) {
+    case UIM_MOUSEMOVE:
+        pt = *(POINT*)wParam;
+        //pPanel->DefaultMouseHandler(pt,  );
+    }
+    if (UserHandler) UserHandler(pUI, Message, wParam, lParam);
+}
+
 UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback, POSITION Pos, int nDelay)
 {
     pFocusedUI     = NULL;
@@ -113,23 +132,4 @@ void UI_Panel::DefaultMouseHandler(POINT pt, UINT Message, WPARAM wParam, LPARAM
             return;
         }
     }
-}
-
-/**
-    @brief 패널의 기본 핸들러.
-    @remark 마우스 움직임은 기본 핸들러에서 처리되고,
-    @n      그 이후 사용자 지정 핸들러가 실행된다.
-*/
-void UI_Panel::DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
-{
-    UI_Panel* pPanel = (UI_Panel*)pUI;
-    pfnUIHandler UserHandler = pUI->MessageHandler;
-    POINT pt;
-
-    switch (Message) {
-    case UIM_MOUSEMOVE:
-        pt = *(POINT*)wParam;
-        //pPanel->DefaultMouseHandler(pt,  );
-    }
-    if (UserHandler) UserHandler(pUI, Message, wParam, lParam);
 }

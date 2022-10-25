@@ -4,13 +4,27 @@
 #pragma comment (lib, "../bin/debug/foxhop.lib")
 #define CLASSNAME TEXT("TestModule")
 
+void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+
+}
+
+void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+    
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     static UISystem* uiSys;
+    static UI_Panel* pMainPanel;
+ 
 
     switch (Message) {
     case WM_CREATE:
         uiSys = new UISystem(hWnd);
+        pMainPanel = uiSys->InitMainPanel(hWnd, MainPanelProc);
+        pMainPanel->CreateUI(UIType::eUI_Button, { 10,10,100,20 }, (wchar_t*)L"TESTBUTT", 1000, TestButtProc);
         break;
 
     case WM_DESTROY:
@@ -19,6 +33,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
     }
     return DefWindowProc(hWnd, Message, wParam, lParam);
 }
+
+
 
 int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nShowCmd)
 {

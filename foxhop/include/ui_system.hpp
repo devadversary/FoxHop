@@ -69,8 +69,8 @@ private:
 public:
     UISystem(HWND hWnd);
     ~UISystem();
-    void MainPanelProc(UINT Message, WPARAM wParam, LPARAM lParam);
-    //UI_Panel* InitMainPanel(HWND hWnd, pfnUIHandler MainPanelProc);
+    //void MainPanelProc(UINT Message, WPARAM wParam, LPARAM lParam);
+    UI_Panel* InitMainPanel(HWND hWnd, pfnUIHandler MainPanelProc);
     BOOL SendUIMessage(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
     void ReleaseUI();
 };

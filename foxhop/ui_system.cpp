@@ -8,9 +8,8 @@
 /**
     @brief UI시스템을 초기화 한다.
     @param hWnd UI 시스템을 사용할 메인윈도우 핸들
-    @param nMaxUI UI생성 한계치 갯수 지정 (0 지정시 기본값 256개)
     @remark 내부적으로 모션오브젝트 갯수를 각각 5000~10000개정도만 생성하기 때문에
-    @n      nMaxUI 로 UI갯수 상한을 늘릴경우, 모션오브젝트의 갯수 상한에 걸릴 수 있음.
+    @n      렌더링 할 오브젝트가 많을 시, 모션오브젝트의 갯수 상한에 걸릴 수 있음.
     @n      추후에 UI갯수 상한에 따른 적절한 모션오브젝트 갯수를 지정해주어야 함.
 */
 UISystem::UISystem(HWND hWnd)
@@ -52,7 +51,7 @@ UISystem::UISystem(HWND hWnd)
 
 UISystem::~UISystem() {}
 
-#if 1
+#if 0
 /**
     @brief WndProc 에서 UISystem으로 메세지 라우팅
     @remark WndProc으로 전달되는 WINAPI 본연의 메세지를 전달한다.
@@ -68,6 +67,22 @@ void UISystem::MainPanelProc(UINT Message, WPARAM wParam, LPARAM lParam)
     return;
 }
 #endif
+
+/**
+    @brief 메인 패널을 초기화 한다.
+*/
+UI_Panel* UISystem::InitMainPanel(HWND hWnd, pfnUIHandler MainPanelProc)
+{
+    RECT WindowSize;
+    POSITION pos;
+
+    GetClientRect(hWnd, &WindowSize);
+    pos.x = 0;
+    pos.y = 0;
+    pos.width = WindowSize.right;
+    pos.height = WindowSize.bottom;
+    return new UI_Panel(this, this->D2DA.pRenTarget, MainPanelProc, pos);
+}
 
 /**
     @brief 특정 UI에 메세지 보내기
