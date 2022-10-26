@@ -18,9 +18,9 @@ void UI_Panel::DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
     POINT pt;
 
     switch (Message) {
-    case UIM_MOUSEMOVE:
-        pt = *(POINT*)wParam;
-        //pPanel->DefaultMouseHandler(pt,  );
+    case WM_MOUSEMOVE:
+        pPanel->DefaultMouseHandler(pUI, Message, wParam, lParam);
+        break;
     }
     if (UserHandler) UserHandler(pUI, Message, wParam, lParam);
 }
@@ -37,8 +37,7 @@ UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCal
     uiPos          = Pos;
     PanelDelay     = nDelay;
     //transform = D2D1::Matrix3x2F::Translation(PanelPos.x + 0.5f, PanelPos.y + 0.5f);
-    if (MessageHandler) MessageHandler(this, UIM_CREATE, NULL, NULL); /*UI생성 메세지 전송*/
-
+    DefaultPanelHandler(this, UIM_CREATE, NULL, NULL); /*UI생성 메세지 전송*/
 }
 
 UI_Panel::~UI_Panel() {}
@@ -85,6 +84,11 @@ void UI_Panel::render()
 */
 UI* UI_Panel::CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback)
 {
+    switch (type) {
+    case UIType::eUI_Button:
+        //uiSys->pUIBu
+        break;
+    }
     return NULL;
 }
 
@@ -92,10 +96,14 @@ UI* UI_Panel::CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pf
     @brief 기본 마우스 이벤트 핸들러
     @remark 대상UI에 마우스 진입 / 퇴장 이벤트만 전달한다.
 */
-void UI_Panel::DefaultMouseHandler(POINT pt, UINT Message, WPARAM wParam, LPARAM lParam)
+void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     int i;
     UI* pTargetUI = NULL;
+    POINT pt;
+
+    pt.x = GET_X_LPARAM(lParam);
+    pt.y = GET_Y_LPARAM(lParam);
 
     /*이전에 영역안에 있던 컨트롤이 있었다면 걔 먼저 검사*/
     if (pMouseOverUI) {

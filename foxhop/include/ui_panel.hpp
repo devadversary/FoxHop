@@ -27,6 +27,7 @@ private:
 
 private:
     static void DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
+    void        DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
 public:
     UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback, POSITION Pos, int nDelay = 0);
@@ -40,5 +41,4 @@ public:
 public: /*UI별 옵션 매서드*/
     UI_Panel* CreatePanel() {};
     UI*       CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback);
-    void      DefaultMouseHandler(POINT pt, UINT Message, WPARAM wParam, LPARAM lParam);
 };

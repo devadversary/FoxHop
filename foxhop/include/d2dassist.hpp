@@ -1,5 +1,6 @@
 #pragma once
 #include <windows.h>
+#include <windowsx.h>
 #include <dcommon.h>
 #include <dxgi.h>
 #include <dxgi1_2.h>

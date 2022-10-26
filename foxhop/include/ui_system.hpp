@@ -50,6 +50,7 @@ enum class UIType {
 */
 class UISystem {
 public:
+    HWND                         hBindWnd;             /**< UISystem이 바인딩된 윈도우 핸들*/
     D2DA_CONTEXT                 D2DA;             /**< D2D 개체들의 컨텍스트 (이 안에 다 있다)*/
     IDWriteTextFormat*           TinyTextForm;     /**< 작은 텍스트 폼*/
     IDWriteTextFormat*           SmallTextForm;    /**< 작은 텍스트 폼*/
@@ -63,13 +64,11 @@ public:
 private:
     UI_Panel*                    pMainPanel;       /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
     UI*                          pFocusedUI;       /**< 포커스된 UI*/
-    // UI_PanelFactory* pUIPanelFactory;  /**< 패널UI 팩토리*/
     UI_ButtonFactory*            pUIButtonFactory; /**< 버튼UI 팩토리*/
 
 public:
     UISystem(HWND hWnd);
     ~UISystem();
-    //void MainPanelProc(UINT Message, WPARAM wParam, LPARAM lParam);
     UI_Panel* InitMainPanel(HWND hWnd, pfnUIHandler MainPanelProc);
     BOOL SendUIMessage(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
     void ReleaseUI();

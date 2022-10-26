@@ -6,7 +6,26 @@
 
 void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
+    HWND hWnd = pUI->uiSys->hBindWnd;
 
+    switch(Message) {
+    case WM_LBUTTONDOWN:
+        MessageBox(hWnd, L"asdasd", L"adadadda", MB_OK);
+        break;
+
+    case WM_MOUSEMOVE:
+    {
+        HDC hDC;
+        char str[100];
+
+        hDC = GetDC(hWnd);
+        sprintf_s(str, sizeof(str), "%d, %d", GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        TextOutA(hDC, 10, 10, str, strlen(str));
+        ReleaseDC(hWnd, hDC);
+        break;
+    }
+
+    }
 }
 
 void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -16,9 +35,10 @@ void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
-    static UISystem* uiSys;
-    static UI_Panel* pMainPanel;
+    static UISystem* uiSys = NULL;
+    static UI_Panel* pMainPanel = NULL;
  
+    if (pMainPanel) uiSys->SendUIMessage(pMainPanel, Message, wParam, lParam);
 
     switch (Message) {
     case WM_CREATE:
