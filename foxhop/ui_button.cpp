@@ -89,8 +89,21 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
 
         case eButtonMotionPattern::eInit_Flick:
             TmpPitch = nPitch / 2;
-            //miMove = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, TmpPitch);
+            miMove = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, TmpPitch);
             miColor = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, TmpPitch);
+            MBoxFace->Init(pRenderTarget, uiPos, ALL_ZERO);
+            MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
+
+            MBoxFace->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            MBoxHighlight->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            MBoxFace->addColorMotion(miColor, FALSE, ALL_ZERO, ColorSet.Face);
+            MBoxHighlight->addColorMotion(miColor, FALSE, ALL_ZERO, ColorSet.Highlight);
+
+            miMove.nDelay += TmpPitch;
+            miColor.nDelay += TmpPitch;
+            MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ALL_ZERO, nTextLen);
+            MText->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            MText->addColorMotion(miColor, FALSE, ALL_ZERO, ColorSet.Font);
             break;
         }
         break;

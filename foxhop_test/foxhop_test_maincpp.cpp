@@ -4,6 +4,30 @@
 #pragma comment (lib, "../bin/debug/foxhop.lib")
 #define CLASSNAME TEXT("TestModule")
 
+/**
+    @brief 차이 구하기
+*/
+inline unsigned long distance(unsigned long a, unsigned long b)
+{
+    if (a > b) return a - b;
+    return b - a;
+}
+
+/**
+    @brief 호출 할 때마다 이전 호출된 시간과의 시간차를 리턴한다.
+    @remark 당연하게도, 첫 호출은 0일수도 있다.
+*/
+unsigned int GetElapse()
+{
+    static unsigned int t1 = 0;
+    unsigned int t2;
+
+    if (t1 == 0) t1 = GetTickCount64();
+    t2 = t1;
+    t1 = GetTickCount64();
+    return distance(t2, t1);
+}
+
 void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
@@ -16,24 +40,9 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
     switch(Message) {
     case UIM_CREATE:
-        pPanel->CreateUI(UIType::eUI_Button, { 10,10,100,20 }, (wchar_t*)L"TESTBUTT", 1000, TestButtProc);
+        pPanel->CreateUI(UIType::eUI_Button, { 10,10,100,20 }, (wchar_t*)L"TESTBUTT", 0, TestButtProc);
         break;
 
-    case WM_LBUTTONDOWN:
-        MessageBox(hWnd, L"asdasd", L"adadadda", MB_OK);
-        break;
-
-    case WM_MOUSEMOVE:
-    {
-        HDC hDC;
-        char str[100];
-
-        hDC = GetDC(hWnd);
-        sprintf_s(str, sizeof(str), "%d, %d", GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-        TextOutA(hDC, 10, 10, str, strlen(str));
-        ReleaseDC(hWnd, hDC);
-        break;
-    }
 
     case WM_IME_COMPOSITION:
     {
@@ -66,8 +75,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_TIMER:
-        pMainPanel->update(16);
+        InvalidateRect(hWnd, NULL, FALSE);
+        break;
+
+    case WM_PAINT:
+        uiSys->D2DA.pRenTarget->BeginDraw();
+        uiSys->D2DA.pRenTarget->Clear({0,0,0,0});       
+        pMainPanel->update(GetElapse());
         pMainPanel->render();
+        uiSys->D2DA.pRenTarget->EndDraw();
         break;
 
     case WM_DESTROY:
