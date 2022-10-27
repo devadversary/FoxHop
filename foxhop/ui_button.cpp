@@ -15,6 +15,7 @@ UI_Button::UI_Button(UISystem* pUISys, ID2D1RenderTarget* pRT,
     MessageHandler = pfnCallback;
 
     wcscpy_s(szText, MAX_BUTTONNAME, pText);
+    uiPos          = Pos;
     nTextLen       = (int)wcslen(pText);
     MBoxFace       = uiSys->ObjPoolBox.activateObject();
     MBoxHighlight  = uiSys->ObjPoolBox.activateObject();

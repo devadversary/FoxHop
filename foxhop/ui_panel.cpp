@@ -21,6 +21,9 @@ void UI_Panel::DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
     case WM_MOUSEMOVE:
         pPanel->DefaultMouseHandler(pUI, Message, wParam, lParam);
         break;
+
+    case WM_KEYDOWN:
+        break;
     }
     if (UserHandler) UserHandler(pUI, Message, wParam, lParam);
 }
@@ -67,7 +70,11 @@ void UI_Panel::Destroy()
 */
 BOOL UI_Panel::update(unsigned long time)
 {
-    return FALSE;
+    BOOL updated = FALSE;
+
+    for (UI_Panel* pPanel : PanelList) updated |= pPanel->update(time);
+    for (UI* pUI : UIList) updated |= pUI->update(time);
+    return updated;
 }
 
 /**
@@ -76,6 +83,8 @@ BOOL UI_Panel::update(unsigned long time)
 void UI_Panel::render()
 {
     pRenderTarget->SetTransform(D2D1::Matrix3x2F::Translation(0.5f + uiPos.x, 0.5f + uiPos.y));
+    for (UI_Panel* pPanel : PanelList) pPanel->render();
+    for (UI* pUI : UIList) pUI->render();
 }
 
 /**
@@ -84,16 +93,37 @@ void UI_Panel::render()
 */
 UI* UI_Panel::CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback)
 {
+    UI* pUI = NULL;
+
     switch (type) {
     case UIType::eUI_Button:
-        //uiSys->pUIBu
+        pUI = uiSys->pUIButtonFactory->CreateUI(pos, pText, nDelay, callback);
         break;
     }
-    return NULL;
+    UIList.push_back(pUI);
+    return pUI;
+}
+
+/**
+    @brief 대상 UI에게 WM_MOUSEMOVE 시, 상대좌표정보 변환해서 전달
+    @param UI_X 이 메세지를 받을 UI의 X 시작좌표
+    @param UI_Y 이 메세지를 받을 UI의 Y 시작좌표
+    @param lParam 전달 직전의 lParam
+    @return 전달 해줄 lParam 값
+*/
+static LPARAM RerouteMouseCursorPt(int UI_X, int UI_Y, LPARAM lParam)
+{
+    LPARAM NewParam;
+
+    NewParam = (GET_X_LPARAM(lParam) - UI_X);
+    NewParam |= ((GET_Y_LPARAM(lParam) - UI_Y)<<16);
+    return NewParam;
 }
 
 /**
     @brief 기본 마우스 이벤트 핸들러
+    @param pUI 메세지를 전송한 UI의 핸들
+    @param Message 전달된 메세지 (항상 WM_MOUSEMOVE 여야 한다)
     @remark 대상UI에 마우스 진입 / 퇴장 이벤트만 전달한다.
 */
 void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -101,6 +131,7 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
     int i;
     UI* pTargetUI = NULL;
     POINT pt;
+    LPARAM NewLParam;
 
     pt.x = GET_X_LPARAM(lParam);
     pt.y = GET_Y_LPARAM(lParam);
@@ -109,11 +140,12 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
     if (pMouseOverUI) {
         /*이전 컨트롤부터 영역검사*/
         if (IsInRect(pMouseOverUI->uiPos, pt)) {
-            uiSys->SendUIMessage(pMouseOverUI, Message, wParam, lParam);
+            NewLParam = RerouteMouseCursorPt(pMouseOverUI->uiPos.x, pMouseOverUI->uiPos.y, lParam);
+            uiSys->SendUIMessage(pMouseOverUI, Message, wParam, NewLParam);
             return;
         }
         else {
-            uiSys->SendUIMessage(pMouseOverUI, UIM_MOUSELEAVE, wParam, lParam);
+            uiSys->SendUIMessage(pMouseOverUI, UIM_MOUSELEAVE, 0, 0);
             pMouseOverUI = NULL;
         }
     }
@@ -123,8 +155,9 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
         if (pPanel->uiMotionState == eUIMotionState::eUMS_Hide) continue;
         if (IsInRect(pPanel->uiPos, pt)) {
             pMouseOverUI = pPanel;
-            uiSys->SendUIMessage(pPanel, UIM_MOUSEON, wParam, lParam);
-            uiSys->SendUIMessage(pPanel, Message, wParam, lParam);
+            NewLParam = RerouteMouseCursorPt(pMouseOverUI->uiPos.x, pMouseOverUI->uiPos.y, lParam);
+            uiSys->SendUIMessage(pPanel, UIM_MOUSEON, 0, 0);
+            uiSys->SendUIMessage(pPanel, Message, wParam, NewLParam);
             return;
         }
     }
@@ -135,8 +168,9 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
         if (pUI->uiType == UIType::eUI_FragLine) continue;
         if (IsInRect(pUI->uiPos, pt)) {
             pMouseOverUI = pUI;
-            uiSys->SendUIMessage(pMouseOverUI, UIM_MOUSEON, wParam, lParam);
-            uiSys->SendUIMessage(pMouseOverUI, Message, wParam, lParam);
+            NewLParam = RerouteMouseCursorPt(pMouseOverUI->uiPos.x, pMouseOverUI->uiPos.y, lParam);
+            uiSys->SendUIMessage(pMouseOverUI, UIM_MOUSEON, 0, 0);
+            uiSys->SendUIMessage(pMouseOverUI, Message, wParam, NewLParam);
             return;
         }
     }

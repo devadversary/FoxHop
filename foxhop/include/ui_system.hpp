@@ -61,14 +61,13 @@ public:
     ObjectPool<ObjectMotionLine> ObjPoolLine;
     ObjectPool<ObjectMotionText> ObjPoolText;
 
-private:
-    UI_Panel*                    pMainPanel;       /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
-    UI*                          pFocusedUI;       /**< 포커스된 UI*/
     UI_ButtonFactory*            pUIButtonFactory; /**< 버튼UI 팩토리*/
+    UI_Panel*                    pMainPanel;       /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
 
 public:
     UISystem(HWND hWnd);
     ~UISystem();
+
     UI_Panel* InitMainPanel(HWND hWnd, pfnUIHandler MainPanelProc);
     BOOL SendUIMessage(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
     void ReleaseUI();

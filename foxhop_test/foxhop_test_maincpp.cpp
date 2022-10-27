@@ -4,11 +4,21 @@
 #pragma comment (lib, "../bin/debug/foxhop.lib")
 #define CLASSNAME TEXT("TestModule")
 
+void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+
+}
+
 void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     HWND hWnd = pUI->uiSys->hBindWnd;
+    UI_Panel* pPanel = (UI_Panel*)pUI;
 
     switch(Message) {
+    case UIM_CREATE:
+        pPanel->CreateUI(UIType::eUI_Button, { 10,10,100,20 }, (wchar_t*)L"TESTBUTT", 1000, TestButtProc);
+        break;
+
     case WM_LBUTTONDOWN:
         MessageBox(hWnd, L"asdasd", L"adadadda", MB_OK);
         break;
@@ -25,12 +35,20 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         break;
     }
 
-    }
-}
+    case WM_IME_COMPOSITION:
+    {
+        HDC hDC;
+        wchar_t str[100];
 
-void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
-{
-    
+        hDC = GetDC(hWnd);
+        str[0] = wParam;
+        str[1] = NULL;
+        TextOutW(hDC, 10, 30, str, wcslen(str));
+        ReleaseDC(hWnd, hDC);
+        break;
+    }
+
+    }
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -43,8 +61,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
     switch (Message) {
     case WM_CREATE:
         uiSys = new UISystem(hWnd);
+        SetTimer(hWnd, 666, 15, NULL);
         pMainPanel = uiSys->InitMainPanel(hWnd, MainPanelProc);
-        pMainPanel->CreateUI(UIType::eUI_Button, { 10,10,100,20 }, (wchar_t*)L"TESTBUTT", 1000, TestButtProc);
+        break;
+
+    case WM_TIMER:
+        pMainPanel->update(16);
+        pMainPanel->render();
         break;
 
     case WM_DESTROY:

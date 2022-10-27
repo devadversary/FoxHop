@@ -19,7 +19,6 @@ UISystem::UISystem(HWND hWnd)
     WCHAR szDir[MAX_PATH];
     WCHAR szDrive[8];
 
-    pFocusedUI = NULL;
     pMainPanel = NULL;
     hBindWnd   = hWnd;
 
