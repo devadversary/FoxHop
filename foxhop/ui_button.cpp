@@ -280,6 +280,7 @@ void UI_Button::setText(wchar_t* pText, int nDelay)
     if (!pText) return;
     memset(szText, 0, sizeof(szText));
     wcscpy_s(szText, ARRAYSIZE(szText), pText);
+    nTextLen = wcslen(pText);
     InputMotion(eButtonMotionType::eType_Text, MotionSet.Text, 0, MotionSet.TextPitch, szText);
 }
 
