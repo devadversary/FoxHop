@@ -40,7 +40,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
     switch(Message) {
     case UIM_CREATE:
-        pPanel->CreateUI(UIType::eUI_Button, { 10,10,100,20 }, (wchar_t*)L"TESTBUTT", 0, TestButtProc);
+        pPanel->CreateUI(UIType::eUI_Button, { 10,10,100,20 }, (wchar_t*)L"TESTBUTT", 1000, TestButtProc);
         break;
 
 
