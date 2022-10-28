@@ -40,14 +40,12 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
     POSITION TmpStartPos, TmpEndPos;
     D2D1_COLOR_F TmpStartColor;
     int TmpPitch;
+    int TmpLen;
 
     switch (MotionType) {
     case eButtonMotionType::eType_Init: /*나타나기*/
         switch (Pattern) {
         case eButtonMotionPattern::eInit_Default: /*모션 없음*/
-            miMove  = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
-            miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
-
             MBoxFace->Init(pRenderTarget, uiPos, ColorSet.Face );
             MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
             MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ColorSet.Font, nTextLen);
@@ -86,15 +84,15 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
             MBoxFace->Init(pRenderTarget, uiPos, ALL_ZERO);
             MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
 
-            MBoxFace->addMovementMotion(miMove, FALSE, uiPos, uiPos);
-            MBoxHighlight->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            //MBoxFace->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            //MBoxHighlight->addMovementMotion(miMove, FALSE, uiPos, uiPos);
             MBoxFace->addColorMotion(miColor, FALSE, ALL_ZERO, ColorSet.Face);
-            MBoxHighlight->addColorMotion(miColor, FALSE, ALL_ZERO, ColorSet.Highlight);
+            //MBoxHighlight->addColorMotion(miColor, FALSE, ALL_ZERO, ColorSet.Highlight);
 
             miMove.nDelay += TmpPitch;
             miColor.nDelay += TmpPitch;
             MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ALL_ZERO, nTextLen);
-            MText->addMovementMotion(miMove, FALSE, uiPos, uiPos);
+            //MText->addMovementMotion(miMove, FALSE, uiPos, uiPos);
             MText->addColorMotion(miColor, FALSE, ALL_ZERO, ColorSet.Font);
             break;
         }
@@ -191,14 +189,10 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
         break;
 
     case eButtonMotionType::eType_Text: /*텍스트 교체 모션*/
+        TmpLen = wcslen((wchar_t*)param);
         switch (Pattern) {
         case eButtonMotionPattern::eText_Default:
-            /*
-            MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, TmpEndPos, ALL_ZERO, nTextLen);
-            MText->addMovementMotion(miMove, FALSE, uiPos, uiPos);
-            MText->addColorMotion(miColor, FALSE, ColorSet.Font, ColorSet.Font);
-            */
-            //MText->SetText(); 텍스트 출력길이 조정모션, 랜덤텍스트 셔플 모션 등에 대해 다시 생각해보아야 함
+            MText->Init(pRenderTarget, uiSys->ButtonTextForm, (wchar_t*)param, TmpLen, uiPos, ColorSet.Font, TmpLen);
             break;
         }
 
@@ -284,12 +278,9 @@ void UI_Button::setText(wchar_t* pText, int nDelay)
     MOTION_INFO miText;
 
     if (!pText) return;
-    nTextLen = (int)wcslen(pText);
-    wcscpy_s(szText, MAX_BUTTONNAME, pText);
-    miText.formular = eMotionForm::eMotion_Pulse1;
-    miText.nDelay = nDelay;
-    miText.nPitch = 200;
-    MText->SetText(miText, pText, 0/*Currnet가 TRUE이기때문*/, nTextLen );
+    memset(szText, 0, sizeof(szText));
+    wcscpy_s(szText, ARRAYSIZE(szText), pText);
+    InputMotion(eButtonMotionType::eType_Text, MotionSet.Text, 0, MotionSet.TextPitch, szText);
 }
 
 /**

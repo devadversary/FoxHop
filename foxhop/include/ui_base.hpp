@@ -95,6 +95,9 @@ public:
     ~UI() {}
     virtual BOOL update(unsigned long time) = 0;
     virtual void render() = 0;
+    virtual void pause(int nDelay) = 0;
+    virtual void resume(int nDelay) = 0;
+
 };
 
 /**
