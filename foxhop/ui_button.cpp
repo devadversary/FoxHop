@@ -155,7 +155,7 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
     case eButtonMotionType::eType_Click: /* 마우스 왼쪽버튼이 눌렸을때와 떼어졌을때가 param으로 구분 (UIM 메세지)*/
         switch (Pattern) {
         case eButtonMotionPattern::eClick_Default:
-            if ((int)param == WM_LBUTTONDOWN) {
+            if ((__int64)param == WM_LBUTTONDOWN) {
                 miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
                 MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
                 MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
@@ -168,8 +168,7 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
             break;
 
         case eButtonMotionPattern::eClick_Flash:
-            if ((int)param != WM_LBUTTONDOWN) break; /*점멸 효과의 경우 버튼이 떼어졌을땐 반응X*/
-
+            if ((__int64)param != WM_LBUTTONDOWN) break; /*점멸 효과의 경우 버튼이 떼어졌을땐 반응X*/
             miColor = InitMotionInfo(eMotionForm::eMotion_x3_1to0_2, nDelay, nPitch);
             MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
             MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ALL_ZERO);
@@ -189,7 +188,7 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
         break;
 
     case eButtonMotionType::eType_Text: /*텍스트 교체 모션*/
-        TmpLen = wcslen((wchar_t*)param);
+        TmpLen = (int)wcslen((wchar_t*)param);
         switch (Pattern) {
         case eButtonMotionPattern::eText_Default:
             MText->Init(pRenderTarget, uiSys->ButtonTextForm, (wchar_t*)param, TmpLen, uiPos, ColorSet.Font, TmpLen);
@@ -219,8 +218,6 @@ void UI_Button::Destroy()
 */
 void UI_Button::pause(int nDelay)
 {
-    MOTION_INFO miColor;
-
     InputMotion(eButtonMotionType::eType_Pause, MotionSet.Pause, nDelay, MotionSet.PausePitch, NULL);
     uiMotionState = eUIMotionState::eUMS_PlayingHide;
     
@@ -275,12 +272,10 @@ void UI_Button::render()
 
 void UI_Button::setText(wchar_t* pText, int nDelay)
 {
-    MOTION_INFO miText;
-
     if (!pText) return;
     memset(szText, 0, sizeof(szText));
     wcscpy_s(szText, ARRAYSIZE(szText), pText);
-    nTextLen = wcslen(pText);
+    nTextLen = (int)wcslen(pText);
     InputMotion(eButtonMotionType::eType_Text, MotionSet.Text, 0, MotionSet.TextPitch, szText);
 }
 

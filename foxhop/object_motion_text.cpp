@@ -1,6 +1,21 @@
 #include "./include/object_motion_text.hpp"
 
-ObjectMotionText::ObjectMotionText() {}
+ObjectMotionText::ObjectMotionText()
+{
+    Brush = 0;
+    CurColor = {0,0,0,0};
+    CurPos = { 0,0,0,0 };
+    InitLen = 0;
+    CurLen = 0;
+    InitColor = { 0,0,0,0 };
+    InitPos = { 0,0,0,0 };
+    bActivate = 0;
+    nStrLen = 0;
+    pNext = 0;
+    pPrev = 0;
+    pStr = NULL;
+    pTextFmt = NULL;
+}
 
 ObjectMotionText::~ObjectMotionText() {}
 
@@ -14,7 +29,8 @@ void ObjectMotionText::Init(ID2D1RenderTarget* pRT, IDWriteTextFormat* pTexFmt, 
     pTextFmt = pTexFmt; /*폰트 출력 정보 개체별로 지정*/
     InitPos = CurPos = StartPos;
     InitColor = CurColor = StartColor;
-    InitLen = CurLen = StartLen;
+    InitLen = StartLen;
+    CurLen = (float)StartLen;
     pStr = pText;
     nStrLen = nTextLen;
     ComMotionColor.clearChannel();
@@ -53,7 +69,7 @@ void ObjectMotionText::addLenMotion(MOTION_INFO MotionInfo, BOOL bAppend, int nS
     MOTION_PATTERN mc;
 
     mc = InitMotionPattern(MotionInfo, NULL);
-    AddChain(&mc, &CurLen, nStartLen, nEndLen);
+    AddChain(&mc, &CurLen, (float)nStartLen, (float)nEndLen);
     if (bAppend) ComMotionStrLen.appendChannel(mc);
     else ComMotionStrLen.addChannel(mc);
 }

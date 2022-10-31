@@ -33,7 +33,7 @@ void ComponentMotion::addChannel(MOTION_PATTERN patt)
 {
     if (nCntUsedChannel == MAX_CHANNEL_CNT) return; /*채널 꽉참*/
     ChannelList[nCntUsedChannel] = patt;
-    nTotalPlaytime = max(nTotalPlaytime, patt.MotionInfo.nDelay + patt.MotionInfo.nPitch); /* 채널 전부 합쳐서 총 재생 시간 구하기*/
+    nTotalPlaytime = max(nTotalPlaytime, (unsigned int)patt.MotionInfo.nDelay + patt.MotionInfo.nPitch); /* 채널 전부 합쳐서 총 재생 시간 구하기*/
     nCntUsedChannel++;
 }
 
@@ -111,7 +111,7 @@ BOOL ComponentMotion::update(unsigned long ElapsedTime)
     for (i = 0; i < nCntUsedChannel; i++) {
         pCh = &ChannelList[i];
         if (pCh->MotionInfo.formular == eMotionForm::eMotion_None) continue;
-        if (nRunTime < pCh->MotionInfo.nDelay) continue;
+        if (nRunTime < (unsigned int)pCh->MotionInfo.nDelay) continue;
         nGapTime = nRunTime - pCh->MotionInfo.nDelay; /*현재진행시간 - 딜레이 = 모션진행시간*/
         x = nGapTime / (float)pCh->MotionInfo.nPitch; /*피치 조절*/
 
