@@ -1,4 +1,5 @@
 #include <windows.h>
+#include "../foxhop/include/alphawindow.hpp"
 #include "../foxhop/include/ui_system.hpp"
 
 #pragma comment (lib, "../bin/debug/foxhop.lib")
@@ -40,6 +41,18 @@ void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pButton->setText(ButtonName, 0);
         break;
     }
+
+    case WM_LBUTTONDOWN:
+    {
+        wchar_t sss[512];
+        wsprintf(sss, L"%x", pUI);
+        MessageBox(pButton->uiSys->hBindWnd, sss, L"UwU", MB_ICONWARNING);
+    }
+        break;
+
+    case WM_MOUSEWHEEL:
+        MessageBox(pButton->uiSys->hBindWnd, L"이거 스끼린데 ~", L"UwU", MB_ICONWARNING);
+        break;
     }
 }
 
@@ -58,22 +71,6 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         ButtonList.push_back(pPanel->CreateUI(UIType::eUI_Button, { 10,90,100,20 }, (wchar_t*)L"TESTBUTT", 400, TestButtProc));
         ButtonList.push_back(pPanel->CreateUI(UIType::eUI_Button, { 10,110,100,20 }, (wchar_t*)L"TESTBUTT", 500, TestButtProc));
         break;
-
-    case WM_RBUTTONDOWN:
-        for (UI* pUI : ButtonList) {
-            pUI->pause(rand() % 700);
-        }
-        break;
-
-    case WM_LBUTTONDOWN:
-    {
-        int i = 0;
-        for (UI* pUI : ButtonList) {
-            pUI->resume(i*100);
-            i++;
-        }
-        break;
-    }
 
     case WM_IME_COMPOSITION:
     {
@@ -116,7 +113,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 
     case WM_PAINT:
         uiSys->D2DA.pRenTarget->BeginDraw();
-        uiSys->D2DA.pRenTarget->Clear({0,0,0,0});       
+        uiSys->D2DA.pRenTarget->Clear({0,0,0,0.7});       
         pMainPanel->update(GetElapse());
         pMainPanel->render();
         uiSys->D2DA.pRenTarget->EndDraw();
@@ -129,8 +126,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hWnd, Message, wParam, lParam);
 }
 
-
-
 int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nShowCmd)
 {
     WNDCLASS wc;
@@ -140,7 +135,7 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     wc.hInstance = hInst;
     wc.lpszClassName = CLASSNAME;
     wc.lpfnWndProc = WndProc;
-    wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+    wc.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
     wc.hCursor = LoadCursor(hInst, IDC_ARROW);
     wc.hIcon = LoadIcon(hInst, IDI_APPLICATION);
     wc.style = CS_HREDRAW | CS_VREDRAW;
@@ -149,6 +144,7 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     wc.cbWndExtra = NULL;
     RegisterClass(&wc);
     hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 600, 400, NULL, NULL, hInst, NULL);
+    AlphaWindow(hWnd, WINDOWMODE_TRANSPARENT);
     ShowWindow(hWnd, TRUE);
     while (GetMessage(&Message, NULL, NULL, NULL)) {
         TranslateMessage(&Message);

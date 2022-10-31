@@ -20,14 +20,14 @@
 */
 typedef struct _d2da_context
 {
-    ID3D11Device* pD3D11;     /**< D3D11 디바이스*/
-    ID3D11DeviceContext* pD3D11DC;   /**< D3D11의 DC*/
-    IDXGIDevice* pDXGIDev;   /**< 얻어낸 DXGI 개체*/
-    ID2D1Device* pD2D;       /**< D2D 장치*/
-    ID2D1Factory* pFactory;   /**< D2D 팩토리*/
+    ID3D11Device*          pD3D11;     /**< D3D11 디바이스*/
+    ID3D11DeviceContext*   pD3D11DC;   /**< D3D11의 DC*/
+    IDXGIDevice*           pDXGIDev;   /**< 얻어낸 DXGI 개체*/
+    ID2D1Device*           pD2D;       /**< D2D 장치*/
+    ID2D1Factory*          pFactory;   /**< D2D 팩토리*/
     ID2D1HwndRenderTarget* pRenTarget; /**< 그려질 렌더 타겟*/
-    IDWriteFactory* pDWFactory; /**< 텍스트를 렌더링 할 팩토리*/
-    IDWriteTextFormat* pDWFormat;  /**< 텍스트가 그려질 형식 지정*/
+    IDWriteFactory*        pDWFactory; /**< 텍스트를 렌더링 할 팩토리*/
+    IDWriteTextFormat*     pDWFormat;  /**< 텍스트가 그려질 형식 지정*/
 }D2DA_CONTEXT;
 
 /**

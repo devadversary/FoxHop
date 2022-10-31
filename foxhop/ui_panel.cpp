@@ -19,10 +19,21 @@ void UI_Panel::DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
 
     switch (Message) {
     case WM_MOUSEMOVE:
+    case WM_MOUSEWHEEL:
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
+    case WM_RBUTTONDOWN:
+    case WM_RBUTTONUP:
+    case WM_MBUTTONDOWN:
+    case WM_MBUTTONUP:
+    case WM_LBUTTONDBLCLK:
+    case WM_RBUTTONDBLCLK:
+    case WM_MBUTTONDBLCLK:
         pPanel->DefaultMouseHandler(pUI, Message, wParam, lParam);
         break;
 
     case WM_KEYDOWN:
+        // DefaultKeyboardHandler 도 필요 할 것으로 보임
         break;
     }
     if (UserHandler) UserHandler(pUI, Message, wParam, lParam);
@@ -135,6 +146,7 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
 
     pt.x = GET_X_LPARAM(lParam);
     pt.y = GET_Y_LPARAM(lParam);
+    //if (Message == WM_MOUSEWHEEL) ScreenToClient(pUI->uiSys->hBindWnd, &pt);
 
     /*이전에 영역안에 있던 컨트롤이 있었다면 걔 먼저 검사*/
     if (pMouseOverUI) {
