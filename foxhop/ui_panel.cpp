@@ -18,6 +18,7 @@ void UI_Panel::DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
     POINT pt;
 
     switch (Message) {
+    /*마우스 관련 메세지 전달*/
     case WM_MOUSEMOVE:
     case WM_MOUSEWHEEL:
     case WM_LBUTTONDOWN:
@@ -32,6 +33,7 @@ void UI_Panel::DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
         pPanel->DefaultMouseHandler(pUI, Message, wParam, lParam);
         break;
 
+    /*키보드 관련 메세지 전달*/
     case WM_KEYDOWN:
         // DefaultKeyboardHandler 도 필요 할 것으로 보임
         break;
@@ -39,8 +41,9 @@ void UI_Panel::DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
     if (UserHandler) UserHandler(pUI, Message, wParam, lParam);
 }
 
-UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback, POSITION Pos, int nDelay)
+UI_Panel::UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback, POSITION Pos, BOOL IsMain, int nDelay)
 {
+    IsMainPanel    = IsMain;
     pFocusedUI     = NULL;
     pMouseOverUI   = NULL;
     uiSys          = pUISys;
@@ -127,7 +130,7 @@ static LPARAM RerouteMouseCursorPt(int UI_X, int UI_Y, LPARAM lParam)
     LPARAM NewParam;
 
     NewParam = (GET_X_LPARAM(lParam) - UI_X);
-    NewParam |= ((GET_Y_LPARAM(lParam) - UI_Y)<<16);
+    NewParam |= (((GET_Y_LPARAM(lParam) - UI_Y)<<16) & 0xffffffff);
     return NewParam;
 }
 
@@ -146,7 +149,14 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
 
     pt.x = GET_X_LPARAM(lParam);
     pt.y = GET_Y_LPARAM(lParam);
-    //if (Message == WM_MOUSEWHEEL) ScreenToClient(pUI->uiSys->hBindWnd, &pt);
+
+    /*휠 스크롤 메세지는 좌표 정보가 모니터 스크린 기준이다. 메인 패널일경우
+      하위 UI로 메세지를 넘길때 lParam을 클라이언트 좌표계로 변환하여 넘겨야 한다.*/
+    if (Message == WM_MOUSEWHEEL && this->IsMainPanel){
+        ScreenToClient(pUI->uiSys->hBindWnd, &pt);
+        lParam = pt.x;
+        lParam |= ((pt.y << 16) & 0xffffffff);
+    }
 
     /*이전에 영역안에 있던 컨트롤이 있었다면 걔 먼저 검사*/
     if (pMouseOverUI) {

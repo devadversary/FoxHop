@@ -22,6 +22,7 @@ private:
     std::list<UI_Panel*> PanelList;    /**< 패널이 가진 하위 패널의 리스트*/
     std::list<UI*>       UIList;       /**< 패널이 가진 하위 UI의 리스트*/
     D2D1::Matrix3x2F     TransMat;     /**< 해당 패널의 변환행렬*/
+    BOOL                 IsMainPanel;  /**< 메인 패널 여부 (메인패널은 최상위 패널 하나여야함)*/
     UI*                  pMouseOverUI; /**< 마우스 이벤트 핸들링을 위한 임시변수*/
     UI*                  pFocusedUI;   /**< 포커싱된 UI*/
 
@@ -30,7 +31,7 @@ private:
     void        DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
 public:
-    UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback, POSITION Pos, int nDelay = 0);
+    UI_Panel(UISystem* pUISys, ID2D1RenderTarget* pRT, pfnUIHandler pfnCallback, POSITION Pos, BOOL IsMain = FALSE, int nDelay = 0);
     ~UI_Panel();
     void pause(int nDelay);
     void resume(int nDelay);

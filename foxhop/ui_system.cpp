@@ -64,7 +64,7 @@ UI_Panel* UISystem::InitMainPanel(HWND hWnd, pfnUIHandler MainPanelProc)
     pos.y = 0;
     pos.width = WindowSize.right;
     pos.height = WindowSize.bottom;
-    return new UI_Panel(this, this->D2DA.pRenTarget, MainPanelProc, pos);
+    return new UI_Panel(this, this->D2DA.pRenTarget, MainPanelProc, pos, TRUE);
 }
 
 /**
