@@ -104,17 +104,13 @@ void UI_Panel::render()
     @brief 해당 패널의 하위 UI를 생성하고 내부 리스트에 등록한다
     @return 생성된 UI 객체
 */
-UI* UI_Panel::CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback)
+UI* UI_Panel::CreateButton(POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback)
 {
-    UI* pUI = NULL;
+    UI_Button* pButton = NULL;
 
-    switch (type) {
-    case UIType::eUI_Button:
-        pUI = uiSys->pUIButtonFactory->CreateUI(pos, pText, nDelay, callback);
-        break;
-    }
-    UIList.push_back(pUI);
-    return pUI;
+    pButton = new UI_Button(uiSys, callback, pos, pText, nDelay);
+    UIList.push_back(pButton);
+    return pButton;
 }
 
 /**

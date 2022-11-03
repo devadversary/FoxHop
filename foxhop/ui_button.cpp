@@ -1,15 +1,11 @@
 #include "./include/ui_button.hpp"
 #include "./include/ui_system.hpp"
 
-UI_Button::UI_Button(UISystem* pUISys, ID2D1RenderTarget* pRT,
-                     BUTTON_MOTION_SET UIMotionSet, BUTTON_COLOR_SET UIColorSet,
-                     pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay)
+UI_Button::UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay)
 {
     uiSys          = pUISys;
-    pRenderTarget  = pRT;
+    pRenderTarget  = pUISys->D2DA.pRenTarget;
     Focusable      = FALSE;
-    MotionSet      = UIMotionSet;
-    ColorSet       = UIColorSet;
 
     DefaultHandler = DefaultButtonProc;
     MessageHandler = pfnCallback;
@@ -21,7 +17,7 @@ UI_Button::UI_Button(UISystem* pUISys, ID2D1RenderTarget* pRT,
     MBoxHighlight  = uiSys->ObjPoolBox.activateObject();
     MText          = uiSys->ObjPoolText.activateObject();
 
-    InputMotion(eButtonMotionType::eType_Init, MotionSet.Init, nDelay, MotionSet.InitPitch, NULL);
+    InputMotion(eButtonAction::eAction_Init, pUISys->Theme, nDelay, NULL);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
     DefaultHandler(this, UIM_CREATE, NULL, NULL); /*UI생성 메세지 전송*/
 }
@@ -34,7 +30,7 @@ UI_Button::UI_Button(UISystem* pUISys, ID2D1RenderTarget* pRT,
     @param nPitch     모션 재생 진행시간
     @param param      사용자 파라미터 (없으면 NULL / ex : 패턴이 eType_Mouseover 일때, BOOL 타입으로사용 - 마우스 진입, 퇴장을 구분)
 */
-void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern Pattern, unsigned int nDelay, unsigned int nPitch, void* param)
+void UI_Button::InputMotion(eButtonAction Action, UITheme* Theme, unsigned int nDelay, void* param)
 {
     MOTION_INFO miMove, miColor;
     POSITION TmpStartPos, TmpEndPos;
@@ -42,126 +38,122 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
     int TmpPitch;
     int TmpLen;
 
-    switch (MotionType) {
-    case eButtonMotionType::eType_Init: /*나타나기*/
-        switch (Pattern) {
+    switch (Action) {
+    case eButtonAction::eAction_Init: /*나타나기*/
+        switch (Theme->ButtonInitMotion) {
         case eButtonMotionPattern::eInit_Default: /*모션 없음*/
-            MBoxFace->Init(pRenderTarget, uiPos, ColorSet.Face );
+            MBoxFace->Init(pRenderTarget, uiPos, Theme->ButtonFaceColor );
             MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
-            MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ColorSet.Font, nTextLen);
+            MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, Theme->ButtonFontColor, nTextLen);
             break;
 
         case eButtonMotionPattern::eInit_Reload:
             /*버튼 생성모션 입력*/
-            miMove = InitMotionInfo(eMotionForm::eMotion_x3_2, nDelay, nPitch / 2);
-            miColor = InitMotionInfo(eMotionForm::eMotion_x3_2, nDelay, nPitch / 2);
             TmpStartPos = uiPos; TmpStartPos.x -= 30; TmpStartPos.y -= 100;
             TmpEndPos = uiPos; TmpEndPos.x -= 30;
-            TmpStartColor = ColorSet.Face; TmpStartColor.a = 0;
-            TmpPitch = nPitch / 2; /*동작이 두개이므로(아래로 이동 후 옆으로 이동) 피치를 적절히 분할한다*/
+            TmpStartColor = Theme->ButtonFaceColor; TmpStartColor.a = 0;
+            TmpPitch = Theme->ButtonInitPitch / 2; /*동작이 두개이므로(아래로 이동 후 옆으로 이동) 피치를 적절히 분할한다*/
+            miMove = InitMotionInfo(eMotionForm::eMotion_x3_2, nDelay, TmpPitch);
+            miColor = InitMotionInfo(eMotionForm::eMotion_x3_2, nDelay, TmpPitch);
             /*최종 위치로부터 -30, -100 위치 (좌상단) 에서부터 시작*/
             MBoxFace->Init(pRenderTarget, TmpStartPos, ALL_ZERO);
             MBoxHighlight->Init(pRenderTarget, TmpStartPos, ALL_ZERO);
             /*첫번째 이동 (아래로 내려오면서 서서히 나타나는 모션)*/
             MBoxFace->addMovementMotion(miMove, FALSE, TmpStartPos, TmpEndPos);
-            MBoxFace->addColorMotion(miColor, FALSE, TmpStartColor, ColorSet.Face);
+            MBoxFace->addColorMotion(miColor, FALSE, TmpStartColor, Theme->ButtonFaceColor);
             MBoxHighlight->addMovementMotion(miMove, FALSE, TmpStartPos, TmpEndPos);
             /*두번째 이동 (우측으로 이동하는 모션*/
             MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, TmpEndPos, ALL_ZERO, nTextLen);
             miMove.nDelay += TmpPitch;
             miColor.nDelay += TmpPitch;
             MText->addMovementMotion(miMove, FALSE, TmpEndPos, uiPos);
-            MText->addColorMotion(miColor, FALSE, ColorSet.Font, ColorSet.Font);
+            MText->addColorMotion(miColor, FALSE, Theme->ButtonFontColor, Theme->ButtonFontColor);
             MBoxFace->addMovementMotion(miMove, TRUE, TmpEndPos, uiPos);
-            MBoxFace->addColorMotion(miColor, TRUE, ColorSet.Highlight, ColorSet.Face);
+            MBoxFace->addColorMotion(miColor, TRUE, Theme->ButtonHighlightColor, ALL_ZERO);
             MBoxHighlight->addMovementMotion(miMove, TRUE, TmpEndPos, uiPos);
             break;
 
         case eButtonMotionPattern::eInit_Flick:
-            TmpPitch = nPitch / 2;
+            TmpPitch = Theme->ButtonInitPitch / 2;
             miMove = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, TmpPitch);
             miColor = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, TmpPitch);
+
             MBoxFace->Init(pRenderTarget, uiPos, ALL_ZERO);
             MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
-
-            //MBoxFace->addMovementMotion(miMove, FALSE, uiPos, uiPos);
-            //MBoxHighlight->addMovementMotion(miMove, FALSE, uiPos, uiPos);
-            MBoxFace->addColorMotion(miColor, FALSE, ALL_ZERO, ColorSet.Face);
-            //MBoxHighlight->addColorMotion(miColor, FALSE, ALL_ZERO, ColorSet.Highlight);
+            MBoxFace->addColorMotion(miColor, FALSE, ALL_ZERO, Theme->ButtonFaceColor);
 
             miMove.nDelay += TmpPitch;
             miColor.nDelay += TmpPitch;
             MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ALL_ZERO, nTextLen);
-            //MText->addMovementMotion(miMove, FALSE, uiPos, uiPos);
-            MText->addColorMotion(miColor, FALSE, ALL_ZERO, ColorSet.Font);
+            MText->addColorMotion(miColor, FALSE, ALL_ZERO, Theme->ButtonFontColor);
             break;
         }
-        break;
+        break; /* Init 종료 */
 
-    case eButtonMotionType::eType_Pause:
-        switch (Pattern) {
+    case eButtonAction::eAction_Pause:
+        switch (Theme->ButtonPauseMotion) {
         case eButtonMotionPattern::ePause_Default:
-            miMove = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
-            miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
+            miMove = InitMotionInfo(eMotionForm::eMotion_None, nDelay, Theme->ButtonPausePitch);
+            miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, Theme->ButtonPausePitch);
             MBoxFace->Init(pRenderTarget, uiPos, ALL_ZERO);
-            MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
+            //MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
             MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ALL_ZERO, nTextLen);
 #if 1 /*모션은 없어도 딜레이는 줄 수 있음*/
-            MBoxFace->addColorMotion(miColor, FALSE, ColorSet.Face, ColorSet.Face);
-            MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
-            MText->addColorMotion(miColor, FALSE, ColorSet.Font, ColorSet.Font);
+            MBoxFace->addColorMotion(miColor, FALSE, Theme->ButtonFaceColor, Theme->ButtonFaceColor);
+            //MBoxHighlight->addColorMotion(miColor, FALSE, Theme->ButtonHighlightColor, ColorSet.Highlight);
+            MText->addColorMotion(miColor, FALSE, Theme->ButtonFontColor, Theme->ButtonFontColor);
 #endif
             break;
 
         case eButtonMotionPattern::ePause_Flick:
-            TmpPitch = nPitch / 2; /*동작이 두개이므로(텍스트가 사라진 후에 버튼이 사라져야함) 피치를 적절히 분할한다*/
+            TmpPitch = Theme->ButtonPausePitch / 2; /*동작이 두개이므로(텍스트가 사라진 후에 버튼이 사라져야함) 피치를 적절히 분할한다*/
             miColor = InitMotionInfo(eMotionForm::eMotion_Pulse2, nDelay, TmpPitch);
             MBoxFace->Init(pRenderTarget, uiPos, ALL_ZERO);
             MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO); /*사라지기전 하이라이트는 먼저 제거*/
             MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ALL_ZERO, nTextLen);
 
-            MText->addColorMotion(miColor, FALSE, ColorSet.Font, ALL_ZERO); /*텍스트 사라짐*/
+            MText->addColorMotion(miColor, FALSE, Theme->ButtonFontColor, ALL_ZERO); /*텍스트 사라짐*/
             miColor.nDelay += TmpPitch; /*텍스트가 사라진 후에 버튼사라짐 모션 진행*/
-            MBoxFace->addColorMotion(miColor, FALSE, ColorSet.Face, ALL_ZERO); /*버튼 사라짐*/
+            MBoxFace->addColorMotion(miColor, FALSE, Theme->ButtonFaceColor, ALL_ZERO); /*버튼 사라짐*/
             break;
         }
-        break;
+        break; /* Pause 종료 */
 
-    case eButtonMotionType::eType_Mouseover: /*마우스가 들어왔을때와 떠났을때 param으로 구분 (BOOL)*/
-        switch (Pattern) {
+    case eButtonAction::eAction_Mouseover: /*마우스가 들어왔을때와 떠났을때 param으로 구분 (BOOL)*/
+        switch (Theme->ButtonMouseOverMotion) {
         case eButtonMotionPattern::eMouseover_Default:
-            miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
+            miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, Theme->ButtonMouseOverPitch);
             if (param)
-                MBoxHighlight->Init(pRenderTarget, uiPos, ColorSet.Mouseover);
+                MBoxHighlight->Init(pRenderTarget, uiPos, Theme->ButtonMouseoverColor);
             else
                 MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
             break;
 
         case eButtonMotionPattern::eMouseover_Flick:
             if (param) { 
-                miColor = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, nPitch);
+                miColor = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, Theme->ButtonMouseOverPitch);
                 MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
-                MBoxHighlight->addColorMotion(miColor, FALSE, ALL_ZERO, ColorSet.Highlight);
+                MBoxHighlight->addColorMotion(miColor, FALSE, ALL_ZERO, Theme->ButtonMouseoverColor);
             }
             else {
-                miColor = InitMotionInfo(eMotionForm::eMotion_Pulse2, nDelay, nPitch);
+                miColor = InitMotionInfo(eMotionForm::eMotion_Pulse2, nDelay, Theme->ButtonMouseOverPitch);
                 MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
-                MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ALL_ZERO);
+                MBoxHighlight->addColorMotion(miColor, FALSE, Theme->ButtonMouseoverColor, ALL_ZERO);
             }
             break;
         }
-        break;
+        break; /* MouseOver 종료*/
 
-    case eButtonMotionType::eType_Click: /* 마우스 왼쪽버튼이 눌렸을때와 떼어졌을때가 param으로 구분 (UIM 메세지)*/
-        switch (Pattern) {
+    case eButtonAction::eAction_Click: /* 마우스 왼쪽버튼이 눌렸을때와 떼어졌을때가 param으로 구분 (UIM 메세지)*/
+        switch (Theme->ButtonClickMotion) {
         case eButtonMotionPattern::eClick_Default:
             if ((__int64)param == WM_LBUTTONDOWN) {
-                miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
+                miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, Theme->ButtonClickPitch);
                 MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
-                MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ColorSet.Highlight);
+                MBoxHighlight->addColorMotion(miColor, FALSE, Theme->ButtonHighlightColor, Theme->ButtonHighlightColor);
             }
             else {
-                miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, nPitch);
+                miColor = InitMotionInfo(eMotionForm::eMotion_None, nDelay, Theme->ButtonClickPitch);
                 MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
                 MBoxHighlight->addColorMotion(miColor, FALSE, ALL_ZERO, ALL_ZERO);
             }
@@ -169,15 +161,15 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
 
         case eButtonMotionPattern::eClick_Flash:
             if ((__int64)param != WM_LBUTTONDOWN) break; /*점멸 효과의 경우 버튼이 떼어졌을땐 반응X*/
-            miColor = InitMotionInfo(eMotionForm::eMotion_x3_1to0_2, nDelay, nPitch);
+            miColor = InitMotionInfo(eMotionForm::eMotion_x3_1to0_2, nDelay, Theme->ButtonClickPitch);
             MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
-            MBoxHighlight->addColorMotion(miColor, FALSE, ColorSet.Highlight, ALL_ZERO);
+            MBoxHighlight->addColorMotion(miColor, FALSE, Theme->ButtonHighlightColor, ALL_ZERO);
             break;
         }
         break;
 
-    case eButtonMotionType::eType_Color: /*색상 바꾸기 모션은 필요시 추가로 기입 하도록 함*/
-        switch (Pattern) {
+    case eButtonAction::eAction_Color: /*색상 바꾸기 모션은 필요시 추가로 기입 하도록 함*/
+        switch (Theme->ButtonColorMotion) {
         case eButtonMotionPattern::eColor_Default:
             break;
 
@@ -187,11 +179,11 @@ void UI_Button::InputMotion(eButtonMotionType MotionType, eButtonMotionPattern P
 
         break;
 
-    case eButtonMotionType::eType_Text: /*텍스트 교체 모션*/
+    case eButtonAction::eAction_Text: /*텍스트 교체 모션*/
         TmpLen = (int)wcslen((wchar_t*)param);
-        switch (Pattern) {
+        switch (Theme->ButtonTextMotion) {
         case eButtonMotionPattern::eText_Default:
-            MText->Init(pRenderTarget, uiSys->ButtonTextForm, (wchar_t*)param, TmpLen, uiPos, ColorSet.Font, TmpLen);
+            MText->Init(pRenderTarget, uiSys->ButtonTextForm, (wchar_t*)param, TmpLen, uiPos, Theme->ButtonFontColor, TmpLen);
             break;
         }
 
@@ -218,7 +210,7 @@ void UI_Button::Destroy()
 */
 void UI_Button::pause(int nDelay)
 {
-    InputMotion(eButtonMotionType::eType_Pause, MotionSet.Pause, nDelay, MotionSet.PausePitch, NULL);
+    InputMotion(eButtonAction::eAction_Pause, uiSys->Theme, nDelay, NULL);
     uiMotionState = eUIMotionState::eUMS_PlayingHide;
     
 }
@@ -228,7 +220,7 @@ void UI_Button::pause(int nDelay)
 */
 void UI_Button::resume(int nDelay)
 {
-    InputMotion(eButtonMotionType::eType_Init, MotionSet.Init, nDelay, MotionSet.InitPitch, NULL);
+    InputMotion(eButtonAction::eAction_Init, uiSys->Theme, nDelay, NULL);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
 }
 
@@ -276,7 +268,7 @@ void UI_Button::setText(wchar_t* pText, int nDelay)
     memset(szText, 0, sizeof(szText));
     wcscpy_s(szText, ARRAYSIZE(szText), pText);
     nTextLen = (int)wcslen(pText);
-    InputMotion(eButtonMotionType::eType_Text, MotionSet.Text, 0, MotionSet.TextPitch, szText);
+    InputMotion(eButtonAction::eAction_Text, uiSys->Theme, 0, szText);
 }
 
 /**
@@ -309,11 +301,11 @@ void UI_Button::DefaultButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM l
     /*2021.07.27 devadversary : UI들의 사용자 상호작용에따른 모션변경은 기본 핸들러가 처리하도록 결정함*/
     switch (Message) {
     case UIM_MOUSEON: /*ON / LEAVE 메세지는 UI_Panel 로 부터 SendMessage 로 전달된다 */
-        pButton->InputMotion(eButtonMotionType::eType_Mouseover, pButton->MotionSet.MouseOver, 0, pButton->MotionSet.MouseOverPitch, (void*)TRUE);
+        pButton->InputMotion(eButtonAction::eAction_Mouseover, pButton->uiSys->Theme, 0, (void*)TRUE);
         break;
 
     case UIM_MOUSELEAVE:
-        pButton->InputMotion(eButtonMotionType::eType_Mouseover, pButton->MotionSet.MouseOver, 0, pButton->MotionSet.MouseOverPitch, (void*)FALSE);
+        pButton->InputMotion(eButtonAction::eAction_Mouseover, pButton->uiSys->Theme, 0, (void*)FALSE);
         break;
 
     case WM_LBUTTONDOWN:
@@ -326,87 +318,4 @@ void UI_Button::DefaultButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM l
     }
 
     if(UserHandler) UserHandler(pUI, Message, wParam, lParam);
-}
-
-/**
-    @brief 팩토리 초기화
-    @remark UISystem::Init 에서 호출된다.
-*/
-UI_ButtonFactory::UI_ButtonFactory(UISystem* pUISystem, ID2D1RenderTarget* pRT)
-{
-    /*기본 환경 개체 초기화*/
-    pUISys = pUISystem;
-    pRenderTarget = pRT;
-
-    /*기본 모션 지정 (추후 변경 가능)*/
-    MotionSet.Init      = eButtonMotionPattern::eInit_Default;
-    MotionSet.Pause     = eButtonMotionPattern::ePause_Default;
-    MotionSet.Color     = eButtonMotionPattern::eMouseover_Default;
-    MotionSet.Text      = eButtonMotionPattern::eText_Default;
-    MotionSet.Click     = eButtonMotionPattern::eColor_Default;
-    MotionSet.MouseOver = eButtonMotionPattern::eText_Default;
-
-    /*기본 모션진행시간 지정 (추후 변경 가능) ms단위*/
-    MotionSet.InitPitch      = 0;
-    MotionSet.PausePitch     = 0;
-    MotionSet.ColorPitch     = 0;
-    MotionSet.TextPitch      = 0;
-    MotionSet.ClickPitch     = 0;
-    MotionSet.MouseOverPitch = 0;
-
-    /*기본 컬러 지정 (추후 변경 가능) : R G B A (0.0f ~ 1.0f)*/
-    ColorSet.Face      = {0.8f, 0.8f, 0.8f, 1.f};  /*밝은 회색*/
-    ColorSet.Font      = {0.f,  0.f,  0.f,  1.f};
-    ColorSet.Frame     = {0.f,  0.f,  0.f,  0.f};
-    ColorSet.Mouseover = {1.f,  1.f,  1.f,  0.5f}; /*반투명 흰색*/
-    ColorSet.Highlight = {1.f,  1.f,  1.f,  1.f};
-}
-
-/**
-    @brief 모션 집합 가져오기
-*/
-void UI_ButtonFactory::GetCurrentMotionSet(BUTTON_MOTION_SET* pMotionSet)
-{
-    if (!pMotionSet) return;
-    *pMotionSet = MotionSet;
-}
-
-/**
-    @brief 모션 집합 적용하기
-*/
-void UI_ButtonFactory::SetCurrentMotionSet(BUTTON_MOTION_SET* pMotionSet)
-{
-    if (!pMotionSet) return;
-    MotionSet = *pMotionSet;
-}
-
-/**
-    @brief 컬러 집합 가져오기
-*/
-void UI_ButtonFactory::GetCurrentColorSet(BUTTON_COLOR_SET* pColorSet)
-{
-    if (!pColorSet) return;
-    *pColorSet = ColorSet;
-}
-
-/**
-    @brief 컬러 집합 적용하기
-*/
-void UI_ButtonFactory::SetCurrentColorSet(BUTTON_COLOR_SET* pColorSet)
-{
-    if (!pColorSet) return;
-    ColorSet = *pColorSet;
-}
-
-/**
-    @brief 버튼 생성
-    @param Pos 생성할 UI의 위치와 크기
-    @param pText 생성할 UI가 가질 텍스트 (필요 없는 UI들은 알아서 이 인자를 무시함)
-    @param nDelay 생성할 UI의 모션 딜레이
-    @param pfnCallback 생성할 UI가 가질 이벤트 핸들러
-    @remark 현재 팩토리의 지정 설정이 적용되어 생성된다 (모션, 색상 등)
-*/
-UI_Button* UI_ButtonFactory::CreateUI(POSITION Pos, wchar_t* pText, int nDelay, pfnUIHandler pfnCallback)
-{
-    return new UI_Button(pUISys, pRenderTarget, MotionSet, ColorSet, pfnCallback, Pos, pText, nDelay);
 }

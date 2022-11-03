@@ -23,9 +23,9 @@ unsigned int GetElapse()
     static unsigned int t1 = 0;
     unsigned int t2;
 
-    if (t1 == 0) t1 = GetTickCount64();
+    if (t1 == 0) t1 = (unsigned int)GetTickCount64();
     t2 = t1;
-    t1 = GetTickCount64();
+    t1 = (unsigned int)GetTickCount64();
     return distance(t2, t1);
 }
 
@@ -64,12 +64,12 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
     switch(Message) {
     case UIM_CREATE:
-        ButtonList.push_back(pPanel->CreateUI(UIType::eUI_Button, { 10,10,100,20 }, (wchar_t*)L"TESTBUTT", 0, TestButtProc));
-        ButtonList.push_back(pPanel->CreateUI(UIType::eUI_Button, { 10,30,100,20 }, (wchar_t*)L"TESTBUTT", 100, TestButtProc));
-        ButtonList.push_back(pPanel->CreateUI(UIType::eUI_Button, { 10,50,100,20 }, (wchar_t*)L"TESTBUTT", 200, TestButtProc));
-        ButtonList.push_back(pPanel->CreateUI(UIType::eUI_Button, { 10,70,100,20 }, (wchar_t*)L"TESTBUTT", 300, TestButtProc));
-        ButtonList.push_back(pPanel->CreateUI(UIType::eUI_Button, { 10,90,100,20 }, (wchar_t*)L"TESTBUTT", 400, TestButtProc));
-        ButtonList.push_back(pPanel->CreateUI(UIType::eUI_Button, { 10,110,100,20 }, (wchar_t*)L"TESTBUTT", 500, TestButtProc));
+        ButtonList.push_back(pPanel->CreateButton({ 10,10,100,20 }, (wchar_t*)L"TESTBUTT", 0, TestButtProc));
+        ButtonList.push_back(pPanel->CreateButton({ 10,30,100,20 }, (wchar_t*)L"TESTBUTT", 100, TestButtProc));
+        ButtonList.push_back(pPanel->CreateButton({ 10,50,100,20 }, (wchar_t*)L"TESTBUTT", 200, TestButtProc));
+        ButtonList.push_back(pPanel->CreateButton({ 10,70,100,20 }, (wchar_t*)L"TESTBUTT", 300, TestButtProc));
+        ButtonList.push_back(pPanel->CreateButton({ 10,90,100,20 }, (wchar_t*)L"TESTBUTT", 400, TestButtProc));
+        ButtonList.push_back(pPanel->CreateButton({ 10,110,100,20 }, (wchar_t*)L"TESTBUTT", 500, TestButtProc));
         break;
 
     case WM_IME_COMPOSITION:
@@ -92,17 +92,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     static UISystem* uiSys = NULL;
     static UI_Panel* pMainPanel = NULL;
-    BUTTON_MOTION_SET bms;
 
     if (pMainPanel) uiSys->SendUIMessage(pMainPanel, Message, wParam, lParam);
 
     switch (Message) {
     case WM_CREATE:
         uiSys = new UISystem(hWnd);
-        uiSys->pUIButtonFactory->GetCurrentMotionSet(&bms);
-        bms.Init = eButtonMotionPattern::eInit_Flick;
-        bms.InitPitch = 300;
-        uiSys->pUIButtonFactory->SetCurrentMotionSet(&bms);
         SetTimer(hWnd, 666, 15, NULL);
         pMainPanel = uiSys->InitMainPanel(hWnd, MainPanelProc);
         break;

@@ -45,8 +45,7 @@ UISystem::UISystem(HWND hWnd)
     ObjPoolLine.Init(5000, 0);
     ObjPoolText.Init(10000, 0);
 
-    /*각 UI 팩토리 초기화 (UI_Panel 팩토리는 삭제됨)*/
-    pUIButtonFactory = new UI_ButtonFactory(this, D2DA.pRenTarget);
+    Theme = new UITheme();
 }
 
 UISystem::~UISystem() {}

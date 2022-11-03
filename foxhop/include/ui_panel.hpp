@@ -41,5 +41,5 @@ public:
 
 public: /*UI별 옵션 매서드*/
     UI_Panel* CreatePanel() {};
-    UI*       CreateUI(UIType type, POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback);
+    UI*       CreateButton(POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback);
 };

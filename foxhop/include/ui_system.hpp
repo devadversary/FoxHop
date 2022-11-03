@@ -9,6 +9,8 @@
 #include "ui_listview.hpp"
 #include "ui_static.hpp"
 #include "ui_fraggedline.hpp"
+#include "ui_theme.hpp"
+
 #include <list>
 
 /*TODO : 추후에 폰트를 쉽게 변경 가능하도록 하드코딩을 제거할 수 있는 구조로 변경할것.*/
@@ -57,11 +59,11 @@ public:
     IDWriteTextFormat*           ButtonTextForm;   /**< 버튼 컨트롤들이 전역적으로 사용할 텍스트 폼. (winAPI 버튼도 텍스트 폼은 무조건 고정임)*/
     IDWriteTextFormat*           MediumTextForm;   /**< 중간크기 텍스트 폼*/
 
+    UITheme*                     Theme;            /**< 전역 UI 테마 설정*/
     ObjectPool<ObjectMotionBox>  ObjPoolBox;
     ObjectPool<ObjectMotionLine> ObjPoolLine;
     ObjectPool<ObjectMotionText> ObjPoolText;
 
-    UI_ButtonFactory*            pUIButtonFactory; /**< 버튼UI 팩토리*/
     UI_Panel*                    pMainPanel;       /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
 
 public:
