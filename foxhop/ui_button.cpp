@@ -109,14 +109,22 @@ void UI_Button::InputMotion(eButtonAction Action, UITheme* Theme, unsigned int n
 
         case eButtonMotionPattern::ePause_Flick:
             TmpPitch = Theme->ButtonPausePitch / 2; /*동작이 두개이므로(텍스트가 사라진 후에 버튼이 사라져야함) 피치를 적절히 분할한다*/
-            miColor = InitMotionInfo(eMotionForm::eMotion_Pulse2, nDelay, TmpPitch);
-            MBoxFace->Init(pRenderTarget, uiPos, ALL_ZERO);
+            miColor = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, TmpPitch);
+#if 0
+            MBoxFace->Init(pRenderTarget, uiPos, Theme->ButtonFaceColor);
             MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO); /*사라지기전 하이라이트는 먼저 제거*/
             MText->Init(pRenderTarget, uiSys->ButtonTextForm, szText, nTextLen, uiPos, ALL_ZERO, nTextLen);
 
-            MText->addColorMotion(miColor, FALSE, Theme->ButtonFontColor, ALL_ZERO); /*텍스트 사라짐*/
+            MText->addColorMotion(miColor, FALSE, t, ALL_ZERO); /*텍스트 사라짐*/
             miColor.nDelay += TmpPitch; /*텍스트가 사라진 후에 버튼사라짐 모션 진행*/
             MBoxFace->addColorMotion(miColor, FALSE, Theme->ButtonFaceColor, ALL_ZERO); /*버튼 사라짐*/
+#else
+            MText->SetColor(miColor, TRUE, ALL_ZERO, ALL_ZERO); /*텍스트 사라짐*/
+            miColor.nDelay += TmpPitch; /*텍스트가 사라진 후에 버튼사라짐 모션 진행*/
+            MBoxFace->SetColor(miColor, TRUE, ALL_ZERO, ALL_ZERO); /*버튼 사라짐*/
+
+#endif
+
             break;
         }
         break; /* Pause 종료 */
