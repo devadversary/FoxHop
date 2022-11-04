@@ -4,7 +4,6 @@
 #include <list>
 
 class UISystem; /*UI시스템 클래스의 전방선언*/
-enum class UIType;
 
 /**
     @brief 패널 UI 클래스

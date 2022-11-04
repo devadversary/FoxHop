@@ -181,7 +181,7 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
     for (UI* pUI : UIList) {
         if (pUI->uiMotionState == eUIMotionState::eUMS_Hide) continue;
         /* 시작점-크기 쌍 대신 시작점-끝점 쌍을 사용하는 UI는 영역검사 X*/
-        if (pUI->uiType == UIType::eUI_FragLine) continue;
+        if (!pUI->MouseEventCheck) continue;
         if (IsInRect(pUI->uiPos, pt)) {
             pMouseOverUI = pUI;
             NewLParam = RerouteMouseCursorPt((int)pMouseOverUI->uiPos.x, (int)pMouseOverUI->uiPos.y, lParam);

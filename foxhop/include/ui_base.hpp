@@ -27,7 +27,6 @@
 /*필요 개체 전방선언*/
 class UI;
 class UISystem;
-enum class UIType;
 
 /**
     @brief UI들의 메세지 핸들러
@@ -74,7 +73,7 @@ public :
     UISystem*          uiSys;
     ID2D1RenderTarget* pRenderTarget;
     BOOL               Focusable;       /**< 포커스를 가질 수 있는 UI인가?*/
-    UIType             uiType;          /**< UI타입*/
+    BOOL               MouseEventCheck; /**< 마우스 관련 영역 체크 여부. 기본값 TRUE (마우스 핸들링이 불필요한 UI면 FALSE : UI_Panel에서 해당 UI는 skip)*/
     POSITION           uiPos;           /**< 베이스로부터의 UI 포지션*/
     eUIMotionState     uiMotionState;   /**< UI의 모션상태 (적절하지 않은 이벤트를 무시 하기 위함 : ex-생성모션 진행중 마우스오버모션 재생 방지)*/
     pfnUIHandler       DefaultHandler;  /**< UI 마다 가질 기본메세지 핸들러*/
@@ -82,14 +81,14 @@ public :
 
 public:
     UI() {
-        uiSys          = 0;
-        pRenderTarget  = 0;
-        Focusable      = FALSE;
-        uiType         = (UIType)0; /* UIType::eUI_Undefined */
-        uiPos          = {0,0,0,0};
-        uiMotionState  = eUIMotionState::eUMS_Null;
-        DefaultHandler = NULL;
-        MessageHandler = NULL;
+        uiSys           = 0;
+        pRenderTarget   = 0;
+        Focusable       = FALSE;
+        uiPos           = {0,0,0,0};
+        MouseEventCheck = TRUE;
+        uiMotionState   = eUIMotionState::eUMS_Null;
+        DefaultHandler  = NULL;
+        MessageHandler  = NULL;
     }
 
     ~UI() {}

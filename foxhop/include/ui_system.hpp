@@ -18,32 +18,6 @@
 #define DEFAULT_MAXUI (256) /*UISystem 초기화시, nMaxUI 를 0으로 설정시 적용할 기본 UI 갯수*/
 
 /**
-    @brief ID별로 UI를 관리할 테이블.
-    @remark UI의 ID를 배열의 인덱스로 사용한다
-*/
-typedef struct _st_UI_TABLE
-{
-    UI* pUI;
-}UI_TABLE;
-
-/**
-    @brief UI 종류 열거자
-*/
-enum class UIType {
-    eUI_Undefined = 0, /**< 아직 정의되지 않은 UI 개체 (일종의NULL)*/
-    eUI_Custom,        /**< 유저 커스텀 UI*/
-    eUI_Panel,         /**< 패널 컨트롤. 이 안에 다른 UI를 배치하여 한번에 관리할때 사용. (패널 안에 패널 가능)*/
-    eUI_Button,        /**< winAPI의 버튼 컨트롤과 같은 용도*/
-    eUI_Static,        /**< 스태틱 컨트롤*/
-    eUI_FragLine,      /**< 분리선*/
-    eUI_List,          /**< 리스트뷰 컨트롤*/
-    eUI_Edit,          /**< 에디트 컨트롤*/
-    eUI_Scroll,        /**< 스크롤 바 (가로 세로)*/
-    eUI_Progress,      /**< 프로그래스 바*/
-    eUI_Graph          /**< 그래프 뷰(가로 세로 원형 등등..)*/
-};
-
-/**
     @brief 모션 UI를 생성하고 관리하는 전역개체
     @remark 전역에 하나만 두고 쓰는것을 의도 했으나
     @n      상황에 따라 여러개 두고 써도 된다.
