@@ -42,7 +42,7 @@ void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         break;
     }
 
-    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
     {
         wchar_t sss[512];
         wsprintf(sss, L"%x", pUI);
@@ -64,12 +64,29 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
     switch(Message) {
     case UIM_CREATE:
-        ButtonList.push_back(pPanel->CreateButton({ 10,10,100,20 }, (wchar_t*)L"TESTBUTT", 0, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 10,30,100,20 }, (wchar_t*)L"TESTBUTT", 100, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 10,50,100,20 }, (wchar_t*)L"TESTBUTT", 200, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 10,70,100,20 }, (wchar_t*)L"TESTBUTT", 300, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 10,90,100,20 }, (wchar_t*)L"TESTBUTT", 400, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 10,110,100,20 }, (wchar_t*)L"TESTBUTT", 500, TestButtProc));
+        ButtonList.push_back(pPanel->CreateButton({ 30,30,100,20 }, (wchar_t*)L"TESTBUTT", 0, TestButtProc));
+        ButtonList.push_back(pPanel->CreateButton({ 30,50,100,20 }, (wchar_t*)L"TESTBUTT", 100, TestButtProc));
+        ButtonList.push_back(pPanel->CreateButton({ 30,70,100,20 }, (wchar_t*)L"TESTBUTT", 200, TestButtProc));
+        ButtonList.push_back(pPanel->CreateButton({ 30,90,100,20 }, (wchar_t*)L"TESTBUTT", 300, TestButtProc));
+        ButtonList.push_back(pPanel->CreateButton({ 30,110,100,20 }, (wchar_t*)L"TESTBUTT", 400, TestButtProc));
+        ButtonList.push_back(pPanel->CreateButton({ 30,130,100,20 }, (wchar_t*)L"TESTBUTT", 500, TestButtProc));
+        break;
+        /*
+    case WM_RBUTTONDOWN :
+        for (UI* pUI : ButtonList){
+            pUI->pause(0);
+        }
+        break;
+
+    case WM_LBUTTONDOWN :
+    {
+        int i = 0;
+        for (UI* pUI : ButtonList) {
+            pUI->resume(i);
+            i += 100;
+        }
+    }
+        */
         break;
 
     case WM_IME_COMPOSITION:
@@ -98,6 +115,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
     switch (Message) {
     case WM_CREATE:
         uiSys = new UISystem(hWnd);
+        uiSys->Theme->ButtonInitMotion = eButtonMotionPattern::eInit_Reload;
+        uiSys->Theme->ButtonInitPitch = 500;
+        
+
         SetTimer(hWnd, 666, 15, NULL);
         pMainPanel = uiSys->InitMainPanel(hWnd, MainPanelProc);
         break;
