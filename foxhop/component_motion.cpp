@@ -23,7 +23,10 @@ void AddChain(MOTION_PATTERN* pPatt, float* pVal, float nStart, float nEnd)
 
 ComponentMotion::ComponentMotion()
 {
-    memset(this, 0, sizeof(ComponentMotion));
+    memset(ChannelList, 0, sizeof(ChannelList));
+    nCntUsedChannel = 0;
+    nTotalPlaytime = 0;
+    nRunTime = 0;
 }
 
 /**
