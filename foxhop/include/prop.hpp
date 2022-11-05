@@ -52,6 +52,12 @@ public:
     PropBase* pNext;
     PropBase* pPrev;
     BOOL      bActivate; /**< 해당 오브젝트의 활성화 여부*/
+
+    PropBase() {
+        pNext = 0;
+        pPrev = 0;
+        bActivate = FALSE;
+    }
 };
 
 /**

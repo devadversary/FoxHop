@@ -1,6 +1,13 @@
 #include "./include/prop_line.hpp"
 
-PropLine::PropLine() {}
+PropLine::PropLine()
+{
+    Brush = 0;
+    InitPos = {0,0,0,0};
+    InitColor = { 0,0,0,0 };
+    CurPos = { 0,0,0,0 };
+    CurColor = { 0,0,0,0 };
+}
 
 PropLine::~PropLine() {}
 
