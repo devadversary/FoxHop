@@ -1,30 +1,32 @@
 #pragma once
 
-#include "object.hpp"
+#include "prop.hpp"
 
 /**
-    @brief 모션그래픽 직선 오브젝트
+    @brief 모션그래픽 박스 오브젝트
 */
-class ObjectMotionLine : public Object{
+class PropBox : public Object{
 public :
-    ObjectMotionLine*     pNext;
-    ObjectMotionLine*     pPrev;
-    BOOL                  bActivate;    /**< 해당 오브젝트의 활성화 여부*/
+    PropBox*      pNext;
+    PropBox*      pPrev;
+    BOOL                  bActivate;    /**< 해당 오브젝트의 활성화 여부 (이 멤버는 오브젝트 풀에서만 사용한다.)*/
 
 private:
     ComponentMotion       ComMotionMovement;
     ComponentMotion       ComMotionColor;
     ID2D1SolidColorBrush* Brush;        /**< 해당 오브젝트의 색상 브러시*/
-    POSITION              InitPos;       /**< 초기 오브젝트의 포지션*/
-    D2D1_COLOR_F          InitColor;     /**< 초기 오브젝트의 RGBA 값*/
+    POSITION              InitPos;      /**< 오브젝트의 초기 포지션*/
     POSITION              CurPos;       /**< 현재 오브젝트의 포지션*/
+    D2D1_COLOR_F          InitColor;    /**< 오브젝트의 초기 RGBA 값*/
     D2D1_COLOR_F          CurColor;     /**< 현재 오브젝트의 RGBA 값*/
+    BOOL                  bFill;        /**< 채워진 사각형 or 비워진 사각형*/
 
-public :
-    ObjectMotionLine();
-    ~ObjectMotionLine();
+public:
+    PropBox();
+    ~PropBox();
     void ClearMovementMotion();
-    void Init(ID2D1RenderTarget* pRT, POSITION StartPoint, D2D1_COLOR_F StartColor);
+    void ClearColorMotion();
+    void Init(ID2D1RenderTarget* pRT, POSITION StartPos, D2D1_COLOR_F StartColor, BOOL Fill = TRUE);
     void addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, POSITION StartPos, POSITION EndPos);
     void addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor);
 

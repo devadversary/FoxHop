@@ -1,14 +1,14 @@
 #pragma once
 
-#include "object.hpp"
+#include "prop.hpp"
 
 /**
     @brief 모션그래픽 텍스트 오브젝트
 */
-class ObjectMotionText : public Object{
+class PropText : public Object{
 public :
-    ObjectMotionText*     pNext;
-    ObjectMotionText*     pPrev;
+    PropText*     pNext;
+    PropText*     pPrev;
     BOOL                  bActivate;     /**< 해당 오브젝트의 활성화 여부*/
 
 private:
@@ -27,8 +27,8 @@ private:
     int                   nStrLen;      /**< 전체 문자 길이*/
 
 public:
-    ObjectMotionText();
-    ~ObjectMotionText();
+    PropText();
+    ~PropText();
     void Init(ID2D1RenderTarget* pRT, IDWriteTextFormat* pTexFmt, wchar_t* pText, int nTextLen, POSITION StartPos, D2D1_COLOR_F StartColor, int StartLen);
     void addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, POSITION StartPos, POSITION EndPos);
     void addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor);

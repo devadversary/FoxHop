@@ -34,9 +34,9 @@ public:
     IDWriteTextFormat*           MediumTextForm;   /**< 중간크기 텍스트 폼*/
 
     UITheme*                     Theme;            /**< 전역 UI 테마 설정*/
-    ObjectPool<ObjectMotionBox>  ObjPoolBox;
-    ObjectPool<ObjectMotionLine> ObjPoolLine;
-    ObjectPool<ObjectMotionText> ObjPoolText;
+    ObjectPool<PropBox>  ObjPoolBox;
+    ObjectPool<PropLine> ObjPoolLine;
+    ObjectPool<PropText> ObjPoolText;
 
     UI_Panel*                    pMainPanel;       /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
 

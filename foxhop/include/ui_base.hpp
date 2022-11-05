@@ -2,9 +2,9 @@
 #include <windows.h>
 
 #include "object_pool.hpp"
-#include "object_motion_box.hpp"
-#include "object_motion_line.hpp"
-#include "object_motion_text.hpp"
+#include "prop_box.hpp"
+#include "prop_line.hpp"
+#include "prop_text.hpp"
 
 /*기본적으로 WM_XXX 메세지를 사용하되,
   별도로 필요한 UI메세지는 여기서 정의한다.*/

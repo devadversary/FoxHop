@@ -32,26 +32,14 @@ unsigned int GetElapse()
 void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     UI_Button* pButton = (UI_Button*)pUI;
+    static int tmp = 0;
+    wchar_t tmpStr[32];
 
     switch (Message) {
-    case WM_MOUSEMOVE:
-    {
-        wchar_t ButtonName[32];
-        wsprintf(ButtonName, L"[%d,%d]", GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-        pButton->setText(ButtonName, 0);
-        break;
-    }
-
-    case WM_LBUTTONUP:
-    {
-        wchar_t sss[512];
-        wsprintf(sss, L"%x", pUI);
-        MessageBox(pButton->uiSys->hBindWnd, sss, L"UwU", MB_ICONWARNING);
-    }
-        break;
-
     case WM_MOUSEWHEEL:
-        MessageBox(pButton->uiSys->hBindWnd, L"이거 스끼린데 ~", L"UwU", MB_ICONWARNING);
+        tmp += GET_WHEEL_DELTA_WPARAM(wParam);
+        wsprintf(tmpStr, L"( %d )", tmp);
+        pButton->setText(tmpStr, 0);
         break;
     }
 }
@@ -92,7 +80,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         
     case WM_RBUTTONDOWN :
         for (UI* pUI : ButtonList){
-            pUI->pause(0);
+            pUI->pause(rand()%300);
         }
         break;
 
@@ -104,7 +92,6 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
             i += 30;
         }
     }
-        
         break;
 
     case WM_IME_COMPOSITION:

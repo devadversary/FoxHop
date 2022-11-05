@@ -1,6 +1,6 @@
-#include "./include/object_motion_text.hpp"
+#include "./include/prop_text.hpp"
 
-ObjectMotionText::ObjectMotionText()
+PropText::PropText()
 {
     Brush = 0;
     CurColor = {0,0,0,0};
@@ -17,13 +17,13 @@ ObjectMotionText::ObjectMotionText()
     pTextFmt = NULL;
 }
 
-ObjectMotionText::~ObjectMotionText() {}
+PropText::~PropText() {}
 
 /**
     @brief  오브젝트의 초기 속성 셋팅
     @remark 딜레이 시간동안 화면에 나가지 않게 하려면 StartColor의 알파값을 0으로 주자.
 */
-void ObjectMotionText::Init(ID2D1RenderTarget* pRT, IDWriteTextFormat* pTexFmt, wchar_t* pText, int nTextLen, POSITION StartPos, D2D1_COLOR_F StartColor, int StartLen)
+void PropText::Init(ID2D1RenderTarget* pRT, IDWriteTextFormat* pTexFmt, wchar_t* pText, int nTextLen, POSITION StartPos, D2D1_COLOR_F StartColor, int StartLen)
 {
     pRT->CreateSolidColorBrush(StartColor, &Brush);
     pTextFmt = pTexFmt; /*폰트 출력 정보 개체별로 지정*/
@@ -38,7 +38,7 @@ void ObjectMotionText::Init(ID2D1RenderTarget* pRT, IDWriteTextFormat* pTexFmt, 
     ComMotionStrLen.clearChannel();
 }
 
-void ObjectMotionText::addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, POSITION StartPos, POSITION EndPos)
+void PropText::addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, POSITION StartPos, POSITION EndPos)
 {
     MOTION_PATTERN mc;
 
@@ -51,7 +51,7 @@ void ObjectMotionText::addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, P
     else ComMotionMovement.addChannel(mc);
 }
 
-void ObjectMotionText::addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor)
+void PropText::addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor)
 {
     MOTION_PATTERN mc;
 
@@ -64,7 +64,7 @@ void ObjectMotionText::addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1
     else ComMotionColor.addChannel(mc);
 }
 
-void ObjectMotionText::addLenMotion(MOTION_INFO MotionInfo, BOOL bAppend, int nStartLen, int nEndLen)
+void PropText::addLenMotion(MOTION_INFO MotionInfo, BOOL bAppend, int nStartLen, int nEndLen)
 {
     MOTION_PATTERN mc;
 
@@ -74,7 +74,7 @@ void ObjectMotionText::addLenMotion(MOTION_INFO MotionInfo, BOOL bAppend, int nS
     else ComMotionStrLen.addChannel(mc);
 }
 
-void ObjectMotionText::SetPos(MOTION_INFO MotionInfo, BOOL bCurrent, POSITION StartPos, POSITION EndPos)
+void PropText::SetPos(MOTION_INFO MotionInfo, BOOL bCurrent, POSITION StartPos, POSITION EndPos)
 {
     POSITION TmpPos;
 
@@ -84,7 +84,7 @@ void ObjectMotionText::SetPos(MOTION_INFO MotionInfo, BOOL bCurrent, POSITION St
     addMovementMotion(MotionInfo, FALSE, TmpPos, EndPos);
 }
 
-void ObjectMotionText::SetColor(MOTION_INFO MotionInfo, BOOL bCurrent, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor)
+void PropText::SetColor(MOTION_INFO MotionInfo, BOOL bCurrent, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor)
 {
     D2D1_COLOR_F TmpColor;
 
@@ -98,13 +98,13 @@ void ObjectMotionText::SetColor(MOTION_INFO MotionInfo, BOOL bCurrent, D2D1_COLO
     @brief 문자열을 셋팅하고 길이 조절 모션을 넣어준다
     @remark 변경된 텍스트를 바로 적용 하기 때문에 길이조절 한정 bCurrent 인자가 없다
 */
-void ObjectMotionText::SetText(MOTION_INFO MotionInfo, wchar_t* pText, int nStartTextLen, int nEndTextLen)
+void PropText::SetText(MOTION_INFO MotionInfo, wchar_t* pText, int nStartTextLen, int nEndTextLen)
 {
     ComMotionStrLen.clearChannel();
     addLenMotion(MotionInfo, FALSE, nStartTextLen, nEndTextLen);
 }
 
-void ObjectMotionText::setRuntime(unsigned long time)
+void PropText::setRuntime(unsigned long time)
 {
     CurPos = InitPos;
     CurColor = InitColor;
@@ -117,7 +117,7 @@ void ObjectMotionText::setRuntime(unsigned long time)
 /**
     @brief 상태 업데이트
 */
-BOOL ObjectMotionText::update(unsigned long time)
+BOOL PropText::update(unsigned long time)
 {
     int nTrue = 0;
     /*모션 보정*/
@@ -131,7 +131,7 @@ BOOL ObjectMotionText::update(unsigned long time)
 /**
     @brief 모션 데이터에 따라 렌더링
 */
-void ObjectMotionText::render(ID2D1RenderTarget* pRT)
+void PropText::render(ID2D1RenderTarget* pRT)
 {
     D2D1_RECT_F rect;
 
@@ -146,10 +146,10 @@ void ObjectMotionText::render(ID2D1RenderTarget* pRT)
 /**
     @brief 상태 업데이트
 */
-BOOL ObjectMotionText::allUpdate(unsigned long time)
+BOOL PropText::allUpdate(unsigned long time)
 {
     int nTrue = 0;
-    ObjectMotionText* p = this;
+    PropText* p = this;
 
     /*모션 보정*/
     while (p) {
@@ -165,9 +165,9 @@ BOOL ObjectMotionText::allUpdate(unsigned long time)
 /**
     @brief 모션 데이터에 따라 렌더링
 */
-void ObjectMotionText::allRender(ID2D1RenderTarget* pRT)
+void PropText::allRender(ID2D1RenderTarget* pRT)
 {
-    ObjectMotionText* p = this;
+    PropText* p = this;
     D2D1_RECT_F rect;
 
     while(p){

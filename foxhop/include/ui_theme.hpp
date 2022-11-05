@@ -39,6 +39,27 @@ enum class eButtonAction {
 
 #define MAX_BUTTONNAME 32 /*버튼의 최대 텍스트 길이*/
 
+
+/**
+    @brief 리스트뷰 모션 타입 상수
+*/
+enum class eListviewMotionPattern {
+    eInit_Default = 0, /**< 생성: 모션 없음*/
+};
+
+/**
+    @brief 리스트뷰 모션 타입
+*/
+enum class eListviewAction {
+    eAction_Init = 0,  /**< 초기화 모션*/
+    eAction_Pause,     /**< 소멸 모션*/
+    eAction_Mouseover, /**< 마우스 오버 모션 (커서가 떠났을때도 포함)*/
+    eAction_Select,    /**< 행 선택 모션*/
+    eAction_Unselect,  /**< 행 선택 모션*/
+    eAction_Scroll,    /**< 스크롤 모션*/
+    eAction_Text       /**< 텍스트 모션*/
+};
+
 /**
     @brief UI들의 테마에 대한 정보
 */
@@ -63,8 +84,24 @@ public:
     D2D1_COLOR_F         ButtonHighlightColor;  /**< 버튼 하이라이트 색*/
     D2D1_COLOR_F         ButtonFontColor;       /**< 초기 텍스트 색*/
 
+    /*UI_Listview 의 속성*/
+    eListviewMotionPattern ListviewInitMotion;      /**< 시작 모션*/
+    eListviewMotionPattern ListviewPauseMotion;     /**< 소멸 모션*/
+    eListviewMotionPattern ListviewLabelMotion;     /**< 칼럼 라벨 모션*/
+    eListviewMotionPattern ListviewScrollingMotion; /**< 스크롤 모션*/
+    D2D1_COLOR_F           ListviewLabelColor;      /**< 칼럼 라벨 색상*/
+    D2D1_COLOR_F           ListviewFaceColor;       /**< 표면 색*/
+    D2D1_COLOR_F           ListviewSecondFaceColor; /**< 교대 표면 색상 (2가지색으로 교차하며 리스트 표시)*/
+    D2D1_COLOR_F           ListviewMouseoverColor;  /**< 마우스오버 색*/
+    D2D1_COLOR_F           ListviewSelectColor;     /**< 선택된 라인 색*/
+    D2D1_COLOR_F           ListviewLabelFontColor;  /**< 칼럼 라벨 폰트 색상*/
+    D2D1_COLOR_F           ListviewRowFontColor;    /**< 행 폰트 색상*/
+    D2D1_COLOR_F           ListviewRowLineColor;    /**< 행간 선 색상*/
+    D2D1_COLOR_F           ListviewColLineColor;    /**< 칼럼 선 색상*/
+
 public:
     UITheme() {
+        /*UI_Button 속성 기본값*/
         ButtonInitMotion = eButtonMotionPattern::eInit_Default;
         ButtonPauseMotion = eButtonMotionPattern::ePause_Default;
         ButtonMouseOverMotion = eButtonMotionPattern::eMouseover_Default;
