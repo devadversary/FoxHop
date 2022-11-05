@@ -52,30 +52,16 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
     switch(Message) {
     case UIM_CREATE:
-        ButtonList.push_back(pPanel->CreateButton({ 30,30,100,20 }, (wchar_t*)L"TESTBUTT", 0, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 150,30,100,20 }, (wchar_t*)L"TESTBUTT", 100, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 270,30,100,20 }, (wchar_t*)L"TESTBUTT", 200, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 390,30,100,20 }, (wchar_t*)L"TESTBUTT", 300, TestButtProc));
-        
-        ButtonList.push_back(pPanel->CreateButton({ 30,80,100,20 }, (wchar_t*)L"TESTBUTT", 400, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 150,80,100,20 }, (wchar_t*)L"TESTBUTT", 500, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 270,80,100,20 }, (wchar_t*)L"TESTBUTT", 600, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 390,80,100,20 }, (wchar_t*)L"TESTBUTT", 700, TestButtProc));
-        
-        ButtonList.push_back(pPanel->CreateButton({ 30,130,100,20 }, (wchar_t*)L"TESTBUTT", 800, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 150,130,100,20 }, (wchar_t*)L"TESTBUTT", 900, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 270,130,100,20 }, (wchar_t*)L"TESTBUTT", 1000, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 390,130,100,20 }, (wchar_t*)L"TESTBUTT", 1100, TestButtProc));
-        
-        ButtonList.push_back(pPanel->CreateButton({ 30,180,100,20 }, (wchar_t*)L"TESTBUTT", 1200, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 150,180,100,20 }, (wchar_t*)L"TESTBUTT", 1300, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 270,180,100,20 }, (wchar_t*)L"TESTBUTT", 1400, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 390,180,100,20 }, (wchar_t*)L"TESTBUTT", 1500, TestButtProc));
-        
-        ButtonList.push_back(pPanel->CreateButton({ 30,230,100,20 }, (wchar_t*)L"TESTBUTT", 1600, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 150,230,100,20 }, (wchar_t*)L"TESTBUTT", 1700, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 270,230,100,20 }, (wchar_t*)L"TESTBUTT", 1800, TestButtProc));
-        ButtonList.push_back(pPanel->CreateButton({ 390,230,100,20 }, (wchar_t*)L"TESTBUTT", 1900, TestButtProc));
+    {
+        int i, k, delay=0;
+        for (k = 10; k < 350; k+=30) {
+            for (i = 10; i < 600; i += 40) {
+                ButtonList.push_back(pPanel->CreateButton({ (float)i, (float)k,30,20 }, (wchar_t*)L"TE", delay, TestButtProc));
+                delay += 10;
+            }
+
+        }
+    }
         break;
         
     case WM_RBUTTONDOWN :
@@ -89,7 +75,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         int i = 0;
         for (UI* pUI : ButtonList) {
             pUI->resume(i);
-            i += 30;
+            i += 5;
         }
     }
         break;
@@ -130,12 +116,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
         pTheme->ButtonFontColor = { 1,1,1,1 };
         
 
-        SetTimer(hWnd, 666, 15, NULL);
+        SetTimer(hWnd, 666, 10, NULL);
         pMainPanel = uiSys->InitMainPanel(hWnd, MainPanelProc);
         break;
 
     case WM_TIMER:
         InvalidateRect(hWnd, NULL, FALSE);
+        break;
+
+    case WM_SIZE:
+        uiSys->D2DA.pRenTarget->Resize({LOWORD(lParam),HIWORD(lParam)});
         break;
 
     case WM_PAINT:

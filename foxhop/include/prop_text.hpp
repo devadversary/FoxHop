@@ -5,12 +5,7 @@
 /**
     @brief 모션그래픽 텍스트 오브젝트
 */
-class PropText : public Object{
-public :
-    PropText*     pNext;
-    PropText*     pPrev;
-    BOOL                  bActivate;     /**< 해당 오브젝트의 활성화 여부*/
-
+class PropText : public PropBase{
 private:
     ComponentMotion       ComMotionMovement;
     ComponentMotion       ComMotionColor;

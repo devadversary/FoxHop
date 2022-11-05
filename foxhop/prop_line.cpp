@@ -99,42 +99,6 @@ void PropLine::setRuntime(int t)
 }
 
 /**
-    @brief 모든 모션을 업데이트한다
-*/
-BOOL PropLine::allUpdate(unsigned long time)
-{
-    int nTrue = 0;
-    PropLine* p = this;
-
-    while (p) {
-        nTrue += p->ComMotionMovement.update(time);
-        nTrue += p->ComMotionColor.update(time);
-        p = p->pNext;
-    }
-    if (!nTrue) return FALSE;
-    return TRUE;
-}
-
-/**
-    @brief 현재 진행 모션에 맞게 렌더링 한다
-    @remark 오브젝트들이 서로 링크드리스트 형태를 띠기 때문에
-    @n      맨 앞 오브젝트에서 이 매서드를 한번만 호출해주면
-    @n      전체 오브젝트가 렌더링 된다. (빈번한 함수호출, 캐시미스 방지)
-*/
-void PropLine::allRender(ID2D1RenderTarget* pRT)
-{
-    PropLine* p = this;
-    D2D1_POINT_2F point1, point2;
-
-    while (p) {
-        p->Brush->SetColor(p->CurColor);
-        point1 = { p->CurPos.x, p->CurPos.y };
-        point2 = { p->CurPos.x2, p->CurPos.y2 };
-        pRT->DrawLine(point1, point2, p->Brush);
-        p = p->pNext;
-    }
-}
-/**
     @brief 개별 업데이트한다
 */
 BOOL PropLine::update(unsigned long time)

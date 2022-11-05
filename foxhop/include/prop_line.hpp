@@ -5,12 +5,7 @@
 /**
     @brief 모션그래픽 직선 오브젝트
 */
-class PropLine : public Object{
-public :
-    PropLine*     pNext;
-    PropLine*     pPrev;
-    BOOL                  bActivate;    /**< 해당 오브젝트의 활성화 여부*/
-
+class PropLine : public PropBase{
 private:
     ComponentMotion       ComMotionMovement;
     ComponentMotion       ComMotionColor;

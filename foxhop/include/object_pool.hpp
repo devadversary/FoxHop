@@ -187,7 +187,7 @@ template <typename T> T* ObjectPool<T>::activateObject()
     }
     /*비활성화 리스트에서 제거*/
     pTmp = pInactivate;
-    pInactivate = pInactivate->pNext;   /*놀고있는 오브젝트 리스트에서 잘라낸다*/
+    pInactivate = (T*)pInactivate->pNext;   /*놀고있는 오브젝트 리스트에서 잘라낸다*/
     memset(pTmp, 0, sizeof(T));         /*발급 전 초기화*/
     pTmp->bActivate = TRUE;             /*활성화 플래그 ON*/
 
@@ -212,7 +212,7 @@ template <typename T> void ObjectPool<T>::deactivateObject(T* pObj)
 
     /*활성화 리스트에서 제거*/
     if (!pObj->pPrev) /*비활성화 하려는 노드가 머리 노드인경우*/
-        pActivate = pObj->pNext; /*다음 노드를 머리 노드로 등록*/
+        pActivate = (T*)pObj->pNext; /*다음 노드를 머리 노드로 등록*/
 
     /*비활성화 하려는 노드가 끄트머리 노드인경우*/
     else if (!pObj->pNext)

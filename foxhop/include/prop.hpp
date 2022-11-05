@@ -20,6 +20,9 @@
 
 /**
     @brief 위치정보 구조체
+    @n     {x, y, width, height}
+    @n     {x, y, x2, y2}
+    @n     {x, y, r, (dummy)}
 */
 typedef struct _POSITION
 {
@@ -34,24 +37,32 @@ typedef struct _POSITION
             float x2;
             float y2;
         };
+        struct {
+            float r;     /**< 반지름*/
+            float dummy; /**< 반지름값으로 사용시 이 값은 무시됨*/
+        };
     };
 }POSITION;
 
 /**
     @brief 어플리케이션에서 사용될 오브젝트 클래스
 */
-class Object {
-#if 0 /*2020.02.10 Devadversary : 데이터 지역성 확보를 위해 추상매서드 제거*/
+class PropBase {
 public:
-    virtual void update(unsigned long ElapsedTime) = 0;
-    virtual void render() = 0;
-#endif
+    PropBase* pNext;
+    PropBase* pPrev;
+    BOOL      bActivate; /**< 해당 오브젝트의 활성화 여부*/
 };
 
 /**
     @biref 위치 구조체 초기화
+    @param x                시작x좌표
+    @param y                시작y좌표
+    @param width_or_x2_or_r 너비 혹은 끝x 좌표 또는 반지름r값
+    @param height_or_y2     높이 혹은 끝y 좌표 (반지름 값 사용시 이 값은 무시됨)
+
 */
-inline POSITION InitPosition(float x, float y, float width_or_x2, float height_or_y2)
+inline POSITION InitPosition(float x, float y, float width_or_x2_or_r, float height_or_y2)
 {
-    return {x, y, width_or_x2, height_or_y2};
+    return {x, y, width_or_x2_or_r, height_or_y2};
 }

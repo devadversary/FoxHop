@@ -5,12 +5,7 @@
 /**
     @brief 모션그래픽 박스 오브젝트
 */
-class PropBox : public Object{
-public :
-    PropBox*      pNext;
-    PropBox*      pPrev;
-    BOOL                  bActivate;    /**< 해당 오브젝트의 활성화 여부 (이 멤버는 오브젝트 풀에서만 사용한다.)*/
-
+class PropBox : public PropBase{
 private:
     ComponentMotion       ComMotionMovement;
     ComponentMotion       ComMotionColor;
