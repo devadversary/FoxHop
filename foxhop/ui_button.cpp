@@ -9,10 +9,10 @@ UI_Button::UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, w
 
     DefaultHandler = DefaultButtonProc;
     MessageHandler = pfnCallback;
-
-    wcscpy_s(szText, MAX_BUTTONNAME, pText);
+    memset(szText, 0, sizeof(szText));
+    wcscpy_s(szText, ARRAYSIZE(szText), pText);
     uiPos          = Pos;
-    nTextLen       = (int)wcslen(pText);
+    nTextLen       = (int)wcslen(szText);
     MBoxFace       = uiSys->ObjPoolBox.activateObject();
     MBoxHighlight  = uiSys->ObjPoolBox.activateObject();
     MText          = uiSys->ObjPoolText.activateObject();

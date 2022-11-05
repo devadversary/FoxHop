@@ -89,13 +89,30 @@ public:
     eListviewMotionPattern ListviewPauseMotion;     /**< 소멸 모션*/
     eListviewMotionPattern ListviewLabelMotion;     /**< 칼럼 라벨 모션*/
     eListviewMotionPattern ListviewScrollingMotion; /**< 스크롤 모션*/
+    eListviewMotionPattern ListviewMouseoverMotion; /**< 마우스오버 모션*/
+    eListviewMotionPattern ListviewSelMotion;       /**< 선택라인 모션*/
+    eListviewMotionPattern ListviewSelCancelMotion; /**< 선택취소 모션*/
+    eListviewMotionPattern ListviewSelMoveMotion;   /**< 선택라인이동 모션*/
+    eListviewMotionPattern ListviewRowInsertMotion; /**< 행 삽입 모션*/
+    eListviewMotionPattern ListviewRowDeleteMotion; /**< 행 삭제 모션*/
+    unsigned int           ListviewInitPitch;       /**< 시작 모션 진행시간*/
+    unsigned int           ListviewPausePitch;      /**< 소멸 모션 진행시간*/
+    unsigned int           ListviewLabelPitch;      /**< 칼럼 라벨 모션 진행시간*/
+    unsigned int           ListviewScrollingPitch;  /**< 스크롤 모션 진행시간*/
+    unsigned int           ListviewMouseoverPitch;  /**< 마우스오버 진행시간*/
+    unsigned int           ListviewSelPitch;        /**< 선택라인 모션 진행시간*/
+    unsigned int           ListviewSelCancelPitch;  /**< 선택취소 모션 진행시간*/
+    unsigned int           ListviewSelMovePitch;    /**< 선택라인이동 모션 진행시간*/
+    unsigned int           ListviewRowInsertPitch;  /**< 행 삽입 모션 진행시간*/
+    unsigned int           ListviewRowDeletePitch;  /**< 행 삽입 모션 진행시간*/
     D2D1_COLOR_F           ListviewLabelColor;      /**< 칼럼 라벨 색상*/
+    D2D1_COLOR_F           ListviewLabelFontColor;  /**< 칼럼 라벨 폰트 색상*/
     D2D1_COLOR_F           ListviewFaceColor;       /**< 표면 색*/
     D2D1_COLOR_F           ListviewSecondFaceColor; /**< 교대 표면 색상 (2가지색으로 교차하며 리스트 표시)*/
+    D2D1_COLOR_F           ListviewRowFontColor;    /**< 행 폰트 색상*/
     D2D1_COLOR_F           ListviewMouseoverColor;  /**< 마우스오버 색*/
     D2D1_COLOR_F           ListviewSelectColor;     /**< 선택된 라인 색*/
-    D2D1_COLOR_F           ListviewLabelFontColor;  /**< 칼럼 라벨 폰트 색상*/
-    D2D1_COLOR_F           ListviewRowFontColor;    /**< 행 폰트 색상*/
+    D2D1_COLOR_F           ListviewSelectFontColor;     /**< 선택된 라인 폰트 색*/
     D2D1_COLOR_F           ListviewRowLineColor;    /**< 행간 선 색상*/
     D2D1_COLOR_F           ListviewColLineColor;    /**< 칼럼 선 색상*/
 
