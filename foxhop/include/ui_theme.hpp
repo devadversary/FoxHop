@@ -112,7 +112,7 @@ public:
     D2D1_COLOR_F           ListviewRowFontColor;    /**< 행 폰트 색상*/
     D2D1_COLOR_F           ListviewMouseoverColor;  /**< 마우스오버 색*/
     D2D1_COLOR_F           ListviewSelectColor;     /**< 선택된 라인 색*/
-    D2D1_COLOR_F           ListviewSelectFontColor;     /**< 선택된 라인 폰트 색*/
+    D2D1_COLOR_F           ListviewSelectFontColor; /**< 선택된 라인 폰트 색*/
     D2D1_COLOR_F           ListviewRowLineColor;    /**< 행간 선 색상*/
     D2D1_COLOR_F           ListviewColLineColor;    /**< 칼럼 선 색상*/
 

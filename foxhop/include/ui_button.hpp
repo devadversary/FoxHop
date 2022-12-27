@@ -14,8 +14,8 @@ private:
     PropBox*  MBoxFace;       /**< 전경 모션 박스*/
     PropBox*  MBoxHighlight;  /**< 하이라이트 모션 박스*/
     PropText* MText;          /**< 모션 박스 기본 텍스트*/
-    int               nTextLen;
-    wchar_t           szText[MAX_BUTTONNAME];
+    int       nTextLen;
+    wchar_t   szText[MAX_BUTTONNAME];
     
 private: /*2022.04.30 : Devadversary - InputMotion 은 기본적으로 Private 함수여야하지만 그렇게 되면, DefaultButtonProc 함수에서 접근을 못함.*/
     void InputMotion(eButtonAction Action, UITheme* Theme, unsigned int nDelay, void* param);
