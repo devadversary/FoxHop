@@ -56,7 +56,9 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         int i, k, delay=0;
         for (k = 10; k < 350; k+=30) {
             for (i = 10; i < 600; i += 40) {
-                ButtonList.push_back(pPanel->CreateButton({ (float)i, (float)k,30,20 }, (wchar_t*)L"TE", delay, TestButtProc));
+                UI_Button* pButton = new UI_Button(pUI->uiSys, TestButtProc, {(float)i,(float)k,30,20}, (wchar_t*)L"TE", delay);
+                pPanel->RegisterUI(pButton);
+                ButtonList.push_back(pButton);
                 delay += 10;
             }
 

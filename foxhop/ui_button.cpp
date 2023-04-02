@@ -220,7 +220,6 @@ void UI_Button::pause(int nDelay)
 {
     InputMotion(eButtonAction::eAction_Pause, uiSys->Theme, nDelay, NULL);
     uiMotionState = eUIMotionState::eUMS_PlayingHide;
-    
 }
 
 /**

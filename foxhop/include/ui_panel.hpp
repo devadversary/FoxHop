@@ -39,6 +39,6 @@ public:
     void render();
 
 public: /*UI별 옵션 매서드*/
-    UI_Panel* CreatePanel() {};
-    UI*       CreateButton(POSITION pos, wchar_t* pText, int nDelay, pfnUIHandler callback);
+    void RegisterPanel(UI_Panel* pPanel);
+    void RegisterUI(UI* pUI);
 };
