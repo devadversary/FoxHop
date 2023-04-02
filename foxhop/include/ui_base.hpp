@@ -61,12 +61,6 @@ enum class eUIMotionState {
 
 /**
     @brief UI 일반화 클래스
-    @remark 가상함수를 사용하지 않도록 한다.
-    @n      update() render() 등의 필수 매서드를
-    @n      이 빈 개체를 상속받은 모든 클래스에서 별도로 구현한다.
-    @n      이로인해 코드 커플링이 발생하지만, vtbl 참조 비용을 줄일 수 있음.
-    @n      더 나은 대안이 있다면 수정 바람.
-    @n      이 클래스의 멤버는 초기화 이후 변경되지 않는것이 좋다
 */
 class UI {
 public :

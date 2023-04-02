@@ -11,8 +11,8 @@ class UISystem; /*UI시스템 클래스의 전방선언*/
 */
 typedef struct _st_ListviewRow
 {
-    bool          bSelected;   /**< 행 선택 여부*/
-    void*         pDataStruct; /**<  임의의 사용자 데이터 구조체 */
+    bool  bSelected;   /**< 행 선택 여부*/
+    void* pDataStruct; /**< 임의의 사용자 데이터 구조체 */
 } LISTVIEW_ROW;
 
 #if 0
@@ -48,6 +48,7 @@ public :
 */
 class UI_ListviewBase : public UI {
 private:
+    BOOL                      MultiSelectMode; /**< FALSE:단일 선택 / TRUE:여러줄 선택 모드*/
     std::vector<LISTVIEW_ROW> MainDataPool;
     /*
     ViewStartPtr;
@@ -59,7 +60,7 @@ private:
     static void DefaultListviewProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
 public:
-    UI_ListviewBase(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos);
+    UI_ListviewBase(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, BOOL MultiSelect);
     ~UI_ListviewBase() {};
 
     void pause(int nDelay);
