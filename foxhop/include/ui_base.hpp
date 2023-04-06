@@ -30,16 +30,17 @@ class UISystem;
 
 /**
     @brief UI들의 메세지 핸들러
-    @param [IN] UI       메세지를 받은 UI. WndProc의 HWND인자와 비슷하다.
-    @param [IN] Message  전달된 메세지
-    @param [OPT] parm    메세지에대한 추가정보. WndProc의 WPARAM, LPARAM과 비슷하다.
+    @param pUI     메세지를 받은 UI. WndProc의 HWND인자와 비슷하다.
+    @param Message 전달된 메세지
+    @param wParam  메세지에대한 추가정보. WndProc의 WPARAM
+    @param lParam  메세지에대한 추가정보. WndProc의 LPARAM
     @remark Win32API의 WndProc 콜백함수와 결이 같다.
 */
 typedef void (*pfnUIHandler)(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
 /**
     @brief 개체별 업데이트 핸들러
-    @param [IN] nTime ms단위 진행시간
+    @param nTime ms단위 진행시간
 */
 typedef void (*pfnUpdate)(unsigned long nTime);
 

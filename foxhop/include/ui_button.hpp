@@ -11,9 +11,9 @@ class UISystem; /*UI시스템 클래스의 전방선언*/
 */
 class UI_Button : public UI {
 private:
-    PropBox*  MBoxFace;       /**< 전경 모션 박스*/
-    PropBox*  MBoxHighlight;  /**< 하이라이트 모션 박스*/
-    PropText* MText;          /**< 모션 박스 기본 텍스트*/
+    PropBox*  MBoxFace;      /**< 전경 모션 박스*/
+    PropBox*  MBoxHighlight; /**< 하이라이트 모션 박스*/
+    PropText* MText;         /**< 모션 박스 기본 텍스트*/
     int       nTextLen;
     wchar_t   szText[MAX_BUTTONNAME];
     

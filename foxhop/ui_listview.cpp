@@ -1,7 +1,7 @@
 #include "./include/ui_listview.hpp"
 #include "./include/ui_system.hpp"
 
-UI_ListviewBase::UI_ListviewBase(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, BOOL MultiSelect)
+UI_ListviewBase::UI_ListviewBase(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, int RowHeight, BOOL MultiSelect)
 {
 
 }

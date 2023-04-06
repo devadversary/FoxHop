@@ -149,6 +149,7 @@
     <ClCompile Include="component_motion.cpp" />
     <ClCompile Include="d2dassist.cpp" />
     <ClCompile Include="alphawindow.cpp" />
+    <ClCompile Include="ui_textsheet.cpp" />
     <ClCompile Include="prop_box.cpp" />
     <ClCompile Include="prop_line.cpp" />
     <ClCompile Include="prop_text.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="include\ui_panel.hpp" />
     <ClInclude Include="include\ui_static.hpp" />
     <ClInclude Include="include\ui_system.hpp" />
+    <ClInclude Include="include\ui_textsheet.hpp" />
     <ClInclude Include="include\ui_theme.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
