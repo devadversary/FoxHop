@@ -9,6 +9,7 @@
 #include "ui_listview.hpp"
 #include "ui_static.hpp"
 #include "ui_fraggedline.hpp"
+#include "ui_table.hpp"
 #include "ui_theme.hpp"
 
 #include <list>

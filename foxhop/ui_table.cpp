@@ -1,16 +1,16 @@
-#include "./include/ui_textsheet.hpp"
+#include "./include/ui_table.hpp"
 #include "./include/ui_system.hpp"
 
 #define TEXTSHEET_DEFAULT_WIDTH     150 /*열 가로폭 기본 픽셀*/
 #define TEXTSHEET_DEFAULT_ROWHEIGHT 20  /*행 세로폭 기본 픽셀*/
 
-UI_TextSheet::UI_TextSheet(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, unsigned int ColumnCount, wchar_t** ColumnNameList, unsigned int* ColumnWidth, unsigned int RowHeight, BOOL MultiSelect)
+UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, unsigned int ColumnCount, wchar_t** ColumnNameList, unsigned int* ColumnWidth, unsigned int RowHeight, BOOL MultiSelect)
 {
     /*기본 UI 멤버 셋팅*/
     uiSys = pUISys;
     pRenderTarget = pUISys->D2DA.pRenTarget;
     Focusable = TRUE;
-    DefaultHandler = DefaultTextSheetProc;
+    DefaultHandler = DefaultTableProc;
     MessageHandler = pfnCallback;
     uiPos = Pos;
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
@@ -28,10 +28,13 @@ UI_TextSheet::UI_TextSheet(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
     if (!ColName || !ColWidth) return; /*TODO : 예외 처리 필요*/
 
     for (int i = 0; i < ColCnt; i++) {
-        ColName[i] = (wchar_t*)_wcsdup(ColumnNameList[i]);
+        ColName[i] = (wchar_t*)_wcsdup(ColumnNameList[i]); /*열 헤더 생성*/
         if (!ColumnWidth) ColWidth[i] = TEXTSHEET_DEFAULT_WIDTH;
         else ColWidth[i] = ColumnWidth[i];
     }
+
+    /*행 생성*/
+    int RowCnt = Pos.y2 / RowWidth;
 
 
     DefaultHandler(this, UIM_CREATE, NULL, NULL); /*UI생성 메세지 전송*/
@@ -41,7 +44,7 @@ UI_TextSheet::UI_TextSheet(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
     @brief 기본 텍스트 리스트뷰 메세지 핸들러
     @remark 사용자 지정 프로시저는 기본 핸들러 실행 후 호출된다.
 */
-void UI_TextSheet::DefaultTextSheetProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
+void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     pfnUIHandler UserHandler = pUI->MessageHandler;
     if (!pUI) return;
@@ -68,27 +71,50 @@ void UI_TextSheet::DefaultTextSheetProc(UI* pUI, UINT Message, WPARAM wParam, LP
     if (UserHandler) UserHandler(pUI, Message, wParam, lParam);
 }
 
-void UI_TextSheet::AddRow(void* ppData)
+/**
+    @brief 테이블에 데이터를 추가한다.
+    @param ppData 반드시 열 갯수에 맞는 배열을 넘겨줘야 한다. (wchar* [x])
+    @n            내부적으로 해당 배열을 malloc후 배열원소인 포인터는 복사된다.
+*/
+void UI_Table::AddData(wchar_t* Data[])
 {
+    TABLE_ROW Row;
+    size_t    AllocSize;
 
+    Row.bSelected = FALSE;
+    AllocSize = sizeof(wchar_t*) * ColCnt;
+    Row.ppData = (wchar_t**)malloc(AllocSize);
+    memcpy_s(Row.ppData, AllocSize, Data, AllocSize);
+    MainDataPool.push_back(Row);
+    DataCount++;
 }
 
-BOOL UI_TextSheet::update(unsigned long time)
+BOOL UI_Table::update(unsigned long time)
 {
     return FALSE;
 }
 
-void UI_TextSheet::pause(int nDelay)
+void UI_Table::pause(int nDelay)
 {
 
 }
 
-void UI_TextSheet::resume(int nDelay)
+void UI_Table::resume(int nDelay)
 {
 
 }
 
-void UI_TextSheet::render()
+void UI_Table::render()
 {
+    D2D1_RECT_F ClipRect;
+    POSITION Pos;
 
+    Pos = uiPos;
+    ClipRect.left = Pos.x;
+    ClipRect.top = Pos.y;
+    ClipRect.right = Pos.x + Pos.x2;
+    ClipRect.bottom = Pos.y + Pos.y2;
+    pRenderTarget->PushAxisAlignedClip(ClipRect, D2D1_ANTIALIAS_MODE::D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+    //render
+    pRenderTarget->PopAxisAlignedClip();
 }

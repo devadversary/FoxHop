@@ -48,8 +48,10 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     HWND hWnd = pUI->uiSys->hBindWnd;
     UI_Panel* pPanel = (UI_Panel*)pUI;
-    static std::list<UI*> ButtonList;
+    static UI_Table* pTable = NULL;
 
+    static std::list<UI*> ButtonList;
+    wchar_t* ColData[3] = { (wchar_t*)L"hello", (wchar_t*)L"hhh", (wchar_t*)L"adad" };
     switch(Message) {
     case UIM_CREATE:
     {
@@ -61,8 +63,11 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
                 ButtonList.push_back(pButton);
                 delay += 10;
             }
-
         }
+
+        pTable = new UI_Table(pUI->uiSys, NULL, {10, 610, 600 , 250}, 3,
+                              ColData, NULL, 20, FALSE);
+        pPanel->RegisterUI(pTable);
     }
         break;
         
@@ -75,10 +80,15 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN :
     {
         int i = 0;
+        wchar_t* TmpData[3];
         for (UI* pUI : ButtonList) {
             pUI->resume(i);
             i += 5;
         }
+        TmpData[0] = _wcsdup(L"test");
+        TmpData[1] = _wcsdup(L"test22");
+        TmpData[2] = _wcsdup(L"test333");
+        pTable->AddData(TmpData);
     }
         break;
 
