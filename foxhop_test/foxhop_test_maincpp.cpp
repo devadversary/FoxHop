@@ -112,20 +112,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     static UISystem* uiSys = NULL;
     static UI_Panel* pMainPanel = NULL;
-    UITheme* pTheme;
 
     if (pMainPanel) uiSys->SendUIMessage(pMainPanel, Message, wParam, lParam);
 
     switch (Message) {
     case WM_CREATE:
         uiSys = new UISystem(hWnd);
-        pTheme = uiSys->Theme;
+        /*
         pTheme->ButtonInitMotion = eButtonMotionPattern::eInit_Reload;
         pTheme->ButtonInitPitch = 700;
         pTheme->ButtonPauseMotion = eButtonMotionPattern::ePause_Flick;
         pTheme->ButtonPausePitch = 500;
         pTheme->ButtonFaceColor = { 0.5f,0.5f,0.5f,1 };
         pTheme->ButtonFontColor = { 1,1,1,1 };
+        */
         
 
         SetTimer(hWnd, 666, 10, NULL);

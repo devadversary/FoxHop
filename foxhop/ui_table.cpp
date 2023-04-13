@@ -4,6 +4,27 @@
 #define TEXTSHEET_DEFAULT_WIDTH     150 /*열 가로폭 기본 픽셀*/
 #define TEXTSHEET_DEFAULT_ROWHEIGHT 20  /*행 세로폭 기본 픽셀*/
 
+/**
+    @brief 행 객체를 생성해 반환한다.
+*/
+static VIEWTABLE_ROW CreateRow(int ColCnt)
+{
+    VIEWTABLE_ROW row;
+
+    if(!ColCnt) return { 0, NULL };
+    row.nDelay = 0;
+    row.ppText = (PropText**)malloc(sizeof(PropText*) * ColCnt);
+    row.ppColLine = (PropLine**)malloc(sizeof(PropLine*) * ColCnt);
+    //if (!row.ppText || !row.ppColLine) return { 0, NULL };
+    for (int i = 0; i < ColCnt; i++) {
+        row.ppText[i] = new PropText();
+        row.ppColLine[i] = new PropLine();
+    }
+    row.pBackgroundBox = new PropBox();
+    row.pHighlightBox = new PropBox();
+    return row;
+}
+
 UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, unsigned int ColumnCount, wchar_t** ColumnNameList, unsigned int* ColumnWidth, unsigned int RowHeight, BOOL MultiSelect)
 {
     /*기본 UI 멤버 셋팅*/
@@ -18,9 +39,11 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     /*하위 클래스 멤버 셋팅*/
     MultiSelectMode = MultiSelect;
     ScrollPixel = 0;
+    MaxScrollPixel = 0;
     DataCount = 0;
 
     /* 열 정보 셋팅 */
+    if (!ColumnCount) ColumnCount = 1; /*최소 1개의 열은 필요함*/
     ColCnt = ColumnCount;
     ColName = (wchar_t**)malloc(sizeof(wchar_t*) * ColCnt);
     ColWidth = (int*)malloc(sizeof(int) * ColCnt);
@@ -107,6 +130,8 @@ void UI_Table::resume(int nDelay)
 void UI_Table::render()
 {
     D2D1_RECT_F ClipRect;
+    D2D_MATRIX_3X2_F OldMat;
+
     POSITION Pos;
 
     Pos = uiPos;
@@ -115,6 +140,8 @@ void UI_Table::render()
     ClipRect.right = Pos.x + Pos.x2;
     ClipRect.bottom = Pos.y + Pos.y2;
     pRenderTarget->PushAxisAlignedClip(ClipRect, D2D1_ANTIALIAS_MODE::D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+    pRenderTarget->GetTransform(&OldMat); /*기존 행렬 백업*/
     //render
+    pRenderTarget->SetTransform(OldMat); /*기존 행렬 복구*/
     pRenderTarget->PopAxisAlignedClip();
 }

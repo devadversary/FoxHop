@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ui_base.hpp"
-#include "ui_theme.hpp"
 #include <vector>
 
 class UISystem; /*UI시스템 클래스의 전방선언*/

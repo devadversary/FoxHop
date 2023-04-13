@@ -10,7 +10,6 @@
 #include "ui_static.hpp"
 #include "ui_fraggedline.hpp"
 #include "ui_table.hpp"
-#include "ui_theme.hpp"
 
 #include <list>
 
@@ -34,7 +33,6 @@ public:
     IDWriteTextFormat*           ButtonTextForm;   /**< 버튼 컨트롤들이 전역적으로 사용할 텍스트 폼. (winAPI 버튼도 텍스트 폼은 무조건 고정임)*/
     IDWriteTextFormat*           MediumTextForm;   /**< 중간크기 텍스트 폼*/
 
-    UITheme*                     Theme;            /**< 전역 UI 테마 설정*/
     ObjectPool<PropBox>  ObjPoolBox;
     ObjectPool<PropLine> ObjPoolLine;
     ObjectPool<PropText> ObjPoolText;

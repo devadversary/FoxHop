@@ -34,8 +34,6 @@ public:
     void SetText(MOTION_INFO MotionInfo, wchar_t* pText, int nStartTextLen, int nEndTextLen);
 
     void setRuntime(unsigned long time);
-    BOOL allUpdate(unsigned long time);
-    void allRender(ID2D1RenderTarget* pRT);
     BOOL update(unsigned long time);
     void render(ID2D1RenderTarget* pRT);
 };

@@ -177,7 +177,6 @@
     <ClInclude Include="include\ui_static.hpp" />
     <ClInclude Include="include\ui_system.hpp" />
     <ClInclude Include="include\ui_table.hpp" />
-    <ClInclude Include="include\ui_theme.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

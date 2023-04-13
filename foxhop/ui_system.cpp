@@ -44,8 +44,6 @@ UISystem::UISystem(HWND hWnd)
     ObjPoolBox.Init(5000, 0);
     ObjPoolLine.Init(5000, 0);
     ObjPoolText.Init(10000, 0);
-
-    Theme = new UITheme();
 }
 
 UISystem::~UISystem() {}
