@@ -9,7 +9,10 @@ PropLine::PropLine()
     CurColor = { 0,0,0,0 };
 }
 
-PropLine::~PropLine() {}
+PropLine::~PropLine()
+{
+    if (Brush) Brush->Release();
+}
 
 void PropLine::ClearMovementMotion()
 {

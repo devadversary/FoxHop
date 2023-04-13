@@ -1,6 +1,7 @@
 #include "./include/prop_box.hpp"
 
-PropBox::PropBox() {
+PropBox::PropBox()
+{
     Brush = 0;
     InitPos = { 0,0,0,0 };
     CurPos = { 0,0,0,0 };
@@ -9,7 +10,10 @@ PropBox::PropBox() {
     bFill = TRUE;
 }
 
-PropBox::~PropBox() {}
+PropBox::~PropBox()
+{
+    if (Brush) Brush->Release();
+}
 
 void PropBox::ClearMovementMotion()
 {

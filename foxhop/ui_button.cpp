@@ -13,15 +13,22 @@ UI_Button::UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, w
     wcscpy_s(szText, ARRAYSIZE(szText), pText);
     uiPos          = Pos;
     nTextLen       = (int)wcslen(szText);
-    MBoxFace       = uiSys->ObjPoolBox.activateObject();
-    MBoxHighlight  = uiSys->ObjPoolBox.activateObject();
-    MText          = uiSys->ObjPoolText.activateObject();
+
+    MBoxFace       = new PropBox();
+    MBoxHighlight  = new PropBox();
+    MText          = new PropText();
 
     InputMotion(eButtonAction::eAction_Init, nDelay, NULL);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
     DefaultHandler(this, UIM_CREATE, NULL, NULL); /*UI생성 메세지 전송*/
 }
 
+UI_Button::~UI_Button()
+{
+    delete MBoxFace;
+    delete MBoxHighlight;
+    delete MText;
+}
 /**
     @brief 모션 기입
     @param Action 기입할 모션의 타입 (생성, 소멸, 기타 조작모션)
@@ -197,20 +204,6 @@ void UI_Button::InputMotion(eButtonAction Action, unsigned int nDelay, void* par
 
         break;
     }
-}
-
-/**
-    @brief UI 사용을 끝내고 초기화 후 반환한다.
-*/
-void UI_Button::Destroy()
-{
-    uiSys->ObjPoolBox.deactivateObject(MBoxFace);
-    uiSys->ObjPoolBox.deactivateObject(MBoxHighlight);
-    uiSys->ObjPoolText.deactivateObject(MText);
-    MBoxFace      = 0;
-    MBoxHighlight = 0;
-    MText         = 0;
-    uiSys->ReleaseUI(); /*스스로를 UI 시스템에 반환*/
 }
 
 /**

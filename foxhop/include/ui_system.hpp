@@ -32,11 +32,6 @@ public:
     IDWriteTextFormat*           SmallTextForm;    /**< 작은 텍스트 폼*/
     IDWriteTextFormat*           ButtonTextForm;   /**< 버튼 컨트롤들이 전역적으로 사용할 텍스트 폼. (winAPI 버튼도 텍스트 폼은 무조건 고정임)*/
     IDWriteTextFormat*           MediumTextForm;   /**< 중간크기 텍스트 폼*/
-
-    ObjectPool<PropBox>  ObjPoolBox;
-    ObjectPool<PropLine> ObjPoolLine;
-    ObjectPool<PropText> ObjPoolText;
-
     UI_Panel*                    pMainPanel;       /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
 
 public:
@@ -45,5 +40,4 @@ public:
 
     UI_Panel* InitMainPanel(HWND hWnd, pfnUIHandler MainPanelProc);
     BOOL SendUIMessage(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
-    void ReleaseUI();
 };

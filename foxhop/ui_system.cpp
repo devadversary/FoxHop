@@ -38,12 +38,6 @@ UISystem::UISystem(HWND hWnd)
     /*D2D에서 렌더링될 때, 실수좌표계를 사용함으로 각 픽셀의 중심을 기준으로 렌더해야한다
       정수 좌표계가 아니므로, 픽셀의 중심 (0.5 픽셀씩 +) 기준이 아니면 상이 흐리다.*/
     D2DA.pRenTarget->SetTransform(D2D1::Matrix3x2F::Translation(0.5f, 0.5f));
-
-    /*2022.06.04 - TODO : 오브젝트 리스트를 UISystem 에서 생성/관리 하지 않고
-      각자 UI마다 스스로 필요한 만큼만 만들어서 사용하도록 변경 예정*/
-    ObjPoolBox.Init(5000, 0);
-    ObjPoolLine.Init(5000, 0);
-    ObjPoolText.Init(10000, 0);
 }
 
 UISystem::~UISystem() {}
@@ -72,12 +66,4 @@ BOOL UISystem::SendUIMessage(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam
     if (!pUI || !pUI->DefaultHandler) return FALSE;
     pUI->DefaultHandler(pUI, Message, wParam, lParam);
     return TRUE;
-}
-
-/**
-    @brief UI 반환처리 (미구현)
-*/
-void UISystem::ReleaseUI()
-{
-
 }

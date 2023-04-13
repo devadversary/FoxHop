@@ -17,7 +17,10 @@ PropText::PropText()
     pTextFmt = NULL;
 }
 
-PropText::~PropText() {}
+PropText::~PropText()
+{
+    if (Brush) Brush->Release();
+}
 
 /**
     @brief  오브젝트의 초기 속성 셋팅
@@ -25,7 +28,7 @@ PropText::~PropText() {}
 */
 void PropText::Init(ID2D1RenderTarget* pRT, IDWriteTextFormat* pTexFmt, wchar_t* pText, int nTextLen, POSITION StartPos, D2D1_COLOR_F StartColor, int StartLen)
 {
-    pRT->CreateSolidColorBrush(StartColor, &Brush);
+    if (!Brush) pRT->CreateSolidColorBrush(StartColor, &Brush);
     pTextFmt = pTexFmt; /*폰트 출력 정보 개체별로 지정*/
     InitPos = CurPos = StartPos;
     InitColor = CurColor = StartColor;

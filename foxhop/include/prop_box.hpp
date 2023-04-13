@@ -29,8 +29,6 @@ public:
     void SetColor(MOTION_INFO MotionInfo, BOOL bCurrent, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor);
 
     void setRuntime(int t);
-    BOOL allUpdate(unsigned long time);
-    void allRender(ID2D1RenderTarget* pRT);
     BOOL update(unsigned long time);
     void render(ID2D1RenderTarget* pRT);
 };
