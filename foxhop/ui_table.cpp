@@ -25,7 +25,29 @@ static VIEWTABLE_ROW CreateRow(int ColCnt)
     return row;
 }
 
-UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, unsigned int ColumnCount, wchar_t** ColumnNameList, unsigned int* ColumnWidth, unsigned int RowHeight, BOOL MultiSelect)
+#if 0
+/**
+    @brief 행 객체를 해제한다
+*/
+static void DeleteRow(VIEWTABLE_ROW* Row)
+{
+    VIEWTABLE_ROW row;
+
+    if(!ColCnt) return { 0, NULL };
+    row.nDelay = 0;
+    row.ppText = (PropText**)malloc(sizeof(PropText*) * ColCnt);
+    row.ppColLine = (PropLine**)malloc(sizeof(PropLine*) * ColCnt);
+    //if (!row.ppText || !row.ppColLine) return { 0, NULL };
+    for (int i = 0; i < ColCnt; i++) {
+        delete row.ppText[i];
+        delete row.ppColLine[i];
+    }
+    delete row.pBackgroundBox;
+    delete row.pHighlightBox;
+}
+#endif
+
+UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, unsigned int ColumnCount, wchar_t** ColumnNameList, unsigned int* ColumnWidth, unsigned int HeaderHeight, unsigned int RowHeight, BOOL MultiSelect)
 {
     /*기본 UI 멤버 셋팅*/
     uiSys = pUISys;
@@ -34,20 +56,28 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     DefaultHandler = DefaultTableProc;
     MessageHandler = pfnCallback;
     uiPos = Pos;
-    uiMotionState = eUIMotionState::eUMS_PlayingVisible;
+    uiMotionState = eUIMotionState::eUMS_Null;
+    //uiMotionState = eUIMotionState::eUMS_Visible;
 
     /*하위 클래스 멤버 셋팅*/
     MultiSelectMode = MultiSelect;
+    CurrScrollPixel = 0;
     ScrollPixel = 0;
     MaxScrollPixel = 0;
     DataCount = 0;
+
+    HeaderHgt = HeaderHeight;
+    RowHgt = RowHeight ? RowHeight : TEXTSHEET_DEFAULT_ROWHEIGHT;
+    ScrollComp = new ComponentMotion;
+    /*행 생성*/
+    ClientHeight = (int)Pos.y2 - HeaderHgt;
+    ViewRowCnt = (ClientHeight / RowHgt) + 2; /*자투리 영역도 온전한 1개 취급 + 여분 1개*/
 
     /* 열 정보 셋팅 */
     if (!ColumnCount) ColumnCount = 1; /*최소 1개의 열은 필요함*/
     ColCnt = ColumnCount;
     ColName = (wchar_t**)malloc(sizeof(wchar_t*) * ColCnt);
     ColWidth = (int*)malloc(sizeof(int) * ColCnt);
-    RowWidth = RowHeight ? RowHeight : TEXTSHEET_DEFAULT_ROWHEIGHT;
     if (!ColName || !ColWidth) return; /*TODO : 예외 처리 필요*/
 
     for (int i = 0; i < ColCnt; i++) {
@@ -55,10 +85,6 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
         if (!ColumnWidth) ColWidth[i] = TEXTSHEET_DEFAULT_WIDTH;
         else ColWidth[i] = ColumnWidth[i];
     }
-
-    /*행 생성*/
-    int RowCnt = Pos.y2 / RowWidth;
-
 
     DefaultHandler(this, UIM_CREATE, NULL, NULL); /*UI생성 메세지 전송*/
 }
@@ -69,6 +95,7 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
 */
 void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
+    UI_Table* pTable = static_cast<UI_Table*>(pUI);
     pfnUIHandler UserHandler = pUI->MessageHandler;
     if (!pUI) return;
 
@@ -86,7 +113,25 @@ void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPa
         break;
 
     case WM_MOUSEWHEEL:
+    {
+        MOTION_PATTERN patt;
+        MOTION_INFO    mi;
+
+        pTable->ScrollPixel += GET_WHEEL_DELTA_WPARAM(wParam);
+        /*스크롤 경계 관리*/
+        if (pTable->ScrollPixel < 0)
+            pTable->ScrollPixel = 0;
+        if (pTable->ScrollPixel > pTable->MaxScrollPixel)
+            pTable->ScrollPixel = pTable->MaxScrollPixel;
+
+        /*스크롤 모션 진행 재시작*/
+        pTable->ScrollComp->clearChannel();
+        mi = InitMotionInfo(eMotionForm::eMotion_x3_2, 0, pTable->PitchScroll);
+        patt = InitMotionPattern(mi, NULL);
+        AddChain(&patt, (float*)&pTable->CurrScrollPixel, pTable->CurrScrollPixel, (float)pTable->ScrollPixel);
+        pTable->ScrollComp->addChannel(patt);
         break;
+    }
 
     default: break;
     }
@@ -114,6 +159,7 @@ void UI_Table::AddData(wchar_t* Data[])
 
 BOOL UI_Table::update(unsigned long time)
 {
+    ScrollComp->update(time);
     return FALSE;
 }
 
@@ -131,7 +177,6 @@ void UI_Table::render()
 {
     D2D1_RECT_F ClipRect;
     D2D_MATRIX_3X2_F OldMat;
-
     POSITION Pos;
 
     Pos = uiPos;
@@ -144,4 +189,16 @@ void UI_Table::render()
     //render
     pRenderTarget->SetTransform(OldMat); /*기존 행렬 복구*/
     pRenderTarget->PopAxisAlignedClip();
+#if 0 /*스크롤 모션값 테스트용*/
+    {
+        static ID2D1SolidColorBrush* Brush = 0;
+        static ID2D1SolidColorBrush* Brush2 = 0;
+        wchar_t test[54];
+        if (!Brush) pRenderTarget->CreateSolidColorBrush({1,1,1,1}, &Brush );
+        if (!Brush2) pRenderTarget->CreateSolidColorBrush({1,1,1,0.1}, &Brush2 );
+        wsprintfW(test, L"%d", (int)CurrScrollPixel);
+        pRenderTarget->DrawRectangle({ uiPos.x, uiPos.y, uiPos.x+uiPos.x2, uiPos.y + uiPos.y2 }, Brush2);
+        pRenderTarget->DrawTextW(test, wcslen(test), uiSys->MediumTextForm, { uiPos.x, uiPos.y, uiPos.x + uiPos.x2, uiPos.y + uiPos.y2 },Brush );
+    }
+#endif
 }

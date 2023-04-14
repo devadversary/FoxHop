@@ -26,13 +26,13 @@
 */
 class UISystem {
 public:
-    HWND                         hBindWnd;             /**< UISystem이 바인딩된 윈도우 핸들*/
-    D2DA_CONTEXT                 D2DA;             /**< D2D 개체들의 컨텍스트 (이 안에 다 있다)*/
-    IDWriteTextFormat*           TinyTextForm;     /**< 작은 텍스트 폼*/
-    IDWriteTextFormat*           SmallTextForm;    /**< 작은 텍스트 폼*/
-    IDWriteTextFormat*           ButtonTextForm;   /**< 버튼 컨트롤들이 전역적으로 사용할 텍스트 폼. (winAPI 버튼도 텍스트 폼은 무조건 고정임)*/
-    IDWriteTextFormat*           MediumTextForm;   /**< 중간크기 텍스트 폼*/
-    UI_Panel*                    pMainPanel;       /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
+    HWND               hBindWnd;             /**< UISystem이 바인딩된 윈도우 핸들*/
+    D2DA_CONTEXT       D2DA;             /**< D2D 개체들의 컨텍스트 (이 안에 다 있다)*/
+    IDWriteTextFormat* TinyTextForm;     /**< 작은 텍스트 폼*/
+    IDWriteTextFormat* SmallTextForm;    /**< 작은 텍스트 폼*/
+    IDWriteTextFormat* ButtonTextForm;   /**< 버튼 컨트롤들이 전역적으로 사용할 텍스트 폼. (winAPI 버튼도 텍스트 폼은 무조건 고정임)*/
+    IDWriteTextFormat* MediumTextForm;   /**< 중간크기 텍스트 폼*/
+    UI_Panel*          pMainPanel;       /**< 앞으로 모든 UI가 그려질 메인 패널 (이 패널로 UI를 생성한다)*/
 
 public:
     UISystem(HWND hWnd);

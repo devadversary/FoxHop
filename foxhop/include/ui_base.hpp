@@ -71,7 +71,7 @@ public :
     BOOL               MouseEventCheck; /**< 마우스 관련 영역 체크 여부. 기본값 TRUE (마우스 핸들링이 불필요한 UI면 FALSE : UI_Panel에서 해당 UI는 skip)*/
     POSITION           uiPos;           /**< 베이스로부터의 UI 포지션*/
     eUIMotionState     uiMotionState;   /**< UI의 모션상태 (적절하지 않은 이벤트를 무시 하기 위함 : ex-생성모션 진행중 마우스오버모션 재생 방지)*/
-    pfnUIHandler       DefaultHandler;  /**< UI 마다 가질 기본메세지 핸들러*/
+    pfnUIHandler       DefaultHandler;  /**< UI 마다 가질 기본메세지 핸들러 (각 UI마다 이 기본 핸들러를 static 으로 만든 후, 이 함수포인터에 등록해야 한다)*/
     pfnUIHandler       MessageHandler;  /**< UI 마다 가질 사용자메세지 핸들러*/
 
 public:

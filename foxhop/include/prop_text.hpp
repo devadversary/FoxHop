@@ -11,13 +11,13 @@ private:
     ComponentMotion       ComMotionColor;
     ComponentMotion       ComMotionStrLen;
     ID2D1SolidColorBrush* Brush;        /**< 해당 오브젝트의 색상 브러시*/
+    IDWriteTextFormat*    pTextFmt;     /**< 텍스트가 그려질 형식 지정(폰트, 정렬, 자간 등)*/
     POSITION              InitPos;      /**< 현재 오브젝트의 포지션*/
     D2D1_COLOR_F          InitColor;    /**< 현재 오브젝트의 RGBA 값*/
     int                   InitLen;      /**< 현재 출력중인 문자열 길이*/
     POSITION              CurPos;       /**< 현재 오브젝트의 포지션*/
     D2D1_COLOR_F          CurColor;     /**< 현재 오브젝트의 RGBA 값*/
     float                 CurLen;       /**< 현재 출력중인 문자열 길이 (정수변환해야함)*/
-    IDWriteTextFormat*    pTextFmt;     /**< 텍스트가 그려질 형식 지정(폰트, 정렬, 자간 등)*/
     wchar_t*              pStr;         /**< 출력 대상 문자열*/
     int                   nStrLen;      /**< 전체 문자 길이*/
 

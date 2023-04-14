@@ -66,11 +66,11 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         }
 
         pTable = new UI_Table(pUI->uiSys, NULL, {10, 610, 600 , 250}, 3,
-                              ColData, NULL, 20, FALSE);
+                              ColData, NULL, 30, 20, FALSE);
         pPanel->RegisterUI(pTable);
     }
         break;
-        
+
     case WM_RBUTTONDOWN :
         for (UI* pUI : ButtonList){
             pUI->pause(rand()%300);

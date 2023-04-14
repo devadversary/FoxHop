@@ -10,11 +10,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foxhop_test", "foxhop_test\
 		{E954553C-77BC-476A-99E8-F2B6550249AB} = {E954553C-77BC-476A-99E8-F2B6550249AB}
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EF157D6E-3CE9-4892-BC0D-FAA4D5E76D2F}"
-	ProjectSection(SolutionItems) = preProject
-		todo.txt = todo.txt
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
