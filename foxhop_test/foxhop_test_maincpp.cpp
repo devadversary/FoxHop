@@ -88,7 +88,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         TmpData[0] = _wcsdup(L"test");
         TmpData[1] = _wcsdup(L"test22");
         TmpData[2] = _wcsdup(L"test333");
-        pTable->AddData(TmpData);
+        pTable->AddData(TmpData, FALSE);
     }
         break;
 

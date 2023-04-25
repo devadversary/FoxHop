@@ -4,49 +4,6 @@
 #define TEXTSHEET_DEFAULT_WIDTH     150 /*열 가로폭 기본 픽셀*/
 #define TEXTSHEET_DEFAULT_ROWHEIGHT 20  /*행 세로폭 기본 픽셀*/
 
-/**
-    @brief 행 객체를 생성해 반환한다.
-*/
-static VIEWTABLE_ROW CreateRow(int ColCnt)
-{
-    VIEWTABLE_ROW row;
-
-    if(!ColCnt) return { 0, NULL };
-    row.nDelay = 0;
-    row.ppText = (PropText**)malloc(sizeof(PropText*) * ColCnt);
-    row.ppColLine = (PropLine**)malloc(sizeof(PropLine*) * ColCnt);
-    //if (!row.ppText || !row.ppColLine) return { 0, NULL };
-    for (int i = 0; i < ColCnt; i++) {
-        row.ppText[i] = new PropText();
-        row.ppColLine[i] = new PropLine();
-    }
-    row.pBackgroundBox = new PropBox();
-    row.pHighlightBox = new PropBox();
-    return row;
-}
-
-#if 0
-/**
-    @brief 행 객체를 해제한다
-*/
-static void DeleteRow(VIEWTABLE_ROW* Row)
-{
-    VIEWTABLE_ROW row;
-
-    if(!ColCnt) return { 0, NULL };
-    row.nDelay = 0;
-    row.ppText = (PropText**)malloc(sizeof(PropText*) * ColCnt);
-    row.ppColLine = (PropLine**)malloc(sizeof(PropLine*) * ColCnt);
-    //if (!row.ppText || !row.ppColLine) return { 0, NULL };
-    for (int i = 0; i < ColCnt; i++) {
-        delete row.ppText[i];
-        delete row.ppColLine[i];
-    }
-    delete row.pBackgroundBox;
-    delete row.pHighlightBox;
-}
-#endif
-
 UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, unsigned int ColumnCount, wchar_t** ColumnNameList, unsigned int* ColumnWidth, unsigned int HeaderHeight, unsigned int RowHeight, BOOL MultiSelect)
 {
     /*기본 UI 멤버 셋팅*/
@@ -65,13 +22,14 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     ScrollPixel = 0;
     MaxScrollPixel = 0;
     DataCount = 0;
+    CurrIndex = 0;
 
     HeaderHgt = HeaderHeight;
     RowHgt = RowHeight ? RowHeight : TEXTSHEET_DEFAULT_ROWHEIGHT;
     ScrollComp = new ComponentMotion;
     /*행 생성*/
     ClientHeight = (int)Pos.y2 - HeaderHgt;
-    ViewRowCnt = (ClientHeight / RowHgt) + 2; /*자투리 영역도 온전한 1개 취급 + 여분 1개*/
+    ViewRowCnt = (ClientHeight / RowHgt) + 1; /*자투리 영역도 온전한 1개 취급*/
 
     /* 열 정보 셋팅 */
     if (!ColumnCount) ColumnCount = 1; /*최소 1개의 열은 필요함*/
@@ -121,7 +79,7 @@ void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPa
         /*스크롤 경계 관리*/
         if (pTable->ScrollPixel < 0)
             pTable->ScrollPixel = 0;
-        if (pTable->ScrollPixel > pTable->MaxScrollPixel)
+        if (pTable->ScrollPixel > pTable->MaxScrollPixel - pTable->ClientHeight)
             pTable->ScrollPixel = pTable->MaxScrollPixel;
 
         /*스크롤 모션 진행 재시작*/
@@ -143,8 +101,9 @@ void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPa
     @brief 테이블에 데이터를 추가한다.
     @param ppData 반드시 열 갯수에 맞는 배열을 넘겨줘야 한다. (wchar* [x])
     @n            내부적으로 해당 배열을 malloc후 배열원소인 포인터는 복사된다.
+    @param bEnsure 새 데이터가 추가 될 때, 해당 라인으로 자동 스크롤 된다.
 */
-void UI_Table::AddData(wchar_t* Data[])
+void UI_Table::AddData(wchar_t* Data[], BOOL bEnsure = FALSE)
 {
     TABLE_ROW Row;
     size_t    AllocSize;
@@ -155,11 +114,16 @@ void UI_Table::AddData(wchar_t* Data[])
     memcpy_s(Row.ppData, AllocSize, Data, AllocSize);
     MainDataPool.push_back(Row);
     DataCount++;
+    MaxScrollPixel = (DataCount * RowHgt) - ClientHeight;
+    if (MaxScrollPixel < 0) MaxScrollPixel = 0; /*음수는 없다.*/
 }
 
 BOOL UI_Table::update(unsigned long time)
 {
-    ScrollComp->update(time);
+    ScrollComp->update(time); /*스크롤 상태 먼저 업데이트*/
+
+    /*주요 변수 업데이트*/
+    CurrIndex = (long long)CurrScrollPixel / RowHgt;
     return FALSE;
 }
 
@@ -177,16 +141,30 @@ void UI_Table::render()
 {
     D2D1_RECT_F ClipRect;
     D2D_MATRIX_3X2_F OldMat;
+    D2D_MATRIX_3X2_F TmpMat;
     POSITION Pos;
+    unsigned long Mod;
+    int BaseY;
 
     Pos = uiPos;
     ClipRect.left = Pos.x;
     ClipRect.top = Pos.y;
     ClipRect.right = Pos.x + Pos.x2;
     ClipRect.bottom = Pos.y + Pos.y2;
+
     pRenderTarget->PushAxisAlignedClip(ClipRect, D2D1_ANTIALIAS_MODE::D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
     pRenderTarget->GetTransform(&OldMat); /*기존 행렬 백업*/
-    //render
+    TmpMat = OldMat;
+
+    Mod = (unsigned long)CurrScrollPixel % RowHgt;
+    /* TmpMat._31 는 X, TmpMat._32 는 Y */
+    TmpMat._32 -= (float)Mod; /* Mod 음수값부터 높이를 차차 더해가며 렌더링*/
+    for (int i = 0; i < ViewRowCnt; i++) {
+        pRenderTarget->SetTransform(TmpMat);
+        ViewData[i].render(); /*행 렌더링*/
+        TmpMat._32 += (float)RowHgt;
+    }
+
     pRenderTarget->SetTransform(OldMat); /*기존 행렬 복구*/
     pRenderTarget->PopAxisAlignedClip();
 #if 0 /*스크롤 모션값 테스트용*/
@@ -201,4 +179,143 @@ void UI_Table::render()
         pRenderTarget->DrawTextW(test, wcslen(test), uiSys->MediumTextForm, { uiPos.x, uiPos.y, uiPos.x + uiPos.x2, uiPos.y + uiPos.y2 },Brush );
     }
 #endif
+}
+
+
+
+
+
+
+
+
+
+
+
+/**
+    @brief 행 객체를 생성해 반환한다.
+*/
+RowObject::RowObject(UISystem* pUISys, UI_Table* pParentTable, POSITION pos, unsigned int ColCnt)
+{
+    if (!pParentTable) return;
+    if (!ColCnt) ColCnt = 1;
+    pParent = pParentTable;
+    nColumn = ColCnt;
+    uisys = pUISys;
+    Pos = pos;
+    ppText = (PropText**)malloc(sizeof(PropText*) * ColCnt);
+    ppColLine = (PropLine**)malloc(sizeof(PropLine*) * ColCnt);
+    if (!ppText || !ppColLine) return;
+    for (int i = 0; i < ColCnt; i++) {
+        ppText[i] = new PropText();
+        ppColLine[i] = new PropLine();
+    }
+    pBackgroundBox = new PropBox();
+    pMouseoverBox = new PropBox();
+    pSelectBox = new PropBox();
+    pHighlightBox = new PropBox();
+}
+
+RowObject::~RowObject()
+{
+    for (int i = 0; i < nColumn; i++) {
+        delete ppText[i];
+        delete ppColLine[i];
+    }
+    delete pBackgroundBox;
+    delete pMouseoverBox;
+    delete pSelectBox;
+    delete pHighlightBox;
+    free(ppText);
+    free(ppColLine);
+}
+
+/**
+    @brief 행 진행시간 재설정
+    @n     뷰 영역 진입/이탈시 조정되며
+    @n     이탈시엔 INT_MAX 로 지정하면 된다.
+*/
+void RowObject::SetElapse(unsigned long value)
+{
+    for (int i = 0; i < nColumn; i++) {
+        ppText[i]->setRuntime(value);
+        ppColLine[i]->setRuntime(value);
+    }
+    pBackgroundBox->setRuntime(value);
+    pMouseoverBox->setRuntime(value);
+    pSelectBox->setRuntime(value);
+    pHighlightBox->setRuntime(value);
+}
+
+void RowObject::SetSelect(BOOL bSel, D2D1_COLOR_F Color)
+{
+    D2D1_COLOR_F TargetColor = bSel ? Color : D2D1_COLOR_F{ 0.f, 0.f, 0.f, 0.f };
+    unsigned long pitch = bSel ? pParent->PitchSelect : pParent->PitchUnselect;
+    MOTION_INFO mi;
+
+    switch (pParent->MotionSelect) {
+    case eTableMotionPattern::eSelect_Default:
+        pSelectBox->Init(uiSys->D2DA.pRenTarget, Pos, TargetColor);
+        break;
+    }
+}
+
+void RowObject::SetHighlight(D2D1_COLOR_F Color)
+{
+    //
+}
+
+void RowObject::SetBgColor(D2D1_COLOR_F Color)
+{
+    pBackgroundBox->Init(uiSys->D2DA.pRenTarget, Pos, Color);
+}
+
+void RowObject::SetData(wchar_t** ppData, int* pWidth, int nCnt, int Height)
+{
+    wchar_t* pStr;
+    int CurrentX = 0;
+    POSITION TmpPos;
+
+    for (int i = 0; i < nCnt; i++) {
+        pStr = ppData[i];
+        TmpPos = {0, (float)CurrentX, (float)pWidth[i], (float)Height};
+        CurrentX += pWidth[i];
+        ppText[i]->Init(uiSys->D2DA.pRenTarget, uiSys->SmallTextForm, pStr, wcslen(pStr), TmpPos, pParent->ColorRowText, 0);
+    }
+}
+
+void RowObject::pause(int nDelay)
+{
+}
+
+void RowObject::resume(int nDelay)
+{
+}
+
+BOOL RowObject::update(unsigned long time)
+{
+    BOOL bResult;
+
+    for (int i = 0; i < nColumn; i++) {
+        bResult |= ppText[i]->update(time);
+        bResult |= ppColLine[i]->update(time);
+    }
+    bResult |= pBackgroundBox->update(time);
+    bResult |= pMouseoverBox->update(time);
+    bResult |= pSelectBox->update(time);
+    bResult |= pHighlightBox->update(time);
+    return bResult;
+}
+
+void RowObject::render()
+{
+    ID2D1RenderTarget* pRT = uiSys->D2DA.pRenTarget;
+
+    for (int i = 0; i < nColumn; i++) {
+        ppText[i]->render(pRT);
+        ppColLine[i]->render(pRT);
+    }
+    pBackgroundBox->render(pRT);
+    pMouseoverBox->render(pRT);
+    pSelectBox->render(pRT);
+    pHighlightBox->render(pRT);
 }

@@ -15,18 +15,6 @@ typedef struct _st_TableRow
 } TABLE_ROW;
 
 /**
-    @brief 테이블이 화면에 렌더링할 행 데이터
-*/
-typedef struct _st_viewrow
-{
-    unsigned int nDelay;         /**< 해당 행의 딜레이*/
-    PropText**   ppText;         /**< 해당 행의 모션텍스트객체들 (UI_Table의 열 갯수만큼)*/
-    PropLine**   ppColLine;      /**< 열 구분선*/
-    PropBox*     pBackgroundBox; /**< 해당 행의 배경색 (행 선택 색상 또한 겸용)*/
-    PropBox*     pHighlightBox;  /**< 해당 행의 하이라이트 색 (내용변경 등의 모션에 응용 가능)*/
-} VIEWTABLE_ROW;
-
-/**
     @brief 테이블 모션 타입 상수
 */
 enum class eTableMotionPattern {
@@ -36,21 +24,29 @@ enum class eTableMotionPattern {
 
     eMouseover_Default = 0, /**< 마우스오버 : 모션 없음*/
 
+    eMouseleave_Default = 0, /**< 마우스이탈 : 모션 없음*/
+
     eSelect_Default = 0, /**< 선택 : 모션 없음*/
 
     eUnselect_Default = 0, /**< 선택 해제 : 모션 없음*/
+
+    eHighlight_Default = 0 /**< 하이라이팅 : 모션 없음*/
 };
 
 /**
     @brief 테이블 모션 타입
 */
 enum class eTableAction {
-    eAction_Init = 0,  /**< 초기화 모션*/
-    eAction_Pause,     /**< 소멸 모션*/
-    eAction_Mouseover, /**< 마우스 오버 모션 (커서가 떠났을때도 포함)*/
-    eAction_Select,    /**< 행 선택 모션*/
-    eAction_Unselect,  /**< 행 선택 모션*/
+    eAction_Init = 0,   /**< 초기화 모션*/
+    eAction_Pause,      /**< 소멸 모션*/
+    eAction_Mouseover,  /**< 마우스 오버 모션*/
+    eAction_Mouseleave, /**< 마우스 이탈 모션*/
+    eAction_Select,     /**< 행 선택 모션*/
+    eAction_Unselect,   /**< 행 선택 모션*/
+    eAction_Highlight,  /**< 하이라이팅*/
 };
+
+class RowObject;
 
 /**
     @brief 테이블 클래스
@@ -60,6 +56,7 @@ public:
     eTableMotionPattern MotionInit      = eTableMotionPattern::eInit_Default;
     eTableMotionPattern MotionPause     = eTableMotionPattern::ePause_Default;
     eTableMotionPattern MotionMouseover = eTableMotionPattern::eMouseover_Default;
+    eTableMotionPattern MotionMouseleave = eTableMotionPattern::eMouseover_Default;
     eTableMotionPattern MotionSelect    = eTableMotionPattern::eSelect_Default;
     eTableMotionPattern MotionUnselect  = eTableMotionPattern::eUnselect_Default;
     unsigned long PitchInit      = 0;
@@ -81,20 +78,20 @@ public:
 private:
     ComponentMotion*           ScrollComp;   /**< 스크롤 모션 진행을 위한 컴포넌트*/
     std::vector<TABLE_ROW>     MainDataPool; /**< 갖고있는 모든 데이터*/
-    std::vector<VIEWTABLE_ROW> ViewData;     /**< 화면에 보일 행 데이터 (화면 크기만큼만 생성)*/
+    std::vector<RowObject>     ViewData;     /**< 화면에 보일 행 데이터 (화면 크기만큼만 생성)*/
     
     BOOL      MultiSelectMode; /**< FALSE:단일 선택 / TRUE:여러줄 선택 모드*/
     long long DataCount;       /**< 현재 데이터 갯수*/
-    float     CurrScrollPixel; /**< 현재 모션 진행중인 스크롤 픽셀 (연속적으로 변함)*/
+    float     CurrScrollPixel; /**< 현재 모션 진행중인 스크롤 픽셀 (연속적으로 변함, 렌더링시 사용)*/
+    long long CurrIndex;       /**< 현재 렌더링 될 데이터의 시작 인덱스 (4이면, 4,5,6,7...n 이 렌더링된다.)*/
     long long ScrollPixel;     /**< 스크롤된 픽셀. 최대 스크롤 길이는, 데이터 갯수 x 행 높이*/
     long long MaxScrollPixel;  /**< 데이터 갯수 x 행 높이 = 최대 스크롤가능 픽셀*/
-    //int       ScrollModule;    /**< 스크롤 모듈러스 (0 ~ 행 높이 사이의 값)*/
     int       ColCnt;          /**< 열 갯수*/
     wchar_t** ColName;         /**< 열 이름*/
     int*      ColWidth;        /**< 열 가로폭 픽셀*/
     int       HeaderHgt;       /**< 헤더 높이 픽셀*/
     int       RowHgt;          /**< 행 높이 픽셀*/
-    int       ClientHeight;    /**< 헤더 높이를 제외한 순수 테이블 높이*/
+    int       ClientHeight;    /**< 헤더 높이를 제외한 순수 테이블 영역 높이*/
     int       ViewRowCnt;      /**< 화면에 보여지는 행 갯수*/
     /*
     ViewStartPtr;
@@ -115,6 +112,37 @@ public:
     void render();
 
 public: /*UI별 옵션 매서드*/
+    void Resize(POSITION Pos);
+    void AddData(wchar_t* Data[], BOOL bEnsure);
+};
 
-    void AddData(wchar_t* Data[]);
+/**
+    @brief 테이블이 화면에 렌더링할 행 데이터
+*/
+class RowObject : public UI {
+private:
+    UISystem* uisys;
+    UI_Table* pParent;
+    POSITION  Pos;
+    int          nColumn;        /**< 열 갯수*/
+    PropText** ppText;         /**< 해당 행의 모션텍스트객체들 (UI_Table의 열 갯수만큼)*/
+    PropLine** ppColLine;      /**< 열 구분선*/
+    PropBox* pBackgroundBox; /**< 배경색*/
+    PropBox* pMouseoverBox;  /**< 마우스오버색*/
+    PropBox* pSelectBox;     /**< 선택 색상*/
+    PropBox* pHighlightBox;  /**< 하이라이트 색 (내용변경 등의 모션에 응용 가능)*/
+
+public:
+    RowObject(UISystem* pUISys, UI_Table* pParentTable, POSITION pos, unsigned int ColCnt);
+    ~RowObject();
+    void SetElapse(unsigned long value);
+    void SetSelect(BOOL bSel, D2D1_COLOR_F Color);
+    void SetHighlight(D2D1_COLOR_F Color);
+    void SetBgColor(D2D1_COLOR_F Color);
+    void SetData(wchar_t** ppData, int* pWidth, int nCnt, int Height);
+
+    void pause(int nDelay);
+    void resume(int nDelay);
+    BOOL update(unsigned long time);
+    void render();
 };
