@@ -32,6 +32,7 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     ColCnt = ColumnCount;
     ColName = (wchar_t**)malloc(sizeof(wchar_t*) * ColCnt);
     ColWidth = (int*)malloc(sizeof(int) * ColCnt);
+    ppTextHdr = (PropText**)malloc(sizeof(PropText*) * ColCnt);
     if (!ColName || !ColWidth) return; /*TODO : 예외 처리 필요*/
 
     for (int i = 0; i < ColCnt; i++) {
@@ -48,11 +49,35 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
         ViewData.push_back(obj);
     }
 
-    pBox = new PropBox();
+    pBoxHeader = new PropBox();
+    for (int i = 0; i < ColCnt; i++) ppTextHdr[i] = new PropText();
+    pBoxFrame = new PropBox();
 
+    /* 초기화 / 재개 모션 기입 */
+    /*TODO : InputMotion 함수는 사용 하지 않을 예정이므로, resume 함수로 이 코드를 옮긴다.*/
     switch (MotionInit) {
     case eTableMotionPattern::eInit_Default:
-        pBox->Init(pRenderTarget, uiPos, ColorFrame, FALSE);
+    {
+        POSITION TmpPos;
+        int      WidthOffset = 0;
+
+        TmpPos.x  = uiPos.x;
+        TmpPos.y  = uiPos.y;
+        TmpPos.x2 = uiPos.x2;
+        TmpPos.y2 = HeaderHgt;
+
+        pBoxHeader->Init(pRenderTarget, TmpPos, ColorHeaderBg);
+        for (int i = 0; i < ColCnt; i++) {
+            TmpPos.x = uiPos.x + WidthOffset;
+            TmpPos.x2 = ColWidth[i];
+            WidthOffset += ColWidth[i];
+            ppTextHdr[i]->Init(pRenderTarget, uiSys->MediumTextForm, ColName[i], 0, TmpPos, ColorHeaderText, wcslen(ColName[i]));
+        }
+        pBoxFrame->Init(pRenderTarget, uiPos, ColorFrame, FALSE);
+        break;
+    }
+
+        break;
     }
     DefaultHandler(this, UIM_CREATE, NULL, NULL); /*UI생성 메세지 전송*/
 }
@@ -176,12 +201,17 @@ BOOL UI_Table::update(unsigned long time)
     }
 
     /*업데이트*/
+    //bUpdated |= pHeader->update(time);
     for (int i = 0; i < ValidViewRowCnt; i++) {
         if (MainDataPoolSize <= CurrBindIndex) break; /*딱뎀상황에선 자투리 접근 X*/
         UpdateIdx = (ModIndex + i) % ViewRowCnt; /*현재 뷰 영역의 인덱스 계산*/
         pViewRow = ViewData[UpdateIdx];
         bUpdated |= pViewRow->update(time);
     }
+
+    /*헤더 업데이트*/
+    pBoxHeader->update(time);
+    for (int i = 0; i < ColCnt; i++) bUpdated |= ppTextHdr[i]->update(time);
 
     if (!bUpdated) {
         if (uiMotionState == eUIMotionState::eUMS_PlayingHide)
@@ -234,7 +264,10 @@ void UI_Table::render()
 
     pRenderTarget->SetTransform(OldMat); /*기존 행렬 복구*/
     pRenderTarget->PopAxisAlignedClip();
-    pBox->render(pRenderTarget);
+
+    pBoxHeader->render(pRenderTarget);
+    for (int i = 0; i < ColCnt; i++) ppTextHdr[i]->render(pRenderTarget);
+    pBoxFrame->render(pRenderTarget);
 #if 0 /*스크롤 모션값 테스트용*/
     {
         static ID2D1SolidColorBrush* Brush = 0;
@@ -344,6 +377,8 @@ void RowObject::SetData(wchar_t** ppData, int* pWidth, int nCnt, int Height)
     int CurrentX = 0;
     POSITION TmpPos;
 
+    /*부모 UI_Table 의 모션 정보에 따라 프랍을 초기화 한다.*/
+    /*TODO : 현재는 모두 Default지만, switch-case 로 나눠야 한다.*/
     for (int i = 0; i < nCnt; i++) {
         pStr = ppData[i];
         TmpPos = {(float)CurrentX, 0, (float)pWidth[i], (float)Height};

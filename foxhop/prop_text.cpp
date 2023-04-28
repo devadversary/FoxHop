@@ -35,7 +35,7 @@ void PropText::Init(ID2D1RenderTarget* pRT, IDWriteTextFormat* pTexFmt, wchar_t*
     InitLen = StartLen;
     CurLen = (float)StartLen;
     pStr = pText;
-    nStrLen = nTextLen;
+    nStrLen = wcslen(pText);
     ComMotionColor.clearChannel();
     ComMotionMovement.clearChannel();
     ComMotionStrLen.clearChannel();

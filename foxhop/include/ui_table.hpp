@@ -77,11 +77,12 @@ public:
     D2D1_COLOR_F  ColorRowBgSelect    = { 0.2f, 0.56f, 0.1f, 1.f }; /**< 연한 파란색*/
 
 private:
-    ComponentMotion*           ScrollComp;   /**< 스크롤 모션 진행을 위한 컴포넌트*/
-    std::vector<TABLE_ROW>     MainDataPool; /**< 갖고있는 모든 데이터*/
-    std::vector<RowObject*>     ViewData;     /**< 화면에 보일 행 데이터 (화면 크기만큼만 생성)*/
-    RowObject*                  pHeader;
-    PropBox* pBox;
+    ComponentMotion*        ScrollComp;   /**< 스크롤 모션 진행을 위한 컴포넌트*/
+    std::vector<TABLE_ROW>  MainDataPool; /**< 갖고있는 모든 데이터*/
+    std::vector<RowObject*> ViewData;     /**< 화면에 보일 행 데이터 (화면 크기만큼만 생성)*/
+    PropBox*  pBoxHeader;
+    PropText** ppTextHdr;
+    PropBox*  pBoxFrame;
     BOOL      MultiSelectMode; /**< FALSE:단일 선택 / TRUE:여러줄 선택 모드*/
     long long DataCount;       /**< 현재 데이터 갯수*/
     float     CurrScrollPixel; /**< 현재 모션 진행중인 스크롤 픽셀 (연속적으로 변함, 렌더링시 사용)*/
