@@ -56,7 +56,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     case UIM_CREATE:
     {
         int i, k, delay=0;
-        for (k = 10; k < 350; k+=30) {
+        for (k = 10; k < 50; k+=30) {
             for (i = 10; i < 600; i += 40) {
                 UI_Button* pButton = new UI_Button(pUI->uiSys, TestButtProc, {(float)i,(float)k,30,20}, (wchar_t*)L"TE", delay);
                 pPanel->RegisterUI(pButton);
@@ -65,7 +65,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
             }
         }
 
-        pTable = new UI_Table(pUI->uiSys, NULL, {10, 610, 600 , 250}, 3,
+        pTable = new UI_Table(pUI->uiSys, NULL, {10, 100, 590 , 250}, 3,
                               ColData, NULL, 30, 20, FALSE);
         pPanel->RegisterUI(pTable);
     }
@@ -80,15 +80,22 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN :
     {
         int i = 0;
-        wchar_t* TmpData[3];
+        wchar_t TmpData[3][32];
+        wchar_t* Data[3];
+        static int ttt = 1;
+
         for (UI* pUI : ButtonList) {
             pUI->resume(i);
             i += 5;
         }
-        TmpData[0] = _wcsdup(L"test");
-        TmpData[1] = _wcsdup(L"test22");
-        TmpData[2] = _wcsdup(L"test333");
-        pTable->AddData(TmpData, FALSE);
+        wsprintfW(TmpData[0], L"%s%d", L"TestData", ttt);
+        wsprintfW(TmpData[1], L"%s%d", L"TestData", ttt);
+        wsprintfW(TmpData[2], L"%s%d", L"TestData", ttt);
+        Data[0] = _wcsdup(TmpData[0]);
+        Data[1] = _wcsdup(TmpData[1]);
+        Data[2] = _wcsdup(TmpData[2]);
+        pTable->AddData(Data, FALSE);
+        ttt++;
     }
         break;
 
@@ -133,7 +140,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
         uiSys->D2DA.pRenTarget->BeginDraw();
         //uiSys->D2DA.pRenTarget->Clear({1,1,1,1});
-        uiSys->D2DA.pRenTarget->Clear({0,0,0,0.7});
+        uiSys->D2DA.pRenTarget->Clear({1,1,1,0.7});
         pMainPanel->update(GetElapse());
         pMainPanel->render();
         uiSys->D2DA.pRenTarget->EndDraw();
@@ -156,14 +163,14 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     wc.lpszClassName = CLASSNAME;
     wc.lpfnWndProc = WndProc;
     wc.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
-    wc.hCursor = LoadCursor(hInst, IDC_ARROW);
-    wc.hIcon = LoadIcon(hInst, IDI_APPLICATION);
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
     wc.style = CS_HREDRAW | CS_VREDRAW;
     wc.lpszMenuName = NULL;
     wc.cbClsExtra = NULL;
     wc.cbWndExtra = NULL;
     RegisterClass(&wc);
-    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 600, 400, NULL, NULL, hInst, NULL);
+    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 630, 400, NULL, NULL, hInst, NULL);
     AlphaWindow(hWnd, WINDOWMODE_TRANSPARENT);
     ShowWindow(hWnd, TRUE);
     while (GetMessage(&Message, NULL, NULL, NULL)) {
