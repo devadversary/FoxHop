@@ -43,7 +43,7 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
 
     /*행 생성*/
     ClientHeight = (int)Pos.y2 - HeaderHgt;
-    ViewRowCnt = (ClientHeight / RowHgt) + 1; /*자투리 영역도 온전한 1개 취급*/
+    ViewRowCnt = (ClientHeight / RowHgt) + 2; /*자투리 영역도 온전한 1개 취급*/
     for (int i = 0; i < ViewRowCnt; i++) {
         RowObject* obj = new RowObject(pUISys, this, { 0,0,Pos.x2,(float)RowHgt }, ColCnt);
         ViewData.push_back(obj);
@@ -194,7 +194,7 @@ BOOL UI_Table::update(unsigned long time)
         if (pViewRow->bBindComplete && (pViewRow->MainDataIdx == CurrBindIndex)) continue;
 
         pViewRow->SetData(MainDataPool[CurrBindIndex].ppData, ColWidth, ColCnt, RowHgt);
-        if(UpdateIdx & 1) pViewRow->SetBgColor(ColorRowBg2);
+        if(CurrBindIndex & 1) pViewRow->SetBgColor(ColorRowBg2);
         else              pViewRow->SetBgColor(ColorRowBg1);
         pViewRow->bBindComplete = TRUE;
         pViewRow->MainDataIdx   = CurrBindIndex;
