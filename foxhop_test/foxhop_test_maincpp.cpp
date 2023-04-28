@@ -52,6 +52,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
     static std::list<UI*> ButtonList;
     wchar_t* ColData[3] = { (wchar_t*)L"hello", (wchar_t*)L"hhh", (wchar_t*)L"adad" };
+    unsigned int ColWidth[3] = {150,100,200};
     switch(Message) {
     case UIM_CREATE:
     {
@@ -66,7 +67,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         }
 
         pTable = new UI_Table(pUI->uiSys, NULL, {10, 100, 590 , 250}, 3,
-                              ColData, NULL, 30, 20, FALSE);
+                              ColData, ColWidth, 30, 20, FALSE);
         pPanel->RegisterUI(pTable);
     }
         break;

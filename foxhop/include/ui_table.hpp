@@ -69,7 +69,7 @@ public:
     D2D1_COLOR_F  ColorHeaderBg       = { 0.9f, 0.9f, 0.9f, 1.f };  /**< 밝은 회색*/
     D2D1_COLOR_F  ColorHeaderText     = { 0.f, 0.f, 0.f, 1.f };     /**< 검은색*/
     D2D1_COLOR_F  ColorRowBg1         = { 1.f, 1.f, 1.f, 1.f };     /**< 흰색*/
-    D2D1_COLOR_F  ColorRowBg2         = { 0.92f, 0.92f, 0.92f, 1.f }; /**< 밝은 회색*/
+    D2D1_COLOR_F  ColorRowBg2         = { 0.96f, 0.96f, 0.96f, 1.f }; /**< 밝은 회색*/
     D2D1_COLOR_F  ColorRowText        = { 0.f, 0.f, 0.f, 1.f };     /**< 검은색*/
     D2D1_COLOR_F  ColorRowLine        = { 0.f, 0.f, 0.f, 1.f };     /**< 검은색*/
     D2D1_COLOR_F  ColorRowBgMouseover = { 0.f, 0.f, 0.f, 0.1f };    /**< 투명도 0.1 검은색*/
