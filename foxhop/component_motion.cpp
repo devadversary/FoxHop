@@ -113,7 +113,6 @@ BOOL ComponentMotion::update(unsigned long ElapsedTime)
     nRunTime += ElapsedTime;
     for (i = 0; i < nCntUsedChannel; i++) {
         pCh = &ChannelList[i];
-        if (pCh->MotionInfo.formular == eMotionForm::eMotion_None) continue;
         if (nRunTime < (unsigned int)pCh->MotionInfo.nDelay) continue;
         nGapTime = nRunTime - pCh->MotionInfo.nDelay; /*현재진행시간 - 딜레이 = 모션진행시간*/
         x = nGapTime / (float)pCh->MotionInfo.nPitch; /*피치 조절*/
