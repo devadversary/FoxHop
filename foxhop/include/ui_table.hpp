@@ -74,15 +74,17 @@ public:
     D2D1_COLOR_F  ColorRowLine        = { 0.f, 0.f, 0.f, 1.f };     /**< 검은색*/
     D2D1_COLOR_F  ColorRowBgMouseover = { 0.f, 0.f, 0.f, 0.1f };    /**< 투명도 0.1 검은색*/
     D2D1_COLOR_F  ColorRowBgHighlight = { 0.f, 0.f, 0.f, 1.f };     /**< 검은색*/
-    D2D1_COLOR_F  ColorRowBgSelect    = { 0.2f, 0.56f, 0.1f, 1.f }; /**< 연한 파란색*/
+    D2D1_COLOR_F  ColorRowBgSelect    = { 0.2f, 0.56f, 1.f, 1.f }; /**< 연한 파란색*/
+    D2D1_COLOR_F  ColorRowTextSelect  = { 1.f, 1.f, 1.f, 1.f }; /**< 흰색*/
 
 private:
     ComponentMotion*        ScrollComp;   /**< 스크롤 모션 진행을 위한 컴포넌트*/
-    std::vector<TABLE_ROW>  MainDataPool; /**< 갖고있는 모든 데이터*/
-    std::vector<RowObject*> ViewData;     /**< 화면에 보일 행 데이터 (화면 크기만큼만 생성)*/
     PropBox*  pBoxHeader;
     PropText** ppTextHdr;
     PropBox*  pBoxFrame;
+    std::vector<TABLE_ROW>  MainDataPool; /**< 갖고있는 모든 데이터*/
+    std::vector<RowObject*> ViewData;     /**< 화면에 보일 행 데이터 (화면 크기만큼만 생성)*/
+    POINT     MousePt;         /**< 마우스 위치*/
     BOOL      MultiSelectMode; /**< FALSE:단일 선택 / TRUE:여러줄 선택 모드*/
     long long DataCount;       /**< 현재 데이터 갯수*/
     float     CurrScrollPixel; /**< 현재 모션 진행중인 스크롤 픽셀 (연속적으로 변함, 렌더링시 사용)*/
@@ -141,10 +143,11 @@ public:
     RowObject(UISystem* pUISys, UI_Table* pParentTable, POSITION pos, unsigned int ColCnt);
     ~RowObject();
     void SetElapse(unsigned long value);
+    void SetData(wchar_t** ppData, int* pWidth, int nCnt, int Height);
     void SetSelect(BOOL bSel, D2D1_COLOR_F Color);
     void SetHighlight(D2D1_COLOR_F Color);
     void SetBgColor(D2D1_COLOR_F Color);
-    void SetData(wchar_t** ppData, int* pWidth, int nCnt, int Height);
+    void SetFontColor(D2D1_COLOR_F Color);
 
     void pause(int nDelay);
     void resume(int nDelay);

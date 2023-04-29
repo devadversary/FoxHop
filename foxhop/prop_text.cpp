@@ -122,12 +122,12 @@ void PropText::setRuntime(unsigned long time)
 */
 BOOL PropText::update(unsigned long time)
 {
-    int nTrue = 0;
+    BOOL bUpdated = FALSE;
     /*모션 보정*/
-    nTrue += ComMotionMovement.update(time);
-    nTrue += ComMotionColor.update(time);
-    nTrue += ComMotionStrLen.update(time);
-    if (!nTrue) return FALSE;
+    bUpdated |= ComMotionMovement.update(time);
+    bUpdated |= ComMotionColor.update(time);
+    bUpdated |= ComMotionStrLen.update(time);
+    if (!bUpdated) return FALSE;
     return TRUE;
 }
 
@@ -137,7 +137,6 @@ BOOL PropText::update(unsigned long time)
 void PropText::render(ID2D1RenderTarget* pRT)
 {
     D2D1_RECT_F rect;
-
     Brush->SetColor(CurColor);
     rect = { (float)CurPos.x,
                 (float)CurPos.y,

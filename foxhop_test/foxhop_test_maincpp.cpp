@@ -29,6 +29,8 @@ unsigned int GetElapse()
     return distance(t2, t1);
 }
 
+UI_Table* pTable = NULL;
+
 void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     UI_Button* pButton = (UI_Button*)pUI;
@@ -36,6 +38,23 @@ void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     wchar_t tmpStr[32];
 
     switch (Message) {
+    case WM_LBUTTONDOWN:
+    {
+        int i = 0;
+        wchar_t TmpData[3][32];
+        wchar_t* Data[3];
+        static int ttt = 1;
+
+        wsprintfW(TmpData[0], L"%s%d", L"TestData", ttt);
+        wsprintfW(TmpData[1], L"%s%d", L"TestData", ttt);
+        wsprintfW(TmpData[2], L"%s%d", L"TestData", ttt);
+        Data[0] = _wcsdup(TmpData[0]);
+        Data[1] = _wcsdup(TmpData[1]);
+        Data[2] = _wcsdup(TmpData[2]);
+        pTable->AddData(Data, FALSE);
+        ttt++;
+    }
+
     case WM_MOUSEWHEEL:
         tmp += GET_WHEEL_DELTA_WPARAM(wParam);
         wsprintf(tmpStr, L"( %d )", tmp);
@@ -48,7 +67,6 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     HWND hWnd = pUI->uiSys->hBindWnd;
     UI_Panel* pPanel = (UI_Panel*)pUI;
-    static UI_Table* pTable = NULL;
 
     static std::list<UI*> ButtonList;
     wchar_t* ColData[3] = { (wchar_t*)L"hello", (wchar_t*)L"hhh", (wchar_t*)L"adad" };
@@ -63,41 +81,30 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
                 pPanel->RegisterUI(pButton);
                 ButtonList.push_back(pButton);
                 delay += 10;
+                break; /////////
             }
+            break; ////////
         }
 
-        pTable = new UI_Table(pUI->uiSys, NULL, {10, 100, 590 , 250}, 3,
+        pTable = new UI_Table(pUI->uiSys, NULL, {10, 80, 590 , 270}, 3,
                               ColData, ColWidth, 30, 20, FALSE);
         pPanel->RegisterUI(pTable);
     }
         break;
-
-    case WM_RBUTTONDOWN :
-        for (UI* pUI : ButtonList){
-            pUI->pause(rand()%300);
-        }
-        break;
-
-    case WM_LBUTTONDOWN :
+#if 0
+    case WM_LBUTTONDOWN:
     {
         int i = 0;
-        wchar_t TmpData[3][32];
-        wchar_t* Data[3];
-        static int ttt = 1;
-
         for (UI* pUI : ButtonList) {
             pUI->resume(i);
             i += 5;
         }
-        wsprintfW(TmpData[0], L"%s%d", L"TestData", ttt);
-        wsprintfW(TmpData[1], L"%s%d", L"TestData", ttt);
-        wsprintfW(TmpData[2], L"%s%d", L"TestData", ttt);
-        Data[0] = _wcsdup(TmpData[0]);
-        Data[1] = _wcsdup(TmpData[1]);
-        Data[2] = _wcsdup(TmpData[2]);
-        pTable->AddData(Data, FALSE);
-        ttt++;
     }
+#endif
+    case WM_RBUTTONDOWN :
+        for (UI* pUI : ButtonList){
+            pUI->pause(rand()%300);
+        }
         break;
 
     case WM_IME_COMPOSITION:

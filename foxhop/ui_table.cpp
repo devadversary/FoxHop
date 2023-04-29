@@ -102,8 +102,30 @@ void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPa
     case WM_LBUTTONDOWN:
         break;
 
-    case WM_LBUTTONUP:
+    case WM_MOUSEMOVE:
+        pTable->MousePt.x = GET_X_LPARAM(lParam);
+        pTable->MousePt.y = GET_Y_LPARAM(lParam);
         break;
+
+    case WM_LBUTTONUP:
+    {
+        POINT pt;
+        int y, idx, OrderIdx, MainIdx;
+        BOOL bSel;
+
+        pt.x = GET_X_LPARAM(lParam);
+        pt.y = GET_Y_LPARAM(lParam);
+        y = pTable->MousePt.y - pTable->HeaderHgt;
+        if (y < 0) break; /*헤더영역 클릭됨*/
+        idx = ((long long)pTable->CurrScrollPixel + y) / pTable->RowHgt;
+        OrderIdx = idx % pTable->ViewRowCnt;
+        MainIdx = pTable->ViewData[OrderIdx]->MainDataIdx; /*선택된 행*/
+        pTable->MainDataPool[MainIdx].bSelected ^= 1; /*TRUE / FALSE 교대*/
+        bSel = pTable->MainDataPool[MainIdx].bSelected;
+        //pTable->ViewData[OrderIdx]->SetSelect(bSel, pTable->ColorRowBgSelect);
+        pTable->ViewData[OrderIdx]->bBindComplete = FALSE;
+        break;
+    }
 
     case WM_MOUSEWHEEL:
     {
@@ -176,7 +198,6 @@ BOOL UI_Table::update(unsigned long time)
     size_t MainDataPoolSize;
 
     bUpdated = ScrollComp->update(time); /*스크롤 상태 먼저 업데이트*/
-    ///////////////// 텍스트, 박스, 선 모두 bUpdated를 통해 업데이트 되었는지 확인 후 UI 모션 상태 갱신 필요
 
     CurrMainIndex = (long long)CurrScrollPixel / RowHgt;
     ModIndex = CurrMainIndex % ViewRowCnt;
@@ -195,15 +216,21 @@ BOOL UI_Table::update(unsigned long time)
 
         pViewRow->SetData(MainDataPool[CurrBindIndex].ppData, ColWidth, ColCnt, RowHgt);
         if(CurrBindIndex & 1) pViewRow->SetBgColor(ColorRowBg2);
-        else              pViewRow->SetBgColor(ColorRowBg1);
+        else                  pViewRow->SetBgColor(ColorRowBg1);
+
+        if (MainDataPool[CurrBindIndex].bSelected)
+            pViewRow->SetFontColor(ColorRowTextSelect);
+        else                                      
+            pViewRow->SetFontColor(ColorRowText);
+
+        pViewRow->SetSelect(MainDataPool[CurrBindIndex].bSelected, ColorRowBgSelect);
+
         pViewRow->bBindComplete = TRUE;
         pViewRow->MainDataIdx   = CurrBindIndex;
     }
 
-    /*업데이트*/
-    //bUpdated |= pHeader->update(time);
+    /*뷰 행 업데이트*/
     for (int i = 0; i < ValidViewRowCnt; i++) {
-        if (MainDataPoolSize <= CurrBindIndex) break; /*딱뎀상황에선 자투리 접근 X*/
         UpdateIdx = (ModIndex + i) % ViewRowCnt; /*현재 뷰 영역의 인덱스 계산*/
         pViewRow = ViewData[UpdateIdx];
         bUpdated |= pViewRow->update(time);
@@ -356,6 +383,8 @@ void RowObject::SetSelect(BOOL bSel, D2D1_COLOR_F Color)
     switch (pParent->MotionSelect) {
     case eTableMotionPattern::eSelect_Default:
         pSelectBox->Init(uiSys->D2DA.pRenTarget, Pos, TargetColor);
+        //mi = InitMotionInfo(eMotionForm::eMotion_x3_2, 0, 250);
+        //pSelectBox->addMovementMotion(mi, TRUE, {Pos.x, Pos.y,0, Pos.y2}, Pos);
         break;
     }
 }
@@ -368,6 +397,15 @@ void RowObject::SetHighlight(D2D1_COLOR_F Color)
 void RowObject::SetBgColor(D2D1_COLOR_F Color)
 {
     pBackgroundBox->Init(uiSys->D2DA.pRenTarget, Pos, Color);
+}
+
+void RowObject::SetFontColor(D2D1_COLOR_F Color)
+{
+    MOTION_INFO mi;
+
+    mi = InitMotionInfo(eMotionForm::eMotion_None, 0, 0);
+    for (int i = 0; i < nColumn; i++)
+        ppText[i]->SetColor(mi, FALSE, Color, Color);
 }
 
 void RowObject::SetData(wchar_t** ppData, int* pWidth, int nCnt, int Height)
@@ -417,7 +455,7 @@ void RowObject::render()
 
     pBackgroundBox->render(pRT);
     //pMouseoverBox->render(pRT);
-    //pSelectBox->render(pRT);
+    pSelectBox->render(pRT);
     //pHighlightBox->render(pRT);
     for (int i = 0; i < nColumn; i++) {
         ppText[i]->render(pRT);

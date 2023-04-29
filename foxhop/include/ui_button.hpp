@@ -60,7 +60,7 @@ public :
     unsigned int         ButtonColorPitch      = 0; /**< 색상 변경 피치*/
     unsigned int         ButtonTextPitch       = 0; /**< 텍스트 변경 피치*/
     D2D1_COLOR_F         ButtonFrameColor      = { 0.f, 0.f, 0.f, 0.f };     /**< 초기 테두리 색*/
-    D2D1_COLOR_F         ButtonFaceColor       = { 0.8f, 0.8f, 0.8f, 1.f };  /**< 초기 버튼 전경색*/
+    D2D1_COLOR_F         ButtonFaceColor       = { 0.9f, 0.9f, 0.9f, 1.f };  /**< 초기 버튼 전경색*/
     D2D1_COLOR_F         ButtonMouseoverColor  = { 1.f,  1.f,  1.f,  0.5f }; /**< 마우스 오버 색*/
     D2D1_COLOR_F         ButtonHighlightColor  = { 1.f,  1.f,  1.f,  1.f };  /**< 버튼 하이라이트 색*/
     D2D1_COLOR_F         ButtonFontColor       = { 0.f, 0.f, 0.f, 1.f };     /**< 초기 텍스트 색*/
