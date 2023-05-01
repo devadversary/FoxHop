@@ -18,19 +18,23 @@ typedef struct _st_TableRow
     @brief 테이블 모션 타입 상수
 */
 enum class eTableMotionPattern {
-    eInit_Default = 0, /**< 생성: 모션 없음*/
+    eInit_Default = 0,       /**< 생성: 모션 없음*/
 
-    ePause_Default = 0, /**< 소멸: 모션 없음*/
+    ePause_Default = 0,      /**< 소멸: 모션 없음*/
 
-    eMouseover_Default = 0, /**< 마우스오버 : 모션 없음*/
+    eMouseover_Default = 0,  /**< 마우스오버 : 모션 없음*/
 
     eMouseleave_Default = 0, /**< 마우스이탈 : 모션 없음*/
 
-    eSelect_Default = 0, /**< 선택 : 모션 없음*/
+    eSelect_Default = 0,     /**< 선택 : 모션 없음*/
+    eSelect_Linear,          /**< 선택 : 선형 모션*/
+    eSelect_Decel,           /**< 선택 : 감속 모션*/
 
-    eUnselect_Default = 0, /**< 선택 해제 : 모션 없음*/
+    eUnselect_Default = 0,   /**< 선택 해제 : 모션 없음*/
 
-    eHighlight_Default = 0 /**< 하이라이팅 : 모션 없음*/
+    eHighlight_Default = 0,  /**< 하이라이팅 : 모션 없음*/
+
+    eText_Default = 0,       /**< 텍스트 : 모션 없음*/
 };
 
 /**
@@ -55,6 +59,7 @@ class UI_Table : public UI {
 public:
     eTableMotionPattern MotionInit      = eTableMotionPattern::eInit_Default;
     eTableMotionPattern MotionPause     = eTableMotionPattern::ePause_Default;
+    eTableMotionPattern MotionRowText   = eTableMotionPattern::eText_Default;
     eTableMotionPattern MotionMouseover = eTableMotionPattern::eMouseover_Default;
     eTableMotionPattern MotionMouseleave = eTableMotionPattern::eMouseover_Default;
     eTableMotionPattern MotionSelect    = eTableMotionPattern::eSelect_Default;
@@ -64,7 +69,9 @@ public:
     unsigned long PitchMouseover = 0;
     unsigned long PitchSelect    = 0;
     unsigned long PitchUnselect  = 0;
-    unsigned long PitchScroll    = 300; /**< 스크롤 모션 속도는 0.2초 기본값.*/
+    unsigned long PitchScroll    = 200; /**< 스크롤 모션 시간은 0.2초 기본값.*/
+    unsigned long PitchRowText = 0; /**< 한 행당 텍스트 모션 시간*/
+    unsigned long PitchRowBg   = 0; /**< 한 행당 배경색 모션 시간*/
     D2D1_COLOR_F  ColorFrame          = { 0.f ,0.f, 0.f, 1.f };     /**< 검은색*/
     D2D1_COLOR_F  ColorHeaderBg       = { 0.9f, 0.9f, 0.9f, 1.f };  /**< 밝은 회색*/
     D2D1_COLOR_F  ColorHeaderText     = { 0.f, 0.f, 0.f, 1.f };     /**< 검은색*/
@@ -98,13 +105,9 @@ private:
     int       RowHgt;          /**< 행 높이 픽셀*/
     int       ClientHeight;    /**< 헤더 높이를 제외한 순수 테이블 영역 높이*/
     int       ViewRowCnt;      /**< 화면에 보여지는 행 갯수*/
-    /*
-    ViewStartPtr;
-    ViewDataPool;
-    */
+    long long PrevSelMainIdx;  /**< 이전에 선택했던 실 데이터 인덱스 (음수이면 미선택)*/
 
 private:
-    //void InputMotion(eListviewAction Action, UITheme* Theme, unsigned int nDelay, void* param);
     static void DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
 public:
@@ -128,6 +131,7 @@ class RowObject : public UI {
 public: 
     unsigned long long MainDataIdx = 0;   /**< 이 뷰행이 가리키는 MainDataPool 데이터의 인덱스*/
     BOOL               bBindComplete = FALSE; /**< 바인딩 완료 여부*/
+    BOOL               bNeedUpdate   = FALSE; /**< 업데이트 필요여부*/
 private:
     UI_Table*  pParent;
     POSITION   Pos;
@@ -142,12 +146,11 @@ private:
 public:
     RowObject(UISystem* pUISys, UI_Table* pParentTable, POSITION pos, unsigned int ColCnt);
     ~RowObject();
-    void SetElapse(unsigned long value);
-    void SetData(wchar_t** ppData, int* pWidth, int nCnt, int Height);
-    void SetSelect(BOOL bSel, D2D1_COLOR_F Color);
+    void SetData(wchar_t** ppData, int* pWidth, int nCnt, BOOL bReplace);
+    void SetSelect(BOOL bSel, D2D1_COLOR_F Color, BOOL bReplace);
     void SetHighlight(D2D1_COLOR_F Color);
-    void SetBgColor(D2D1_COLOR_F Color);
-    void SetFontColor(D2D1_COLOR_F Color);
+    void SetBgColor(D2D1_COLOR_F Color, BOOL bReplace);
+    void SetFontColor(D2D1_COLOR_F Color, BOOL bReplace);
 
     void pause(int nDelay);
     void resume(int nDelay);

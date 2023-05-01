@@ -20,7 +20,7 @@
 #define UIM_MOUSEMOVE     WM_USER + 116
 #define UIM_MOUSEON       WM_USER + 117
 #define UIM_MOUSELEAVE    WM_USER + 118
-#define UIM_LIST_SELECT   WM_USER + 300
+#define UIM_TABLE_SELECT  WM_USER + 300
 
 #define ALL_ZERO { 0,0,0,0 }
 

@@ -52,14 +52,11 @@ void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         Data[1] = _wcsdup(TmpData[1]);
         Data[2] = _wcsdup(TmpData[2]);
         pTable->AddData(Data, FALSE);
-        ttt++;
-    }
-
-    case WM_MOUSEWHEEL:
-        tmp += GET_WHEEL_DELTA_WPARAM(wParam);
-        wsprintf(tmpStr, L"( %d )", tmp);
+        wsprintf(tmpStr, L"%d Datas", ttt);
         pButton->setText(tmpStr, 0);
+        ttt++;
         break;
+    }
     }
 }
 
@@ -68,43 +65,17 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     HWND hWnd = pUI->uiSys->hBindWnd;
     UI_Panel* pPanel = (UI_Panel*)pUI;
 
-    static std::list<UI*> ButtonList;
-    wchar_t* ColData[3] = { (wchar_t*)L"hello", (wchar_t*)L"hhh", (wchar_t*)L"adad" };
-    unsigned int ColWidth[3] = {150,100,200};
+    wchar_t* ColData[3] = { (wchar_t*)L"Data #1", (wchar_t*)L"Data #2", (wchar_t*)L"Desc" };
+    unsigned int ColWidth[3] = {150,120,120};
     switch(Message) {
     case UIM_CREATE:
     {
-        int i, k, delay=0;
-        for (k = 10; k < 50; k+=30) {
-            for (i = 10; i < 600; i += 40) {
-                UI_Button* pButton = new UI_Button(pUI->uiSys, TestButtProc, {(float)i,(float)k,30,20}, (wchar_t*)L"TE", delay);
-                pPanel->RegisterUI(pButton);
-                ButtonList.push_back(pButton);
-                delay += 10;
-                break; /////////
-            }
-            break; ////////
-        }
+        UI_Button* pButton = new UI_Button(pUI->uiSys, TestButtProc, {10,10,100,20}, (wchar_t*)L"Data Input Test", 0);
+        pTable = new UI_Table(pUI->uiSys, NULL, {10, 40, 590 , 270}, 3, ColData, ColWidth, 30, 20, FALSE);
 
-        pTable = new UI_Table(pUI->uiSys, NULL, {10, 80, 590 , 270}, 3,
-                              ColData, ColWidth, 30, 20, FALSE);
+        pPanel->RegisterUI(pButton);
         pPanel->RegisterUI(pTable);
     }
-        break;
-#if 0
-    case WM_LBUTTONDOWN:
-    {
-        int i = 0;
-        for (UI* pUI : ButtonList) {
-            pUI->resume(i);
-            i += 5;
-        }
-    }
-#endif
-    case WM_RBUTTONDOWN :
-        for (UI* pUI : ButtonList){
-            pUI->pause(rand()%300);
-        }
         break;
 
     case WM_IME_COMPOSITION:
@@ -147,8 +118,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 
     case WM_PAINT:
         uiSys->D2DA.pRenTarget->BeginDraw();
-        //uiSys->D2DA.pRenTarget->Clear({1,1,1,1});
-        uiSys->D2DA.pRenTarget->Clear({1,1,1,0.7});
+        uiSys->D2DA.pRenTarget->Clear({1,1,1,1});
+        //uiSys->D2DA.pRenTarget->Clear({1,1,1,0.9});
         pMainPanel->update(GetElapse());
         pMainPanel->render();
         uiSys->D2DA.pRenTarget->EndDraw();

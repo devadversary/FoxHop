@@ -14,7 +14,6 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     MessageHandler = pfnCallback;
     uiPos = Pos;
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
-    //uiMotionState = eUIMotionState::eUMS_Visible;
 
     /*하위 클래스 멤버 셋팅*/
     MultiSelectMode = MultiSelect;
@@ -23,7 +22,7 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     MaxScrollPixel = 0;
     DataCount = 0;
     CurrMainIndex = 0;
-
+    PrevSelMainIdx = -1;
     HeaderHgt = HeaderHeight;
     RowHgt = RowHeight ? RowHeight : TEXTSHEET_DEFAULT_ROWHEIGHT;
     ScrollComp = new ComponentMotion;
@@ -83,6 +82,19 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
 }
 
 /**
+    @brief 범위 내의 값인지 체크
+    @param x 기준 값
+    @param dx 기준으로부터의 범위 (x가 3이고 dx가 2이면, 3~5 범위)
+    @param test 테스트할 값
+*/
+static BOOL IsInRange(long long x, long long dx, long long test)
+{
+    if (test < x) return FALSE;
+    if (test > x+dx) return FALSE;
+    return TRUE;
+}
+
+/**
     @brief 기본 텍스트 리스트뷰 메세지 핸들러
     @remark 사용자 지정 프로시저는 기본 핸들러 실행 후 호출된다.
 */
@@ -117,12 +129,38 @@ void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPa
         pt.y = GET_Y_LPARAM(lParam);
         y = pTable->MousePt.y - pTable->HeaderHgt;
         if (y < 0) break; /*헤더영역 클릭됨*/
+        if (pTable->MainDataPool.size() == 0) break;
         idx = ((long long)pTable->CurrScrollPixel + y) / pTable->RowHgt;
         OrderIdx = idx % pTable->ViewRowCnt;
         MainIdx = pTable->ViewData[OrderIdx]->MainDataIdx; /*선택된 행*/
-        pTable->MainDataPool[MainIdx].bSelected ^= 1; /*TRUE / FALSE 교대*/
+        pTable->MainDataPool[MainIdx].bSelected ^= 1; /*TRUE / FALSE 교대 : 선택 표기 완료*/
         bSel = pTable->MainDataPool[MainIdx].bSelected;
-        //pTable->ViewData[OrderIdx]->SetSelect(bSel, pTable->ColorRowBgSelect);
+
+        /* 다중선택모드가 아닐경우 이전 선택 라인은 해제해줘야 한다.*/
+        if (bSel) {
+            RowObject* pViewRow = pTable->ViewData[OrderIdx];
+            pViewRow->bNeedUpdate = TRUE;
+
+            if (pTable->MessageHandler)
+                pTable->MessageHandler(pTable, UIM_TABLE_SELECT, NULL, MainIdx);/*어떤 라인이 선택 되었는지에 대한 정보 전달*/
+
+            if (!pTable->MultiSelectMode) {
+                /*전에 이미 선택된것이 있을때.*/
+                if (pTable->PrevSelMainIdx >= 0) {
+                    pTable->MainDataPool[pTable->PrevSelMainIdx].bSelected = FALSE;
+                    /*변경 대상이 뷰 영억 안에 있을때엔 모션 재생을 해주어야 함*/
+                    if (IsInRange(pTable->CurrMainIndex, pTable->ViewRowCnt, pTable->PrevSelMainIdx)) {
+                        long long PrevViewRowIdx = pTable->PrevSelMainIdx % pTable->ViewRowCnt;
+                        RowObject* pPrevViewRow  = pTable->ViewData[PrevViewRowIdx];
+                        pPrevViewRow->bNeedUpdate = TRUE;
+                        pPrevViewRow->bBindComplete = FALSE;
+                    }
+                }
+                pTable->PrevSelMainIdx = MainIdx;
+            }
+        }
+        else pTable->PrevSelMainIdx = -1; /*선택 해제시 이전 선택 인덱스 무효화. (다중선택은 고려하지 않아도 된다)*/
+
         pTable->ViewData[OrderIdx]->bBindComplete = FALSE;
         break;
     }
@@ -195,6 +233,7 @@ BOOL UI_Table::update(unsigned long time)
     int UpdateIdx;
     long long ModIndex, CurrBindIndex;
     BOOL bUpdated = FALSE;
+    BOOL bReplace; /*단순 데이터 교체 여부 (이때 모션진행은 항상 Default로 함)*/
     size_t MainDataPoolSize;
 
     bUpdated = ScrollComp->update(time); /*스크롤 상태 먼저 업데이트*/
@@ -212,20 +251,22 @@ BOOL UI_Table::update(unsigned long time)
         pViewRow = ViewData[UpdateIdx];
 
         /*이미 바인드된거 skip*/
-        if (pViewRow->bBindComplete && (pViewRow->MainDataIdx == CurrBindIndex)) continue;
+        if (pViewRow->bBindComplete && (pViewRow->MainDataIdx == CurrBindIndex)&& !pViewRow->bNeedUpdate) continue;
 
-        pViewRow->SetData(MainDataPool[CurrBindIndex].ppData, ColWidth, ColCnt, RowHgt);
-        if(CurrBindIndex & 1) pViewRow->SetBgColor(ColorRowBg2);
-        else                  pViewRow->SetBgColor(ColorRowBg1);
+        /*업데이트가 필요한 상황인지 판단*/
+        if (pViewRow->bNeedUpdate) bReplace = FALSE;
+        else                       bReplace = TRUE;
 
-        if (MainDataPool[CurrBindIndex].bSelected)
-            pViewRow->SetFontColor(ColorRowTextSelect);
-        else                                      
-            pViewRow->SetFontColor(ColorRowText);
+        pViewRow->SetData(MainDataPool[CurrBindIndex].ppData, ColWidth, ColCnt, bReplace);
+        if(CurrBindIndex & 1) pViewRow->SetBgColor(ColorRowBg2, bReplace);
+        else                  pViewRow->SetBgColor(ColorRowBg1, bReplace);
 
-        pViewRow->SetSelect(MainDataPool[CurrBindIndex].bSelected, ColorRowBgSelect);
+        if (MainDataPool[CurrBindIndex].bSelected) pViewRow->SetFontColor(ColorRowTextSelect, bReplace);
+        else                                       pViewRow->SetFontColor(ColorRowText, bReplace);
 
+        pViewRow->SetSelect(MainDataPool[CurrBindIndex].bSelected, ColorRowBgSelect, bReplace);
         pViewRow->bBindComplete = TRUE;
+        pViewRow->bNeedUpdate = FALSE; /*업데이트가 필요했다면, 요구사항 들어줬으니 다시 FALSE*/
         pViewRow->MainDataIdx   = CurrBindIndex;
     }
 
@@ -357,34 +398,31 @@ RowObject::~RowObject()
     free(ppColLine);
 }
 
-/**
-    @brief 행 진행시간 재설정
-    @n     뷰 영역 진입/이탈시 조정되며
-    @n     이탈시엔 INT_MAX 로 지정하면 된다.
-*/
-void RowObject::SetElapse(unsigned long value)
-{
-    for (int i = 0; i < nColumn; i++) {
-        ppText[i]->setRuntime(value);
-        ppColLine[i]->setRuntime(value);
-    }
-    pBackgroundBox->setRuntime(value);
-    pMouseoverBox->setRuntime(value);
-    pSelectBox->setRuntime(value);
-    pHighlightBox->setRuntime(value);
-}
-
-void RowObject::SetSelect(BOOL bSel, D2D1_COLOR_F Color)
+void RowObject::SetSelect(BOOL bSel, D2D1_COLOR_F Color, BOOL bReplace)
 {
     D2D1_COLOR_F TargetColor = bSel ? Color : D2D1_COLOR_F{ 0.f, 0.f, 0.f, 0.f };
     unsigned long pitch = bSel ? pParent->PitchSelect : pParent->PitchUnselect;
     MOTION_INFO mi;
+    eTableMotionPattern Patt;
 
-    switch (pParent->MotionSelect) {
+    if (bReplace) Patt = eTableMotionPattern::eSelect_Default;
+    else Patt = pParent->MotionSelect;
+
+    switch (Patt) {
     case eTableMotionPattern::eSelect_Default:
         pSelectBox->Init(uiSys->D2DA.pRenTarget, Pos, TargetColor);
-        //mi = InitMotionInfo(eMotionForm::eMotion_x3_2, 0, 250);
-        //pSelectBox->addMovementMotion(mi, TRUE, {Pos.x, Pos.y,0, Pos.y2}, Pos);
+        break;
+
+    case eTableMotionPattern::eSelect_Linear:
+        pSelectBox->Init(uiSys->D2DA.pRenTarget, Pos, TargetColor);
+        mi = InitMotionInfo(eMotionForm::eMotion_Linear1, 0, pitch);
+        pSelectBox->addMovementMotion(mi, TRUE, { Pos.x, Pos.y,0, Pos.y2 }, Pos);
+        break;
+
+    case eTableMotionPattern::eSelect_Decel:
+        pSelectBox->Init(uiSys->D2DA.pRenTarget, Pos, TargetColor);
+        mi = InitMotionInfo(eMotionForm::eMotion_x3_2, 0, pitch);
+        pSelectBox->addMovementMotion(mi, TRUE, { Pos.x, Pos.y,0, Pos.y2 }, Pos);
         break;
     }
 }
@@ -394,32 +432,49 @@ void RowObject::SetHighlight(D2D1_COLOR_F Color)
     //
 }
 
-void RowObject::SetBgColor(D2D1_COLOR_F Color)
+void RowObject::SetBgColor(D2D1_COLOR_F Color, BOOL bReplace)
 {
     pBackgroundBox->Init(uiSys->D2DA.pRenTarget, Pos, Color);
 }
 
-void RowObject::SetFontColor(D2D1_COLOR_F Color)
+void RowObject::SetFontColor(D2D1_COLOR_F Color, BOOL bReplace)
 {
     MOTION_INFO mi;
+    eTableMotionPattern Patt;
 
-    mi = InitMotionInfo(eMotionForm::eMotion_None, 0, 0);
-    for (int i = 0; i < nColumn; i++)
-        ppText[i]->SetColor(mi, FALSE, Color, Color);
+    if (bReplace) Patt = eTableMotionPattern::eText_Default;
+    else Patt = pParent->MotionRowText;
+
+    switch (Patt) {
+    case eTableMotionPattern::eText_Default:
+        mi = InitMotionInfo(eMotionForm::eMotion_None, 0, 0);
+        for (int i = 0; i < nColumn; i++) ppText[i]->SetColor(mi, FALSE, Color, Color);
+        break;
+    }
 }
 
-void RowObject::SetData(wchar_t** ppData, int* pWidth, int nCnt, int Height)
+/**
+    @brief 행의 데이터를 교체한다.
+    @param ppData 교체할 데이터뭉치
+    @param pWidth 폭 배열
+    @param nCnt 데이터의 갯수
+    @param bReplace 단순 데이터 교체여부 (스크롤에의한 데이터 교체시, 모션 생략을 위함)
+*/
+void RowObject::SetData(wchar_t** ppData, int* pWidth, int nCnt, BOOL bReplace)
 {
     wchar_t* pStr;
     size_t TextLen;
     int CurrentX = 0;
     POSITION TmpPos;
+    eTableMotionPattern Patt;
 
+    //if (bReplace) Patt = pParent
+    //Patt = pParent->MotionInit;
     /*부모 UI_Table 의 모션 정보에 따라 프랍을 초기화 한다.*/
     /*TODO : 현재는 모두 Default지만, switch-case 로 나눠야 한다.*/
     for (int i = 0; i < nCnt; i++) {
         pStr = ppData[i];
-        TmpPos = {(float)CurrentX, 0, (float)pWidth[i], (float)Height};
+        TmpPos = {(float)CurrentX, 0, (float)pWidth[i], Pos.y2};
         CurrentX += pWidth[i];
         TextLen = wcslen(pStr);
         ppText[i]->Init(uiSys->D2DA.pRenTarget, uiSys->MediumTextForm, pStr, TextLen, TmpPos, pParent->ColorRowText, TextLen);
@@ -428,10 +483,16 @@ void RowObject::SetData(wchar_t** ppData, int* pWidth, int nCnt, int Height)
 
 void RowObject::pause(int nDelay)
 {
+    switch (pParent->MotionPause) {
+
+    }
 }
 
 void RowObject::resume(int nDelay)
 {
+    switch (pParent->MotionInit) {
+
+    }
 }
 
 BOOL RowObject::update(unsigned long time)
