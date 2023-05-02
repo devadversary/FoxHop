@@ -123,13 +123,16 @@ void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPa
         POINT pt;
         int y, idx, OrderIdx, MainIdx;
         BOOL bSel;
+        size_t MainDataPoolSize;
 
         pt.x = GET_X_LPARAM(lParam);
         pt.y = GET_Y_LPARAM(lParam);
         y = pTable->MousePt.y - pTable->HeaderHgt;
         if (y < 0) break; /*헤더영역 클릭됨*/
-        if (pTable->MainDataPool.size() == 0) break;
+        MainDataPoolSize = pTable->MainDataPool.size();
+        if (MainDataPoolSize == 0) break;
         idx = ((long long)pTable->CurrScrollPixel + y) / pTable->RowHgt;
+        if (idx >= MainDataPoolSize) break;
         OrderIdx = idx % pTable->ViewRowCnt;
         MainIdx = pTable->ViewData[OrderIdx]->MainDataIdx; /*선택된 행*/
         pTable->MainDataPool[MainIdx].bSelected ^= 1; /*TRUE / FALSE 교대 : 선택 표기 완료*/
