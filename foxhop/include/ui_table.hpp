@@ -37,19 +37,6 @@ enum class eTableMotionPattern {
     eText_Default = 0,       /**< 텍스트 : 모션 없음*/
 };
 
-/**
-    @brief 테이블 모션 타입
-*/
-enum class eTableAction {
-    eAction_Init = 0,   /**< 초기화 모션*/
-    eAction_Pause,      /**< 소멸 모션*/
-    eAction_Mouseover,  /**< 마우스 오버 모션*/
-    eAction_Mouseleave, /**< 마우스 이탈 모션*/
-    eAction_Select,     /**< 행 선택 모션*/
-    eAction_Unselect,   /**< 행 선택 모션*/
-    eAction_Highlight,  /**< 하이라이팅*/
-};
-
 class RowObject;
 
 /**

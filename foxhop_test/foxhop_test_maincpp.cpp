@@ -29,7 +29,9 @@ unsigned int GetElapse()
     return distance(t2, t1);
 }
 
+UI_Button* pButton = NULL;
 UI_Table* pTable = NULL;
+UI_Static* pStatic = NULL;
 
 void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -60,6 +62,24 @@ void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     }
 }
 
+void TestTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+    UI_Table* pTable = static_cast<UI_Table*>(pUI);
+    wchar_t Noti[64];
+
+    switch (Message) {
+    case UIM_TABLE_SELECT:
+        wsprintfW(Noti, L"Line %d Selected. : %s", (int)lParam, ((wchar_t**)wParam)[0]);
+        pStatic->SetText(Noti);
+        break;
+
+    case UIM_TABLE_UNSELECT:
+        wsprintfW(Noti, L"Line %d Unselected.", (int)lParam);
+        pStatic->SetText(Noti);
+        break;
+    }
+}
+
 void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     HWND hWnd = pUI->uiSys->hBindWnd;
@@ -70,11 +90,12 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     switch(Message) {
     case UIM_CREATE:
     {
-        UI_Button* pButton = new UI_Button(pUI->uiSys, TestButtProc, {10,10,100,20}, (wchar_t*)L"Data Input Test", 0);
-        pTable = new UI_Table(pUI->uiSys, NULL, {10, 40, 590 , 270}, 3, ColData, ColWidth, 30, 20, FALSE);
-
+        pButton = new UI_Button(pUI->uiSys, TestButtProc, {10,10,100,20}, (wchar_t*)L"Data Input Test", 0);
+        pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 590 , 270}, 3, ColData, ColWidth, 30, 20, FALSE);
+        pStatic = new UI_Static(pUI->uiSys, NULL, {10, 320, 590, 25}, (wchar_t*)L"Done.");
         pPanel->RegisterUI(pButton);
         pPanel->RegisterUI(pTable);
+        pPanel->RegisterUI(pStatic);
     }
         break;
 

@@ -9,10 +9,7 @@ PropText::PropText()
     CurLen = 0;
     InitColor = { 0,0,0,0 };
     InitPos = { 0,0,0,0 };
-    bActivate = 0;
     nStrLen = 0;
-    pNext = 0;
-    pPrev = 0;
     pStr = NULL;
     pTextFmt = NULL;
 }

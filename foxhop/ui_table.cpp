@@ -53,7 +53,6 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     pBoxFrame = new PropBox();
 
     /* 초기화 / 재개 모션 기입 */
-    /*TODO : InputMotion 함수는 사용 하지 않을 예정이므로, resume 함수로 이 코드를 옮긴다.*/
     switch (MotionInit) {
     case eTableMotionPattern::eInit_Default:
     {
@@ -142,7 +141,7 @@ void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPa
             pViewRow->bNeedUpdate = TRUE;
 
             if (pTable->MessageHandler)
-                pTable->MessageHandler(pTable, UIM_TABLE_SELECT, NULL, MainIdx);/*어떤 라인이 선택 되었는지에 대한 정보 전달*/
+                pTable->MessageHandler(pTable, UIM_TABLE_SELECT, (WPARAM)pTable->MainDataPool[MainIdx].ppData, MainIdx);/*어떤 라인이 선택 되었는지에 대한 정보 전달*/
 
             if (!pTable->MultiSelectMode) {
                 /*전에 이미 선택된것이 있을때.*/
@@ -159,7 +158,11 @@ void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPa
                 pTable->PrevSelMainIdx = MainIdx;
             }
         }
-        else pTable->PrevSelMainIdx = -1; /*선택 해제시 이전 선택 인덱스 무효화. (다중선택은 고려하지 않아도 된다)*/
+        else {
+            if (pTable->MessageHandler)
+                pTable->MessageHandler(pTable, UIM_TABLE_UNSELECT, NULL, MainIdx);/*어떤 라인이 선택해제 되었는지에 대한 정보 전달*/
+            pTable->PrevSelMainIdx = -1; /*선택 해제시 이전 선택 인덱스 무효화. (다중선택은 고려하지 않아도 된다)*/
+        }
 
         pTable->ViewData[OrderIdx]->bBindComplete = FALSE;
         break;
@@ -223,7 +226,31 @@ void UI_Table::pause(int nDelay)
 
 void UI_Table::resume(int nDelay)
 {
+    /* 초기화 / 재개 모션 기입 */
+    /*TODO : InputMotion 함수는 사용 하지 않을 예정이므로, resume 함수로 이 코드를 옮긴다.*/
+    switch (MotionInit) {
+    case eTableMotionPattern::eInit_Default:
+    {
+        POSITION TmpPos;
+        int      WidthOffset = 0;
 
+        TmpPos.x = uiPos.x;
+        TmpPos.y = uiPos.y;
+        TmpPos.x2 = uiPos.x2;
+        TmpPos.y2 = HeaderHgt;
+
+        pBoxHeader->Init(pRenderTarget, TmpPos, ColorHeaderBg);
+        for (int i = 0; i < ColCnt; i++) {
+            TmpPos.x = uiPos.x + WidthOffset;
+            TmpPos.x2 = ColWidth[i];
+            WidthOffset += ColWidth[i];
+            ppTextHdr[i]->Init(pRenderTarget, uiSys->MediumTextForm, ColName[i], 0, TmpPos, ColorHeaderText, wcslen(ColName[i]));
+        }
+        pBoxFrame->Init(pRenderTarget, uiPos, ColorFrame, FALSE);
+        break;
+    }
+
+    }
 }
 
 BOOL UI_Table::update(unsigned long time)
@@ -235,6 +262,8 @@ BOOL UI_Table::update(unsigned long time)
     BOOL bUpdated = FALSE;
     BOOL bReplace; /*단순 데이터 교체 여부 (이때 모션진행은 항상 Default로 함)*/
     size_t MainDataPoolSize;
+
+    if (uiMotionState == eUIMotionState::eUMS_Hide) return FALSE;
 
     bUpdated = ScrollComp->update(time); /*스크롤 상태 먼저 업데이트*/
 

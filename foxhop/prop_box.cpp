@@ -31,7 +31,7 @@ void PropBox::ClearColorMotion()
 */
 void PropBox::Init(ID2D1RenderTarget* pRT, POSITION StartPos, D2D1_COLOR_F StartColor, BOOL Fill)
 {
-    if (!Brush)pRT->CreateSolidColorBrush(StartColor, &Brush);
+    if (!Brush) pRT->CreateSolidColorBrush(StartColor, &Brush);
     InitPos = StartPos;
     InitColor = StartColor;
     CurPos = StartPos;
@@ -123,11 +123,11 @@ void PropBox::setRuntime(int t)
 */
 BOOL PropBox::update(unsigned long time)
 {
-    int nTrue = 0;
+    BOOL bUpdated = FALSE;
 
-    nTrue += ComMotionMovement.update(time);
-    nTrue += ComMotionColor.update(time);
-    if (!nTrue) return FALSE;
+    bUpdated |= ComMotionMovement.update(time);
+    bUpdated |= ComMotionColor.update(time);
+    if (!bUpdated) return FALSE;
     return TRUE;
 }
 

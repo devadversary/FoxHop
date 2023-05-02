@@ -230,17 +230,16 @@ void UI_Button::resume(int nDelay)
 */
 BOOL UI_Button::update(unsigned long time)
 {
-    int nTrue = 0;
+    BOOL bUpdated = 0;
 
     /*UI 가 숨김 상태로 돌입하면 연산 중지*/
     if (uiMotionState == eUIMotionState::eUMS_Hide) return FALSE;
 
-    nTrue += MBoxFace->update(time);
-    nTrue += MBoxHighlight->update(time);
-    nTrue += MText->update(time);
+    bUpdated |= MBoxFace->update(time);
+    bUpdated |= MBoxHighlight->update(time);
+    bUpdated |= MText->update(time);
 
-    /*nTrue가 0이면 모션 연산이 종료된 것. ~ing 상태를 확정시킨다.*/
-    if (!nTrue) {
+    if (!bUpdated) {
         if (uiMotionState == eUIMotionState::eUMS_PlayingHide)
             uiMotionState = eUIMotionState::eUMS_Hide;
 

@@ -8,19 +8,20 @@
 
 /*기본적으로 WM_XXX 메세지를 사용하되,
   별도로 필요한 UI메세지는 여기서 정의한다.*/
-#define UIM_CREATE        WM_USER + 100
-#define UIM_DELETE        WM_USER + 101
-#define UIM_FOCUS         WM_USER + 109
-#define UIM_UNFOCUS       WM_USER + 110
-#define UIM_SETPOS        WM_USER + 111
-#define UIM_SETCOLOR      WM_USER + 112
-#define UIM_SETTEXT       WM_USER + 113
-#define UIM_PAUSE         WM_USER + 114 /*UI 임시 소멸*/
-#define UIM_RESUME        WM_USER + 115 /*UI 재개*/
-#define UIM_MOUSEMOVE     WM_USER + 116
-#define UIM_MOUSEON       WM_USER + 117
-#define UIM_MOUSELEAVE    WM_USER + 118
-#define UIM_TABLE_SELECT  WM_USER + 300
+#define UIM_CREATE         WM_USER + 100
+#define UIM_DELETE         WM_USER + 101
+#define UIM_FOCUS          WM_USER + 109
+#define UIM_UNFOCUS        WM_USER + 110
+#define UIM_SETPOS         WM_USER + 111
+#define UIM_SETCOLOR       WM_USER + 112
+#define UIM_SETTEXT        WM_USER + 113
+#define UIM_PAUSE          WM_USER + 114 /*UI 임시 소멸*/
+#define UIM_RESUME         WM_USER + 115 /*UI 재개*/
+#define UIM_MOUSEMOVE      WM_USER + 116
+#define UIM_MOUSEON        WM_USER + 117
+#define UIM_MOUSELEAVE     WM_USER + 118
+#define UIM_TABLE_SELECT   WM_USER + 300
+#define UIM_TABLE_UNSELECT WM_USER + 301
 
 #define ALL_ZERO { 0,0,0,0 }
 
