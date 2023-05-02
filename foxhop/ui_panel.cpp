@@ -34,7 +34,23 @@ void UI_Panel::DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
 
     /*키보드 관련 메세지 전달*/
     case WM_KEYDOWN:
-        // DefaultKeyboardHandler 도 필요 할 것으로 보임
+    case WM_KEYUP:
+    case WM_CHAR:
+    case VK_RETURN:
+    case VK_BACK:
+    case VK_DELETE:
+    case VK_TAB:
+    case VK_LEFT:
+    case VK_RIGHT:
+    case VK_UP:
+    case VK_DOWN:
+    case VK_HOME:
+    case VK_END:
+    case VK_ESCAPE:
+    case VK_INSERT:
+    case WM_IME_COMPOSITION:
+    case WM_IME_CHAR:
+        if (pPanel->pFocusedUI) pPanel->pFocusedUI->DefaultHandler(pPanel->pFocusedUI, Message, wParam, lParam);
         break;
     }
     if (UserHandler) UserHandler(pUI, Message, wParam, lParam);
