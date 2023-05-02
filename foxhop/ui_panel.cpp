@@ -164,6 +164,7 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
             return;
         }
         else {
+            if (Message==WM_LBUTTONDOWN) pFocusedUI = NULL; /*클릭메세지라면 포커스 해제*/
             uiSys->SendUIMessage(pMouseOverUI, UIM_MOUSELEAVE, 0, 0);
             pMouseOverUI = NULL;
         }
@@ -174,6 +175,7 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
         if (pPanel->uiMotionState == eUIMotionState::eUMS_Hide) continue;
         if (IsInRect(pPanel->uiPos, pt)) {
             pMouseOverUI = pPanel;
+            if (Message == WM_LBUTTONDOWN) pFocusedUI = pPanel; /*클릭 메세지라면 포커스 지정*/
             NewLParam = RerouteMouseCursorPt((int)pMouseOverUI->uiPos.x, (int)pMouseOverUI->uiPos.y, lParam);
             uiSys->SendUIMessage(pPanel, UIM_MOUSEON, 0, 0);
             uiSys->SendUIMessage(pPanel, Message, wParam, NewLParam);
@@ -183,10 +185,10 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
     /*UI 리스트 체크*/
     for (UI* pUI : UIList) {
         if (pUI->uiMotionState != eUIMotionState::eUMS_Visible) continue;
-        /* 시작점-크기 쌍 대신 시작점-끝점 쌍을 사용하는 UI는 영역검사 X*/
         if (!pUI->MouseEventCheck) continue;
         if (IsInRect(pUI->uiPos, pt)) {
             pMouseOverUI = pUI;
+            if (Message == WM_LBUTTONDOWN) pFocusedUI = pUI; /*클릭 메세지라면 포커스 지정*/
             NewLParam = RerouteMouseCursorPt((int)pMouseOverUI->uiPos.x, (int)pMouseOverUI->uiPos.y, lParam);
             uiSys->SendUIMessage(pMouseOverUI, UIM_MOUSEON, 0, 0);
             uiSys->SendUIMessage(pMouseOverUI, Message, wParam, NewLParam);
