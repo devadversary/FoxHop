@@ -6,6 +6,7 @@ UI_Static::UI_Static(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, w
     uiSys = pUISys;
     pRenderTarget = pUISys->D2DA.pRenTarget;
     Focusable = FALSE;
+    uiMotionState = eUIMotionState::eUMS_PlayingVisible;
 
     DefaultHandler = DefaultStaticProc;
     MessageHandler = pfnCallback;

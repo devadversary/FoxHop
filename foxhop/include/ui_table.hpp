@@ -11,6 +11,7 @@ class UISystem; /*UI시스템 클래스의 전방선언*/
 typedef struct _st_TableRow
 {
     bool      bSelected; /**< 행 선택 여부*/
+    bool      bTextMotionPlayed; /**< 모션이 진행 되었는지 여부*/
     wchar_t** ppData;    /**< 데이터 */
 } TABLE_ROW;
 
@@ -35,6 +36,7 @@ enum class eTableMotionPattern {
     eHighlight_Default = 0,  /**< 하이라이팅 : 모션 없음*/
 
     eText_Default = 0,       /**< 텍스트 : 모션 없음*/
+    eText_Typing,            /**< 텍스트 : 타이핑*/
 };
 
 class RowObject;
@@ -46,18 +48,19 @@ class UI_Table : public UI {
 public:
     eTableMotionPattern MotionInit      = eTableMotionPattern::eInit_Default;
     eTableMotionPattern MotionPause     = eTableMotionPattern::ePause_Default;
-    eTableMotionPattern MotionRowText   = eTableMotionPattern::eText_Default;
+    eTableMotionPattern MotionRowText   = eTableMotionPattern::eText_Typing;
     eTableMotionPattern MotionMouseover = eTableMotionPattern::eMouseover_Default;
     eTableMotionPattern MotionMouseleave = eTableMotionPattern::eMouseover_Default;
-    eTableMotionPattern MotionSelect    = eTableMotionPattern::eSelect_Default;
+    eTableMotionPattern MotionSelect    = eTableMotionPattern::eSelect_Decel;
     eTableMotionPattern MotionUnselect  = eTableMotionPattern::eUnselect_Default;
     unsigned long PitchInit      = 0;
     unsigned long PitchPause     = 0;
     unsigned long PitchMouseover = 0;
-    unsigned long PitchSelect    = 0;
+    unsigned long PitchSelect    = 300;
     unsigned long PitchUnselect  = 0;
     unsigned long PitchScroll    = 200; /**< 스크롤 모션 시간은 0.2초 기본값.*/
-    unsigned long PitchRowText = 0; /**< 한 행당 텍스트 모션 시간*/
+    unsigned long PitchRowOneText = 300; /**< 행당 한개의 텍스트 모션 시간*/
+    unsigned long PitchRowAllText = 700; /**< 행당 전체 텍스트 모션 시간*/
     unsigned long PitchRowBg   = 0; /**< 한 행당 배경색 모션 시간*/
     D2D1_COLOR_F  ColorFrame          = { 0.f ,0.f, 0.f, 1.f };     /**< 검은색*/
     D2D1_COLOR_F  ColorHeaderBg       = { 0.9f, 0.9f, 0.9f, 1.f };  /**< 밝은 회색*/
@@ -71,12 +74,14 @@ public:
     D2D1_COLOR_F  ColorRowBgSelect    = { 0.2f, 0.56f, 1.f, 1.f }; /**< 연한 파란색*/
     D2D1_COLOR_F  ColorRowTextSelect  = { 1.f, 1.f, 1.f, 1.f }; /**< 흰색*/
 
+public:
+    std::vector<TABLE_ROW>  MainDataPool; /**< 갖고있는 모든 데이터*/
+
 private:
     ComponentMotion*        ScrollComp;   /**< 스크롤 모션 진행을 위한 컴포넌트*/
     PropBox*  pBoxHeader;
     PropText** ppTextHdr;
     PropBox*  pBoxFrame;
-    std::vector<TABLE_ROW>  MainDataPool; /**< 갖고있는 모든 데이터*/
     std::vector<RowObject*> ViewData;     /**< 화면에 보일 행 데이터 (화면 크기만큼만 생성)*/
     POINT     MousePt;         /**< 마우스 위치*/
     BOOL      MultiSelectMode; /**< FALSE:단일 선택 / TRUE:여러줄 선택 모드*/
@@ -108,7 +113,8 @@ public:
 
 public: /*UI별 옵션 매서드*/
     void Resize(POSITION Pos);
-    void AddData(wchar_t* Data[], BOOL bEnsure);
+    void AddData(wchar_t* Data[], BOOL bAutoScroll);
+    void SetScroll(long long TargetScrollPx);
 };
 
 /**
@@ -116,9 +122,8 @@ public: /*UI별 옵션 매서드*/
 */
 class RowObject : public UI {
 public: 
-    unsigned long long MainDataIdx = 0;   /**< 이 뷰행이 가리키는 MainDataPool 데이터의 인덱스*/
-    BOOL               bBindComplete = FALSE; /**< 바인딩 완료 여부*/
-    BOOL               bNeedUpdate   = FALSE; /**< 업데이트 필요여부*/
+    unsigned long long MainDataIdx = -1;   /**< 이 뷰행이 가리키는 MainDataPool 데이터의 인덱스*/
+
 private:
     UI_Table*  pParent;
     POSITION   Pos;
@@ -133,12 +138,13 @@ private:
 public:
     RowObject(UISystem* pUISys, UI_Table* pParentTable, POSITION pos, unsigned int ColCnt);
     ~RowObject();
-    void SetData(wchar_t** ppData, int* pWidth, int nCnt, BOOL bReplace);
-    void SetSelect(BOOL bSel, D2D1_COLOR_F Color, BOOL bReplace);
+    void SetData(wchar_t** ppData, int* pWidth, int nCnt, BOOL bMotion);
+    void SetSelectBox(BOOL bSel, D2D1_COLOR_F Color, BOOL bMotion);
     void SetHighlight(D2D1_COLOR_F Color);
-    void SetBgColor(D2D1_COLOR_F Color, BOOL bReplace);
-    void SetFontColor(D2D1_COLOR_F Color, BOOL bReplace);
-
+    void SetBgColor(D2D1_COLOR_F Color, BOOL bMotion);
+    void SetFontColor(D2D1_COLOR_F Color, BOOL bMotion);
+    void OnBind(unsigned long long TargetDataIdx, int* pColWidth, BOOL bNeedUpdate = FALSE);
+    void OnSelectEvent();
     void pause(int nDelay);
     void resume(int nDelay);
     BOOL update(unsigned long time);

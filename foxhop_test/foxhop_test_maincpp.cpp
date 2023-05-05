@@ -53,7 +53,7 @@ void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         Data[0] = _wcsdup(TmpData[0]);
         Data[1] = _wcsdup(TmpData[1]);
         Data[2] = _wcsdup(TmpData[2]);
-        pTable->AddData(Data, FALSE);
+        pTable->AddData(Data, TRUE);
         wsprintf(tmpStr, L"%d Datas", ttt);
         pButton->setText(tmpStr, 0);
         ttt++;
@@ -76,6 +76,12 @@ void TestTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     case UIM_TABLE_UNSELECT:
         wsprintfW(Noti, L"Line %d Unselected.", (int)lParam);
         pStatic->SetText(Noti);
+        break;
+
+    case UIM_FOCUS:
+        break;
+
+    case UIM_UNFOCUS:
         break;
     }
 }
