@@ -80,35 +80,6 @@ unsigned int thread_test(void* pTemp)
     return 0;
 }
 
-void TestButtProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
-{
-    UI_Button* pButton = (UI_Button*)pUI;
-    static int tmp = 0;
-    wchar_t tmpStr[32];
-    FLT_MAX;
-    switch (Message) {
-    case WM_LBUTTONDOWN:
-    {
-        int i = 0;
-        wchar_t TmpData[3][32];
-        wchar_t* Data[3];
-        static int ttt = 1;
-
-        wsprintfW(TmpData[0], L"%s%d", L"TestData", ttt);
-        wsprintfW(TmpData[1], L"%s%d", L"TestData", ttt);
-        wsprintfW(TmpData[2], L"%s%d", L"TestData", ttt);
-        Data[0] = _wcsdup(TmpData[0]);
-        Data[1] = _wcsdup(TmpData[1]);
-        Data[2] = _wcsdup(TmpData[2]);
-        pTable->AddData(Data, TRUE);
-        wsprintf(tmpStr, L"%d Datas", ttt);
-        pButton->setText(tmpStr, 0);
-        ttt++;
-        break;
-    }
-    }
-}
-
 void TestTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     UI_Table* pTable = static_cast<UI_Table*>(pUI);
@@ -116,7 +87,7 @@ void TestTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
     switch (Message) {
     case UIM_TABLE_SELECT:
-        wsprintfW(Noti, L"Line %d Selected. : %s", (int)lParam, ((wchar_t**)wParam)[0]);
+        wsprintfW(Noti, L"Line %d Selected. : %s", (int)lParam, ((wchar_t**)wParam)[1]);
         pStatic->SetText(Noti);
         break;
 
@@ -167,7 +138,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         TableParam.ColorHeaderText = { 1,1,1,1 };
         TableParam.ColorRowBg1 = { 0,0,0,0 };
         TableParam.ColorRowBg2 = { 1,0,0,0.1 };
-        TableParam.ColorRowBgSelect = { 1,1,1,0.5 };
+        TableParam.ColorRowBgSelect = { 1,1,1,0.8 };
         TableParam.ColorRowText = { 1,1,1,1 };
         TableParam.ColorRowTextSelect = { 0,0,0,1 };
 
@@ -177,7 +148,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         StaticParam.ColorFont = { 1,1,1,1 };
         StaticParam.ColorFrame = { 1,0,0,1 };
 
-        pButton = new UI_Button(pUI->uiSys, TestButtProc, {10,10,100,20}, (wchar_t*)L"Data Input Test", 0, ButtonParam);
+        pButton = new UI_Button(pUI->uiSys, NULL, {10,10,100,20}, (wchar_t*)L"Data Input Test", 0, ButtonParam);
         pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 590 , 270}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
         pStatic = new UI_Static(pUI->uiSys, NULL, {10, 320, 590, 25}, (wchar_t*)L"Done.", StaticParam);
         pPanel->RegisterUI(pButton);
