@@ -14,11 +14,6 @@ PropLine::~PropLine()
     if (Brush) Brush->Release();
 }
 
-void PropLine::ClearMovementMotion()
-{
-    ComMotionMovement.clearChannel();
-}
-
 /**
     @brief  오브젝트의 초기 속성 셋팅
     @remark 딜레이 시간동안 화면에 나가지 않게 하려면 StartColor의 알파값을 0으로 주자.

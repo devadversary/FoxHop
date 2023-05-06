@@ -471,7 +471,7 @@ void RowObject::SetFontColor(D2D1_COLOR_F Color, BOOL bMotion)
     }
 }
 
-void RowObject::OnBind(unsigned long long TargetDataIdx, int* pColWidth, BOOL bNeedUpdate = FALSE) {
+void RowObject::OnBind(unsigned long long TargetDataIdx, int* pColWidth, BOOL bNeedUpdate) {
     TABLE_ROW* pTableData;
 
     /*이미 대상을 바인딩 하고 있으면 처리 X*/

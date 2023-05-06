@@ -35,7 +35,6 @@ void UI_Static::pause(int nDelay)
     /*TODO : 소멸 모션도 지정할 수 있도록 할 예정*/
     switch (MotionPause) {
     case eStaticMotionPattern::ePause_Default:
-
         break;
 #if 0 /*나중에 추가할 모션*/
     default:
@@ -60,7 +59,6 @@ void UI_Static::resume(int nDelay)
         pBoxBg->Init(pRenderTarget, uiPos, ColorBg);
         pBoxFrame->Init(pRenderTarget, uiPos, ColorFrame, FALSE);
         SetText(szText, 0);
-        //pText->Init(pRenderTarget, uiSys->MediumTextForm,);
         break;
     }
 }

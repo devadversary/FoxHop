@@ -19,8 +19,6 @@ private:
 public:
     PropBox();
     ~PropBox();
-    void ClearMovementMotion();
-    void ClearColorMotion();
     void Init(ID2D1RenderTarget* pRT, POSITION StartPos, D2D1_COLOR_F StartColor, BOOL Fill = TRUE);
     void addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, POSITION StartPos, POSITION EndPos);
     void addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor);

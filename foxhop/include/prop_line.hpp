@@ -18,7 +18,6 @@ private:
 public :
     PropLine();
     ~PropLine();
-    void ClearMovementMotion();
     void Init(ID2D1RenderTarget* pRT, POSITION StartPoint, D2D1_COLOR_F StartColor);
     void addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, POSITION StartPos, POSITION EndPos);
     void addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor);
