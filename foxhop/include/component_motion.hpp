@@ -43,6 +43,7 @@ enum class eMotionForm {
 typedef struct _st_MotionInfo
 {
     eMotionForm formular; /**< 모션 함수*/
+    //BOOL        periodic; /**< 주기함수 여부 (진행시간 무한)*/
     int         nDelay;   /**< 딜레이*/
     int         nPitch;   /**< 모션 재생 시간*/
 }MOTION_INFO;
@@ -69,7 +70,7 @@ private:
     int            nCntUsedChannel; /**< 현재 사용중인 채널 갯수*/
     unsigned int   nTotalPlaytime;  /**< 채널 전n체 재생시간*/
     unsigned int   nRunTime;        /**< 총 진행시간*/
-
+ 
 public:
     ComponentMotion();
     void         addChannel(MOTION_PATTERN patt);
@@ -137,7 +138,8 @@ inline float Preset_Pulse2(float x)
 }
 
 inline float Preset_None(float x) { return 1; }
-inline float Preset_Osc1(float x) { return (float)(-0.5 * cos(6.283184 * x) + 0.5); }                      /* y = -1/2 cos(2pi) + 1/2 */
+inline float Preset_Osc_Cosine(float x) { return (float)(-0.5 * cos(6.283184 * x) + 0.5); }                /* y = -1/2 cos(2pi) + 1/2 */
+inline float Preset_Osc_Triangle(float x) { return (float)(-0.5 * cos(6.283184 * x) + 0.5); }              /* y = -1/2 cos(2pi) + 1/2 */
 inline float Preset_Linear1(float x) { if (x > 1) return 1.f; return x; }                                  /* y = x */
 inline float Preset_Linear2(float x) { if (x > 1) return 0.f; return -x + 1.f; }                           /* y = -x + 1 */
 inline float Preset_x3_0to1_1(float x) { if (x > 1) return 1.f; return x * x * x; }                        /* ||| |  |    |      | */

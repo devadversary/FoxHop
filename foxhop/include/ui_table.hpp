@@ -41,41 +41,74 @@ enum class eTableMotionPattern {
 
 class RowObject;
 
+class UI_Table_MotionParam {
+public:
+    eTableMotionPattern MotionInit;
+    eTableMotionPattern MotionPause;
+    eTableMotionPattern MotionRowText;
+    eTableMotionPattern MotionMouseover;
+    eTableMotionPattern MotionMouseleave;
+    eTableMotionPattern MotionSelect;
+    eTableMotionPattern MotionUnselect;
+    unsigned long PitchInit;
+    unsigned long PitchPause;
+    unsigned long PitchMouseover;
+    unsigned long PitchSelect;
+    unsigned long PitchUnselect;
+    unsigned long PitchScroll;
+    unsigned long PitchRowOneText;
+    unsigned long PitchRowAllText;
+    unsigned long PitchRowBg;
+    D2D1_COLOR_F  ColorFrame;
+    D2D1_COLOR_F  ColorHeaderBg;
+    D2D1_COLOR_F  ColorHeaderText;
+    D2D1_COLOR_F  ColorRowBg1;
+    D2D1_COLOR_F  ColorRowBg2;
+    D2D1_COLOR_F  ColorRowText;
+    D2D1_COLOR_F  ColorRowLine;
+    D2D1_COLOR_F  ColorRowBgMouseover;
+    D2D1_COLOR_F  ColorRowBgHighlight;
+    D2D1_COLOR_F  ColorRowBgSelect;
+    D2D1_COLOR_F  ColorRowTextSelect;
+
+public:
+    UI_Table_MotionParam() {
+        MotionInit = eTableMotionPattern::eInit_Default;
+        MotionPause = eTableMotionPattern::ePause_Default;
+        MotionRowText = eTableMotionPattern::eText_Default;
+        MotionMouseover = eTableMotionPattern::eMouseover_Default;
+        MotionMouseleave = eTableMotionPattern::eMouseover_Default;
+        MotionSelect = eTableMotionPattern::eSelect_Default;
+        MotionUnselect = eTableMotionPattern::eUnselect_Default;
+        PitchInit = 0;
+        PitchPause = 0;
+        PitchMouseover = 0;
+        PitchSelect = 0;
+        PitchUnselect = 0;
+        PitchScroll = 200;
+        PitchRowOneText = 0;
+        PitchRowAllText = 0;
+        PitchRowBg = 0;
+        ColorFrame = { 0.f ,0.f, 0.f, 1.f };
+        ColorHeaderBg = { 0.9f, 0.9f, 0.9f, 1.f };
+        ColorHeaderText = { 0.f, 0.f, 0.f, 1.f };
+        ColorRowBg1 = { 1.f, 1.f, 1.f, 1.f };
+        ColorRowBg2 = { 0.96f, 0.96f, 0.96f, 1.f };
+        ColorRowText = { 0.f, 0.f, 0.f, 1.f };
+        ColorRowLine = { 0.f, 0.f, 0.f, 1.f };
+        ColorRowBgMouseover = { 0.f, 0.f, 0.f, 0.1f };
+        ColorRowBgHighlight = { 0.f, 0.f, 0.f, 1.f };
+        ColorRowBgSelect = { 0.2f, 0.56f, 1.f, 1.f };
+        ColorRowTextSelect = { 1.f, 1.f, 1.f, 1.f };
+    }
+};
 /**
     @brief 테이블 클래스
 */
 class UI_Table : public UI {
 public:
-    eTableMotionPattern MotionInit      = eTableMotionPattern::eInit_Default;
-    eTableMotionPattern MotionPause     = eTableMotionPattern::ePause_Default;
-    eTableMotionPattern MotionRowText   = eTableMotionPattern::eText_Typing;
-    eTableMotionPattern MotionMouseover = eTableMotionPattern::eMouseover_Default;
-    eTableMotionPattern MotionMouseleave = eTableMotionPattern::eMouseover_Default;
-    eTableMotionPattern MotionSelect    = eTableMotionPattern::eSelect_Decel;
-    eTableMotionPattern MotionUnselect  = eTableMotionPattern::eUnselect_Default;
-    unsigned long PitchInit      = 0;
-    unsigned long PitchPause     = 0;
-    unsigned long PitchMouseover = 0;
-    unsigned long PitchSelect    = 300;
-    unsigned long PitchUnselect  = 0;
-    unsigned long PitchScroll    = 200; /**< 스크롤 모션 시간은 0.2초 기본값.*/
-    unsigned long PitchRowOneText = 300; /**< 행당 한개의 텍스트 모션 시간*/
-    unsigned long PitchRowAllText = 700; /**< 행당 전체 텍스트 모션 시간*/
-    unsigned long PitchRowBg   = 0; /**< 한 행당 배경색 모션 시간*/
-    D2D1_COLOR_F  ColorFrame          = { 0.f ,0.f, 0.f, 1.f };     /**< 검은색*/
-    D2D1_COLOR_F  ColorHeaderBg       = { 0.9f, 0.9f, 0.9f, 1.f };  /**< 밝은 회색*/
-    D2D1_COLOR_F  ColorHeaderText     = { 0.f, 0.f, 0.f, 1.f };     /**< 검은색*/
-    D2D1_COLOR_F  ColorRowBg1         = { 1.f, 1.f, 1.f, 1.f };     /**< 흰색*/
-    D2D1_COLOR_F  ColorRowBg2         = { 0.96f, 0.96f, 0.96f, 1.f }; /**< 밝은 회색*/
-    D2D1_COLOR_F  ColorRowText        = { 0.f, 0.f, 0.f, 1.f };     /**< 검은색*/
-    D2D1_COLOR_F  ColorRowLine        = { 0.f, 0.f, 0.f, 1.f };     /**< 검은색*/
-    D2D1_COLOR_F  ColorRowBgMouseover = { 0.f, 0.f, 0.f, 0.1f };    /**< 투명도 0.1 검은색*/
-    D2D1_COLOR_F  ColorRowBgHighlight = { 0.f, 0.f, 0.f, 1.f };     /**< 검은색*/
-    D2D1_COLOR_F  ColorRowBgSelect    = { 0.2f, 0.56f, 1.f, 1.f }; /**< 연한 파란색*/
-    D2D1_COLOR_F  ColorRowTextSelect  = { 1.f, 1.f, 1.f, 1.f }; /**< 흰색*/
-
-public:
     std::vector<TABLE_ROW>  MainDataPool; /**< 갖고있는 모든 데이터*/
+    UI_Table_MotionParam Motion;
 
 private:
     ComponentMotion*        ScrollComp;   /**< 스크롤 모션 진행을 위한 컴포넌트*/
@@ -103,7 +136,7 @@ private:
     static void DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
 public:
-    UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, unsigned int ColumnCount, wchar_t** ColumnNameList, unsigned int* ColumnWidth, unsigned int HeaderHeight, unsigned int RowHeight, BOOL MultiSelect);
+    UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, unsigned int ColumnCount, wchar_t** ColumnNameList, unsigned int* ColumnWidth, unsigned int HeaderHeight, unsigned int RowHeight, BOOL MultiSelect, UI_Table_MotionParam MotionParam = UI_Table_MotionParam());
     ~UI_Table() {};
 
     void pause(int nDelay);

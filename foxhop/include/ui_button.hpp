@@ -41,30 +41,54 @@ enum class eButtonAction {
     eAction_Text       /**< 텍스트 모션*/
 };
 
+class UI_Button_MotionParam {
+public:
+    eButtonMotionPattern InitMotion;
+    eButtonMotionPattern PauseMotion;
+    eButtonMotionPattern MouseoverMotion;
+    eButtonMotionPattern ClickMotion;
+    eButtonMotionPattern ColorMotion;
+    eButtonMotionPattern TextMotion;
+    unsigned int         InitPitch;
+    unsigned int         PausePitch;
+    unsigned int         MouseoverPitch;
+    unsigned int         ClickPitch;
+    unsigned int         ColorPitch;
+    unsigned int         TextPitch;
+    D2D1_COLOR_F         FrameColor;
+    D2D1_COLOR_F         FaceColor;
+    D2D1_COLOR_F         MouseoverColor;
+    D2D1_COLOR_F         HighlightColor;
+    D2D1_COLOR_F         FontColor;
+
+public:
+    UI_Button_MotionParam() {
+        InitMotion = eButtonMotionPattern::eInit_Default;      /**< 시작모션*/
+        PauseMotion = eButtonMotionPattern::ePause_Default;     /**< 소멸모션*/
+        MouseoverMotion = eButtonMotionPattern::eMouseover_Default; /**< 마우스오버 모션*/
+        ClickMotion = eButtonMotionPattern::eText_Default;     /**< 클릭 모션*/
+        ColorMotion = eButtonMotionPattern::eColor_Default;     /**< 색상 변경 모션*/
+        TextMotion = eButtonMotionPattern::eText_Default;      /**< 텍스트 변경 모션*/
+        InitPitch = 0; /**< 시작모션 피치*/
+        PausePitch = 0; /**< 소멸모션 피치*/
+        MouseoverPitch = 0; /**< 마우스오버모션 피치*/
+        ClickPitch = 0; /**< 클릭 피치*/
+        ColorPitch = 0; /**< 색상 변경 피치*/
+        TextPitch = 0; /**< 텍스트 변경 피치*/
+        FrameColor = { 0.f, 0.f, 0.f, 0.f };     /**< 초기 테두리 색*/
+        FaceColor = { 0.9f, 0.9f, 0.9f, 1.f };  /**< 초기 버튼 전경색*/
+        MouseoverColor = { 1.f,  1.f,  1.f,  0.5f }; /**< 마우스 오버 색*/
+        HighlightColor = { 1.f,  1.f,  1.f,  1.f };  /**< 버튼 하이라이트 색*/
+        FontColor = { 0.f, 0.f, 0.f, 1.f };     /**< 초기 텍스트 색*/
+    }
+};
 /**
     @brief 버튼 클래스
     @remark 생성은 팩토리에서 해준다.
 */
 class UI_Button : public UI {
 public :
-    eButtonMotionPattern ButtonInitMotion      = eButtonMotionPattern::eInit_Default;      /**< 시작모션*/
-    eButtonMotionPattern ButtonPauseMotion     = eButtonMotionPattern::ePause_Default;     /**< 소멸모션*/
-    eButtonMotionPattern ButtonMouseOverMotion = eButtonMotionPattern::eMouseover_Default; /**< 마우스오버 모션*/
-    eButtonMotionPattern ButtonClickMotion     = eButtonMotionPattern::eText_Default;     /**< 클릭 모션*/
-    eButtonMotionPattern ButtonColorMotion     = eButtonMotionPattern::eColor_Default;     /**< 색상 변경 모션*/
-    eButtonMotionPattern ButtonTextMotion      = eButtonMotionPattern::eText_Default;      /**< 텍스트 변경 모션*/
-    unsigned int         ButtonInitPitch       = 0; /**< 시작모션 피치*/
-    unsigned int         ButtonPausePitch      = 0; /**< 소멸모션 피치*/
-    unsigned int         ButtonMouseOverPitch  = 0; /**< 마우스오버모션 피치*/
-    unsigned int         ButtonClickPitch      = 0; /**< 클릭 피치*/
-    unsigned int         ButtonColorPitch      = 0; /**< 색상 변경 피치*/
-    unsigned int         ButtonTextPitch       = 0; /**< 텍스트 변경 피치*/
-    D2D1_COLOR_F         ButtonFrameColor      = { 0.f, 0.f, 0.f, 0.f };     /**< 초기 테두리 색*/
-    D2D1_COLOR_F         ButtonFaceColor       = { 0.9f, 0.9f, 0.9f, 1.f };  /**< 초기 버튼 전경색*/
-    D2D1_COLOR_F         ButtonMouseoverColor  = { 1.f,  1.f,  1.f,  0.5f }; /**< 마우스 오버 색*/
-    D2D1_COLOR_F         ButtonHighlightColor  = { 1.f,  1.f,  1.f,  1.f };  /**< 버튼 하이라이트 색*/
-    D2D1_COLOR_F         ButtonFontColor       = { 0.f, 0.f, 0.f, 1.f };     /**< 초기 텍스트 색*/
-
+    UI_Button_MotionParam Motion;
 private:
     PropBox*  MBoxFace;      /**< 전경 모션 박스*/
     PropBox*  MBoxHighlight; /**< 하이라이트 모션 박스*/
@@ -77,7 +101,7 @@ private:
     static void DefaultButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
 public:
-    UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay);
+    UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay, UI_Button_MotionParam MotionParam = UI_Button_MotionParam());
     ~UI_Button();
 
     void pause(int nDelay);
