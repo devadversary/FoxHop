@@ -210,7 +210,7 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
                 pFocusedUI = pPanel; /*클릭 메세지라면 포커스 지정*/
             }
             NewLParam = RerouteMouseCursorPt((int)pMouseOverUI->uiPos.x, (int)pMouseOverUI->uiPos.y, lParam);
-            pPanel->DefaultHandler(pPanel, UIM_MOUSEON, 0, 0);
+            if(Message==WM_MOUSEMOVE) pPanel->DefaultHandler(pPanel, UIM_MOUSEON, 0, 0);
             pPanel->DefaultHandler(pPanel, Message, wParam, NewLParam);
             return;
         }
@@ -226,7 +226,7 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
                 pFocusedUI = pUI; /*클릭 메세지라면 포커스 지정*/
             }
             NewLParam = RerouteMouseCursorPt((int)pMouseOverUI->uiPos.x, (int)pMouseOverUI->uiPos.y, lParam);
-            pMouseOverUI->DefaultHandler(pMouseOverUI, UIM_MOUSEON, 0, 0);
+            if (Message == WM_MOUSEMOVE) pMouseOverUI->DefaultHandler(pMouseOverUI, UIM_MOUSEON, 0, 0);
             pMouseOverUI->DefaultHandler(pMouseOverUI, Message, wParam, NewLParam);
             return;
         }

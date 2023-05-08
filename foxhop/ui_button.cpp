@@ -177,8 +177,8 @@ void UI_Button::InputMotion(eButtonAction Action, unsigned int nDelay, void* par
 
         case eButtonMotionPattern::eClick_Flash:
             if ((__int64)param != TRUE) break; /*점멸 효과의 경우 버튼이 떼어졌을땐 반응X*/
-            miColor = InitMotionInfo(eMotionForm::eMotion_x3_1to0_2, nDelay, Motion.ClickPitch);
-            MBoxHighlight->Init(pRenderTarget, uiPos, ALL_ZERO);
+            miColor = InitMotionInfo(eMotionForm::eMotion_x3_2, nDelay, Motion.ClickPitch);
+            MBoxHighlight->Init(pRenderTarget, uiPos, Motion.HighlightColor);
             MBoxHighlight->addColorMotion(miColor, FALSE, Motion.HighlightColor, ALL_ZERO);
             break;
         }
