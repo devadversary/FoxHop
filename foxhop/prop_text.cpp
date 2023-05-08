@@ -1,9 +1,9 @@
 #include "./include/prop_text.hpp"
 
-PropText::PropText()
+PropText::PropText(ID2D1RenderTarget* pRT)
 {
-    Brush = 0;
-    CurColor = {0,0,0,0};
+    pRT->CreateSolidColorBrush({ 0,0,0,0 }, &Brush);
+    CurColor = { 0,0,0,0 };
     CurPos = { 0,0,0,0 };
     InitLen = 0;
     CurLen = 0;
@@ -23,9 +23,8 @@ PropText::~PropText()
     @brief  오브젝트의 초기 속성 셋팅
     @remark 딜레이 시간동안 화면에 나가지 않게 하려면 StartColor의 알파값을 0으로 주자.
 */
-void PropText::Init(ID2D1RenderTarget* pRT, IDWriteTextFormat* pTexFmt, wchar_t* pText, int nTextLen, POSITION StartPos, D2D1_COLOR_F StartColor, int StartLen)
+void PropText::Init(IDWriteTextFormat* pTexFmt, wchar_t* pText, int nTextLen, POSITION StartPos, D2D1_COLOR_F StartColor, int StartLen)
 {
-    if (!Brush) pRT->CreateSolidColorBrush(StartColor, &Brush);
     pTextFmt = pTexFmt; /*폰트 출력 정보 개체별로 지정*/
     InitPos = CurPos = StartPos;
     InitColor = CurColor = StartColor;

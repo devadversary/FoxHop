@@ -1,8 +1,8 @@
 #include "./include/prop_box.hpp"
 
-PropBox::PropBox()
+PropBox::PropBox(ID2D1RenderTarget* pRT)
 {
-    Brush = 0;
+    pRT->CreateSolidColorBrush({0,0,0,0}, &Brush);;
     InitPos = { 0,0,0,0 };
     CurPos = { 0,0,0,0 };
     InitColor = { 0,0,0,0 };
@@ -19,9 +19,8 @@ PropBox::~PropBox()
     @brief  오브젝트의 초기 속성 셋팅
     @remark 딜레이 시간동안 화면에 나가지 않게 하려면 StartColor의 알파값을 0으로 주자.
 */
-void PropBox::Init(ID2D1RenderTarget* pRT, POSITION StartPos, D2D1_COLOR_F StartColor, BOOL Fill)
+void PropBox::Init(POSITION StartPos, D2D1_COLOR_F StartColor, BOOL Fill)
 {
-    if (!Brush) pRT->CreateSolidColorBrush(StartColor, &Brush);
     InitPos = StartPos;
     InitColor = StartColor;
     CurPos = StartPos;

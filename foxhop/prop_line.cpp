@@ -1,8 +1,8 @@
 #include "./include/prop_line.hpp"
 
-PropLine::PropLine()
+PropLine::PropLine(ID2D1RenderTarget* pRT)
 {
-    Brush = 0;
+    pRT->CreateSolidColorBrush({0,0,0,0}, &Brush);
     InitPos = {0,0,0,0};
     InitColor = { 0,0,0,0 };
     CurPos = { 0,0,0,0 };
@@ -18,9 +18,8 @@ PropLine::~PropLine()
     @brief  오브젝트의 초기 속성 셋팅
     @remark 딜레이 시간동안 화면에 나가지 않게 하려면 StartColor의 알파값을 0으로 주자.
 */
-void PropLine::Init(ID2D1RenderTarget* pRT, POSITION StartPoint, D2D1_COLOR_F StartColor)
+void PropLine::Init(POSITION StartPoint, D2D1_COLOR_F StartColor)
 {
-    if(!Brush) pRT->CreateSolidColorBrush(StartColor, &Brush);
     InitPos = CurPos = StartPoint;
     InitColor = CurColor = StartColor;
     ComMotionMovement.clearChannel();

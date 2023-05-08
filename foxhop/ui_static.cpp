@@ -14,9 +14,9 @@ UI_Static::UI_Static(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, w
     uiPos = Pos;
 
     Motion = MotionParam;
-    pText = new PropText();
-    pBoxBg = new PropBox();
-    pBoxFrame = new PropBox();
+    pText = new PropText(pRenderTarget);
+    pBoxBg = new PropBox(pRenderTarget);
+    pBoxFrame = new PropBox(pRenderTarget);
     wcscpy_s(szText, ARRAYSIZE(szText), Text);
     resume(0);
 }
@@ -57,8 +57,8 @@ void UI_Static::resume(int nDelay)
 {
     switch (Motion.MotionInit) {
     case eStaticMotionPattern::eInit_Default:
-        pBoxBg->Init(pRenderTarget, uiPos, Motion.ColorBg);
-        pBoxFrame->Init(pRenderTarget, uiPos, Motion.ColorFrame, FALSE);
+        pBoxBg->Init(uiPos, Motion.ColorBg);
+        pBoxFrame->Init(uiPos, Motion.ColorFrame, FALSE);
         SetText(szText, 0);
         break;
     }
@@ -103,12 +103,12 @@ void UI_Static::SetText(wchar_t* pStr, int nDelay)
 
     switch(Motion.MotionText) {
     case eStaticMotionPattern::eText_Default:
-        pText->Init(pRenderTarget, uiSys->MediumTextForm, szText, 0, uiPos, Motion.ColorFont, wcslen(szText));
+        pText->Init(uiSys->MediumTextForm, szText, 0, uiPos, Motion.ColorFont, wcslen(szText));
         break;
 
     case eStaticMotionPattern::eText_Flick:
         mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, Motion.PitchText);
-        pText->Init(pRenderTarget, uiSys->MediumTextForm, szText, 0, uiPos, {0,0,0,0}, wcslen(szText));
+        pText->Init(uiSys->MediumTextForm, szText, 0, uiPos, {0,0,0,0}, wcslen(szText));
         pText->addColorMotion(mi, TRUE, {0,0,0,0}, Motion.ColorFont);
         break;
     }

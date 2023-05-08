@@ -1,10 +1,5 @@
 #include "./include/ui_system.hpp"
 
-#include "./include/ui_panel.hpp"
-#include "./include/ui_button.hpp"
-#include "./include/ui_fraggedline.hpp"
-#include "./include/ui_static.hpp"
-
 /**
     @brief UI시스템을 초기화 한다.
     @param hWnd UI 시스템을 사용할 메인윈도우 핸들

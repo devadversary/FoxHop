@@ -17,9 +17,9 @@ private:
     BOOL                  bFill;        /**< 채워진 사각형 or 비워진 사각형*/
 
 public:
-    PropBox();
+    PropBox(ID2D1RenderTarget* pRT);
     ~PropBox();
-    void Init(ID2D1RenderTarget* pRT, POSITION StartPos, D2D1_COLOR_F StartColor, BOOL Fill = TRUE);
+    void Init(POSITION StartPos, D2D1_COLOR_F StartColor, BOOL Fill = TRUE);
     void addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, POSITION StartPos, POSITION EndPos);
     void addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor);
 

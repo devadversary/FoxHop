@@ -16,9 +16,9 @@ private:
     D2D1_COLOR_F          CurColor;     /**< 현재 오브젝트의 RGBA 값*/
 
 public :
-    PropLine();
+    PropLine(ID2D1RenderTarget* pRT);
     ~PropLine();
-    void Init(ID2D1RenderTarget* pRT, POSITION StartPoint, D2D1_COLOR_F StartColor);
+    void Init(POSITION StartPoint, D2D1_COLOR_F StartColor);
     void addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, POSITION StartPos, POSITION EndPos);
     void addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor);
 

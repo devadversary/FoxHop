@@ -31,6 +31,10 @@ enum class eTableMotionPattern {
     eSelect_Linear,          /**< 선택 : 선형 모션*/
     eSelect_Decel,           /**< 선택 : 감속 모션*/
 
+    eHeadertext_Default = 0,
+    eHeadertext_Flick,
+    eHeadertext_Slide,
+
     eUnselect_Default = 0,   /**< 선택 해제 : 모션 없음*/
 
     eHighlight_Default = 0,  /**< 하이라이팅 : 모션 없음*/
@@ -59,6 +63,8 @@ public:
     unsigned long PitchRowOneText;
     unsigned long PitchRowAllText;
     unsigned long PitchRowBg;
+    unsigned long PitchHeadertextOne;
+    unsigned long PitchHeadertextAll;
     D2D1_COLOR_F  ColorFrame;
     D2D1_COLOR_F  ColorHeaderBg;
     D2D1_COLOR_F  ColorHeaderText;
@@ -89,6 +95,8 @@ public:
         PitchRowOneText = 0;
         PitchRowAllText = 0;
         PitchRowBg = 0;
+        PitchHeadertextOne = 0;
+        PitchHeadertextAll = 0;
         ColorFrame = { 0.f ,0.f, 0.f, 1.f };
         ColorHeaderBg = { 0.9f, 0.9f, 0.9f, 1.f };
         ColorHeaderText = { 0.f, 0.f, 0.f, 1.f };
