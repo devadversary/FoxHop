@@ -6,6 +6,13 @@
 #include <mstcpip.h>
 #include "../foxhop/include/alphawindow.hpp"
 #include "../foxhop/include/ui_system.hpp"
+#include "../foxhop/include/ui_base.hpp"
+#include "../foxhop/include/ui_button.hpp"
+#include "../foxhop/include/ui_listview.hpp"
+#include "../foxhop/include/ui_static.hpp"
+#include "../foxhop/include/ui_fraggedline.hpp"
+#include "../foxhop/include/ui_table.hpp"
+#include "../foxhop/include/ui_textinput.hpp"
 #include <process.h>
 #pragma comment (lib,"ws2_32.lib")
 #pragma comment (lib, "../bin/debug/foxhop.lib")
@@ -38,6 +45,7 @@ unsigned int GetElapse()
 UI_Button* pButton = NULL;
 UI_Table* pTable = NULL;
 UI_Static* pStatic = NULL;
+UI_Textinput* pInput = NULL;
 
 unsigned int thread_test(void* pTemp)
 {
@@ -123,7 +131,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         ButtonParam.InitMotion = eButtonMotionPattern::eInit_Reload;
         ButtonParam.InitPitch = 700;
         ButtonParam.ClickMotion = eButtonMotionPattern::eClick_Flash;
-        ButtonParam.ClickPitch = 300;
+        ButtonParam.ClickPitch = 1000;
         ButtonParam.FaceColor = { 0.7,0,0,0.6 };
         ButtonParam.FrameColor = { 1,0,0,1 };
         ButtonParam.FontColor = { 1,1,1,1 };
@@ -151,9 +159,11 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pButton = new UI_Button(pUI->uiSys, NULL, {10,10,100,20}, (wchar_t*)L"Data Input Test", 0, ButtonParam);
         pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 590 , 270}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
         pStatic = new UI_Static(pUI->uiSys, NULL, {10, 320, 590, 25}, (wchar_t*)L"Done.", StaticParam);
+        pInput = new UI_Textinput(pUI->uiSys, NULL, { 10, 355, 590, 150 });
         pPanel->RegisterUI(pButton);
         pPanel->RegisterUI(pTable);
         pPanel->RegisterUI(pStatic);
+        pPanel->RegisterUI(pInput);
 
         _beginthreadex(NULL, NULL, thread_test, 0, 0, &ThreadID);
     }
@@ -231,7 +241,7 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     wc.cbClsExtra = NULL;
     wc.cbWndExtra = NULL;
     RegisterClass(&wc);
-    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 630, 400, NULL, NULL, hInst, NULL);
+    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 630, 550, NULL, NULL, hInst, NULL);
     AlphaWindow(hWnd, WINDOWMODE_TRANSPARENT);
     ShowWindow(hWnd, TRUE);
     while (GetMessage(&Message, NULL, NULL, NULL)) {
