@@ -14,10 +14,14 @@ UI_Textinput::UI_Textinput(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
     Motion = MotionParam;
     pTextFormat = pTextFmt;
     DragState = FALSE;
+    CaretX = 0;
+    CaretY = 0;
     CaretIdx = 0;
 
     Str.assign(L"");
     pUISys->D2DA.pDWFactory->CreateTextLayout(Str.c_str(), Str.size(), pTextFormat, uiPos.x2, uiPos.y2, &pLayout);
+    pLayout->SetMaxWidth(uiPos.x2);
+    pLayout->SetMaxHeight(uiPos.y2);
     pRenderTarget->CreateSolidColorBrush({ 0,0,0,0 }, &pTextBrush);
     pBoxBg = new PropBox(pRenderTarget);
     pBoxFrame = new PropBox(pRenderTarget);
@@ -40,7 +44,7 @@ void UI_Textinput::resume(int nDelay)
     SetBg(Motion.ColorBg, TRUE);
     SetFrame(Motion.ColorFrame, TRUE);
     SetTextlayout(Motion.ColorFont, TRUE);
-    pBoxCaret->Init(ALL_ZERO, Motion.ColorFont);
+    pBoxCaret->Init({uiPos.x, uiPos.y, Motion.CaretWidth, 0}, Motion.ColorFont);
 }
 
 BOOL UI_Textinput::update(unsigned long time)
@@ -77,22 +81,25 @@ void UI_Textinput::render()
 void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     UI_Textinput* pInput = static_cast<UI_Textinput*>(pUI);
+    IDWriteTextLayout* pNewLayout;
+    IDWriteTextLayout* pOldLayout;
+    DWRITE_HIT_TEST_METRICS HitMet;
+    DWRITE_TEXT_METRICS TextMet;
+    BOOL Trail, Inside;
+    POSITION uiPos = pInput->uiPos;
+    float x, y;
 
     switch (Message) {
         case WM_LBUTTONDOWN: {
             long x = GET_X_LPARAM(lParam);
             long y = GET_Y_LPARAM(lParam);
-            float CaretX, CaretY;
-            BOOL Trail, Inside;
-            DWRITE_HIT_TEST_METRICS mat;
             DWRITE_HIT_TEST_METRICS mat2;
-            POSITION uiPos = pInput->uiPos;
 
             pInput->DragState = TRUE;
-            pInput->pLayout->HitTestPoint((float)x, (float)y, &Trail, &Inside, &mat);
-            pInput->pLayout->HitTestTextPosition(mat.textPosition, Trail, &CaretX, &CaretY, &mat2);
-            pInput->CaretIdx = mat.textPosition;
-            pInput->SetCaret({uiPos.x+CaretX, uiPos.y+CaretY, 3, mat.height}, TRUE);
+            pInput->pLayout->HitTestPoint((float)x, (float)y, &Trail, &Inside, &HitMet);
+            pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &mat2);
+            pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+            pInput->SetCaret(HitMet.height, TRUE);
             break;
         }
 
@@ -103,53 +110,107 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
         case WM_KEYDOWN: {
             switch (wParam) {
                 case VK_BACK: {
-                    IDWriteTextLayout* pNewLayout;
-                    IDWriteTextLayout* pOldLayout;
-                    DWRITE_HIT_TEST_METRICS mat;
-                    POSITION uiPos = pInput->uiPos;
-                    float x, y;
-
                     pInput->CaretIdx--;
-                    if (pInput->CaretIdx < 0)pInput->CaretIdx = 0;
+                    if (pInput->CaretIdx < 0) {
+                        pInput->CaretIdx = 0;
+                        break;
+                    }
 
                     pInput->Str.erase(pInput->CaretIdx, 1);
                     pInput->UpdateTextLayout();
-                    pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &x, &y, &mat);
-                    pInput->SetCaret({ uiPos.x + x, uiPos.y + y, 3, mat.height }, TRUE);
+                    pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
+                    pInput->SetCaret(HitMet.height, TRUE);
                     break;
                 }
 
                 case VK_DELETE: {
-                    IDWriteTextLayout* pNewLayout;
-                    IDWriteTextLayout* pOldLayout;
-                    DWRITE_HIT_TEST_METRICS mat;
-                    POSITION uiPos = pInput->uiPos;
-                    float x, y;
-
                     pInput->Str.erase(pInput->CaretIdx, 1);
                     pInput->UpdateTextLayout();
-                    pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &x, &y, &mat);
-                    pInput->SetCaret({ uiPos.x + x, uiPos.y + y, 3, mat.height }, TRUE);
+                    pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
+                    pInput->SetCaret(HitMet.height, TRUE);
                     break;
                 }
+
+                case VK_UP: {
+                    int i;
+                    float tmp=0;
+                    DWRITE_HIT_TEST_METRICS TmpMet;
+                    pInput->pLayout->GetMetrics(&TextMet);
+                    pInput->LineMetric.resize(TextMet.lineCount);
+                    pInput->pLayout->GetLineMetrics(&pInput->LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
+                    for (i=0; i < TextMet.lineCount; i++) {
+                        tmp += pInput->LineMetric[i].height;
+                        /*행 높이 합산중, 캐럿Y좌표를 넘는순간*/
+                        if (tmp > pInput->CaretY) {
+                            tmp -= pInput->LineMetric[i].height;
+                            if (i < 1) break;
+                            tmp -= pInput->LineMetric[i-1].height;
+                            pInput->pLayout->HitTestPoint(pInput->CaretX, tmp, &Trail, &Inside, &HitMet);
+                            pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &TmpMet);
+                            pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+                            pInput->SetCaret(HitMet.height, TRUE);
+                            break;
+                        }
+                    }
+                    break;
+                }
+
+                case VK_DOWN: {
+                    int i;
+                    float tmp = 0;
+                    DWRITE_HIT_TEST_METRICS TmpMet;
+                    pInput->pLayout->GetMetrics(&TextMet);
+                    pInput->LineMetric.resize(TextMet.lineCount);
+                    pInput->pLayout->GetLineMetrics(&pInput->LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
+                    for (i = 0; i < TextMet.lineCount; i++) {
+                        tmp += pInput->LineMetric[i].height;
+                        /*행 높이 합산중, 캐럿Y좌표를 넘는순간*/
+                        if (tmp > pInput->CaretY) {
+                            //if (i + 1 > TextMet.lineCount) break;
+                            //tmp += pInput->LineMetric[i].height;
+                            pInput->pLayout->HitTestPoint(pInput->CaretX, tmp, &Trail, &Inside, &HitMet);
+                            pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &TmpMet);
+                            pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+                            pInput->SetCaret(HitMet.height, TRUE);
+                            break;
+                        }
+                    }
+                    break;
+                }
+
+                case VK_LEFT:
+                    pInput->CaretIdx--;
+                    if (pInput->CaretIdx < 0) {
+                        pInput->CaretIdx = 0;
+                        break;
+                    }
+                    pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
+                    pInput->SetCaret(HitMet.height, TRUE);
+                    break;
+
+                case VK_RIGHT:
+                    pInput->CaretIdx++;
+                    if (pInput->CaretIdx > pInput->Str.size()) {
+                        pInput->CaretIdx--;
+                        break;
+                    }
+                    pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
+                    pInput->SetCaret(HitMet.height, TRUE);
+                    break;
             }
             break;
         }
 
 
         case WM_CHAR: {
-            IDWriteTextLayout* pNewLayout;
-            IDWriteTextLayout* pOldLayout;
-            DWRITE_HIT_TEST_METRICS mat;
-            POSITION uiPos = pInput->uiPos;
-            float x, y;
-
+            //DWRITE_TEXT_METRICS tm;
             if (wParam < 0x20 && wParam != VK_RETURN) break;
             pInput->Str.insert(pInput->CaretIdx, 1, wParam);
             pInput->UpdateTextLayout();
             pInput->CaretIdx++;
-            pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &x, &y, &mat);
-            pInput->SetCaret({ uiPos.x + x, uiPos.y + y, 3, mat.height }, TRUE);
+            pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
+            //pInput->pLayout->GetMetrics(&tm);
+            pInput->SetCaret(HitMet.height, TRUE);
             break;
         }
     }
@@ -210,10 +271,11 @@ void UI_Textinput::PauseBg(unsigned long Delay)
     }
 }
 
-void UI_Textinput::SetCaret(POSITION CaretPos, BOOL bMotion)
+void UI_Textinput::SetCaret(float CaretHeight, BOOL bMotion)
 {
     eTextinputMotionPattern patt;
     MOTION_INFO mi;
+    POSITION CaretPos = {uiPos.x+CaretX, uiPos.y+CaretY, Motion.CaretWidth, CaretHeight };
 
     if (bMotion) patt = Motion.MotionCaretMove;
     else patt = eTextinputMotionPattern::eCaretMove_Default;

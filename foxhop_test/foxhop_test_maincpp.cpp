@@ -163,7 +163,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         InputParam.ColorFrame = { 0.8,0,0,0.6 };
         InputParam.ColorBg = ALL_ZERO;
         InputParam.ColorFont = { 1,1,1,1 };
-        InputParam.PitchCaretMove = 200;
+        InputParam.PitchCaretMove = 150;
 
         pButton = new UI_Button(pUI->uiSys, NULL, {10,10,100,20}, (wchar_t*)L"Data Input Test", 0, ButtonParam);
         pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 590 , 270}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);

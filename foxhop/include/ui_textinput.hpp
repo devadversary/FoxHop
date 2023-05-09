@@ -2,6 +2,7 @@
 
 #include "ui_base.hpp"
 #include "ui_system.hpp"
+#include <vector>
 
 /**
     @brief 스태틱 모션 타입
@@ -43,6 +44,7 @@ public:
     unsigned long PitchPause;
     unsigned long PitchText;
     unsigned long PitchCaretMove;
+    float CaretWidth;
 
 public:
     UI_Textinput_MotionParam() {
@@ -63,6 +65,7 @@ public:
         PitchPause = 0;
         PitchText = 0;
         PitchCaretMove = 0;
+        CaretWidth = 2;
     }
 };
 
@@ -71,8 +74,6 @@ public:
     UI_Textinput_MotionParam Motion;
 
 private:
-    //wchar_t szText[UISTATIC_MAX_TEXTLEN];
-    //PropText* pText;
     PropBox* pBoxBg;
     PropBox* pBoxFrame;
     PropBox* pBoxCaret;
@@ -81,18 +82,23 @@ private:
     IDWriteTextFormat* pTextFormat;
     IDWriteTextLayout* pLayout;
     BOOL DragState;
-    long long CaretIdx;
-
+    int CaretIdx;
+    float CaretX, CaretY;
+    std::vector<DWRITE_LINE_METRICS> LineMetric;
+    DWRITE_TEXT_METRICS TextMet;
 private:
     static void DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
     void SetFrame(D2D1_COLOR_F Color, BOOL bMotion);
     void PauseFrame(unsigned long Delay);
     void SetBg(D2D1_COLOR_F Color, BOOL bMotion);
     void PauseBg(unsigned long Delay);
-    void SetCaret(POSITION CaretPos, BOOL bMotion);
+    void SetCaret(float CaretHeight, BOOL bMotion);
     void PauseCaret(unsigned long Delay);
     void SetTextlayout(D2D1_COLOR_F Color, BOOL bMotion);
+    void PauseTextlayout(D2D1_COLOR_F Color, BOOL bMotion);
     void UpdateTextLayout();
+    void DrawSelectArea();
+
 public: /*반드시 있어야 되는 매서드*/
     UI_Textinput(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, IDWriteTextFormat* pTextFmt, UI_Textinput_MotionParam MotionParam = UI_Textinput_MotionParam());
     ~UI_Textinput();    
