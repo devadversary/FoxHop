@@ -46,4 +46,5 @@ public:
 
     UI_Panel* InitMainPanel(HWND hWnd, pfnUIHandler MainPanelProc);
     BOOL SendUIMessage(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
+    IDWriteTextFormat* CreateTextFmt(wchar_t* szFontName, float fFontSize, DWRITE_TEXT_ALIGNMENT TextAlign, DWRITE_PARAGRAPH_ALIGNMENT ParagraphAlign);
 };

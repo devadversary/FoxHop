@@ -138,5 +138,6 @@ void PropText::render(ID2D1RenderTarget* pRT)
                 (float)CurPos.y,
                 (float)CurPos.x + CurPos.width,
                 (float)CurPos.y + CurPos.height };
-    pRT->DrawTextW(pStr, (UINT32)CurLen, pTextFmt, rect, Brush);
+    if(pStr)
+        pRT->DrawTextW(pStr, (UINT32)CurLen, pTextFmt, rect, Brush);
 }

@@ -127,6 +127,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         UI_Button_MotionParam ButtonParam;
         UI_Table_MotionParam TableParam;
         UI_Static_MotionParam StaticParam;
+        UI_Textinput_MotionParam InputParam;
 
         ButtonParam.InitMotion = eButtonMotionPattern::eInit_Reload;
         ButtonParam.InitPitch = 700;
@@ -152,14 +153,22 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
         StaticParam.MotionText = eStaticMotionPattern::eText_Flick;
         StaticParam.PitchText = 200;
-        StaticParam.ColorBg = { 0.7,0,0,0.4 };
+        //StaticParam.ColorFrame = { 1,0,0,1 };
+        //StaticParam.ColorBg = { 0.7,0,0,0.4 };
+        StaticParam.ColorFrame = { 0,0,0,0 };
+        StaticParam.ColorBg = { 0,0,0,0 };
         StaticParam.ColorFont = { 1,1,1,1 };
-        StaticParam.ColorFrame = { 1,0,0,1 };
+
+        InputParam.MotionCaretMove = eTextinputMotionPattern::eCaretMove_Decel;
+        InputParam.ColorFrame = { 0.8,0,0,0.6 };
+        InputParam.ColorBg = ALL_ZERO;
+        InputParam.ColorFont = { 1,1,1,1 };
+        InputParam.PitchCaretMove = 200;
 
         pButton = new UI_Button(pUI->uiSys, NULL, {10,10,100,20}, (wchar_t*)L"Data Input Test", 0, ButtonParam);
         pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 590 , 270}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
         pStatic = new UI_Static(pUI->uiSys, NULL, {10, 320, 590, 25}, (wchar_t*)L"Done.", StaticParam);
-        pInput = new UI_Textinput(pUI->uiSys, NULL, { 10, 355, 590, 150 });
+        pInput = new UI_Textinput(pUI->uiSys, NULL, { 10, 355, 590, 150 }, pUI->uiSys->CreateTextFmt((wchar_t*)L"Consolas", 15, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_NEAR), InputParam);
         pPanel->RegisterUI(pButton);
         pPanel->RegisterUI(pTable);
         pPanel->RegisterUI(pStatic);

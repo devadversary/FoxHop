@@ -25,10 +25,10 @@ UISystem::UISystem(HWND hWnd)
 
     /*D2D 환경 초기화 및 UI시스템 초기화*/
     D2DA_Init(&D2DA, hWnd); /*Direct X 개체들과 렌더타겟, 팩토리 등 초기화*/
-    TinyTextForm   = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 7.9f, DWRITE_TEXT_ALIGNMENT_JUSTIFIED, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-    SmallTextForm  = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 9.f, DWRITE_TEXT_ALIGNMENT_JUSTIFIED, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-    ButtonTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 12, DWRITE_TEXT_ALIGNMENT_CENTER, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-    MediumTextForm = D2DA_SetFont(&D2DA, (wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 15, DWRITE_TEXT_ALIGNMENT_JUSTIFIED, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+    TinyTextForm   = CreateTextFmt((wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 7.9f, DWRITE_TEXT_ALIGNMENT_JUSTIFIED, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+    SmallTextForm  = CreateTextFmt((wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 9.f, DWRITE_TEXT_ALIGNMENT_JUSTIFIED, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+    ButtonTextForm = CreateTextFmt((wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 12, DWRITE_TEXT_ALIGNMENT_CENTER, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+    MediumTextForm = CreateTextFmt((wchar_t*)UISYSTEM_FONTNAME_DEFAULT, 15, DWRITE_TEXT_ALIGNMENT_JUSTIFIED, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
     /*D2D에서 렌더링될 때, 실수좌표계를 사용함으로 각 픽셀의 중심을 기준으로 렌더해야한다
       정수 좌표계가 아니므로, 픽셀의 중심 (0.5 픽셀씩 +) 기준이 아니면 상이 흐리다.*/
@@ -61,4 +61,16 @@ BOOL UISystem::SendUIMessage(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam
     if (!pUI || !pUI->DefaultHandler) return FALSE;
     pUI->DefaultHandler(pUI, Message, wParam, lParam);
     return TRUE;
+}
+
+IDWriteTextFormat* UISystem::CreateTextFmt(wchar_t* szFontName, float fFontSize, DWRITE_TEXT_ALIGNMENT TextAlign, DWRITE_PARAGRAPH_ALIGNMENT ParagraphAlign)
+{
+    IDWriteTextFormat* pTextFmt;
+
+    if (S_OK != D2DA.pDWFactory->CreateTextFormat(szFontName, 0, DWRITE_FONT_WEIGHT_MEDIUM, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fFontSize, L"en-us", &pTextFmt)) return FALSE;
+    pTextFmt->SetTextAlignment(TextAlign); /*각 줄의 정렬 (가운데 정렬 등)*/
+    /*ex : DWRITE_TEXT_ALIGNMENT_LEADING*/
+    pTextFmt->SetParagraphAlignment(ParagraphAlign); /*텍스트 출력 영역의 정렬 (하단 맞춤, 상단 맞춤 등)*/
+    /*ex : DWRITE_PARAGRAPH_ALIGNMENT_CENTER*/
+    return pTextFmt;
 }

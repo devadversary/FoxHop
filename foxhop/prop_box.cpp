@@ -2,7 +2,7 @@
 
 PropBox::PropBox(ID2D1RenderTarget* pRT)
 {
-    pRT->CreateSolidColorBrush({0,0,0,0}, &Brush);;
+    pRT->CreateSolidColorBrush({0,0,0,0}, &Brush);
     InitPos = { 0,0,0,0 };
     CurPos = { 0,0,0,0 };
     InitColor = { 0,0,0,0 };
