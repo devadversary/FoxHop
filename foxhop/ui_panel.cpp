@@ -48,6 +48,8 @@ void UI_Panel::DefaultPanelHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
     case VK_END:
     case VK_ESCAPE:
     case VK_INSERT:
+    case WM_IME_STARTCOMPOSITION:
+    case WM_IME_ENDCOMPOSITION:
     case WM_IME_COMPOSITION:
     case WM_IME_CHAR:
         if (pPanel->pFocusedUI) pPanel->pFocusedUI->DefaultHandler(pPanel->pFocusedUI, Message, wParam, lParam);

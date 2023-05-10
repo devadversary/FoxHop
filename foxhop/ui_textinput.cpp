@@ -17,6 +17,7 @@ UI_Textinput::UI_Textinput(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
     CaretX = 0;
     CaretY = 0;
     CaretIdx = 0;
+    ImeCompBoot = FALSE;
 
     Str.assign(L"");
     pUISys->D2DA.pDWFactory->CreateTextLayout(Str.c_str(), Str.size(), pTextFormat, uiPos.x2, uiPos.y2, &pLayout);
@@ -200,7 +201,44 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
             }
             break;
         }
+#if 0
+        case WM_IME_STARTCOMPOSITION: {
+            pInput->ImeComposing = TRUE;
+            break;
+        }
 
+        case WM_IME_ENDCOMPOSITION: {
+            pInput->ImeComposing = FALSE;
+            pInput->Str.erase(pInput->CaretIdx, 1);
+            //pInput->CaretIdx--;
+            break;
+        }
+#endif
+        case WM_IME_COMPOSITION: {
+            //if (!pInput->ImeOneCharComplete) break;
+            if (lParam & GCS_RESULTSTR) {
+                pInput->Str.erase(pInput->CaretIdx, 1);
+                pInput->ImeCompBoot = FALSE;
+            }
+            if (lParam & GCS_COMPSTR) {
+                if (!pInput->ImeCompBoot) {
+                    pInput->Str.insert(pInput->CaretIdx, 1, wParam);
+                    pInput->ImeCompBoot = TRUE;
+                }
+                else {
+                    pInput->Str.replace(pInput->CaretIdx, 1, 1, wParam);
+                }
+                pInput->UpdateTextLayout();
+                pInput->pLayout->HitTestTextPosition(pInput->CaretIdx+1, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
+                pInput->SetCaret(HitMet.height, TRUE);
+            }
+            break;
+        }
+        
+        case WM_IME_CHAR: {
+
+            break;
+        }
 
         case WM_CHAR: {
             //DWRITE_TEXT_METRICS tm;

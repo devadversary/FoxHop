@@ -86,6 +86,8 @@ private:
     float CaretX, CaretY;
     std::vector<DWRITE_LINE_METRICS> LineMetric;
     DWRITE_TEXT_METRICS TextMet;
+    BOOL ImeCompBoot;
+
 private:
     static void DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
     void SetFrame(D2D1_COLOR_F Color, BOOL bMotion);
