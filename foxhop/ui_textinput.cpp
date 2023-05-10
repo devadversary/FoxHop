@@ -167,8 +167,6 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
                         tmp += pInput->LineMetric[i].height;
                         /*행 높이 합산중, 캐럿Y좌표를 넘는순간*/
                         if (tmp > pInput->CaretY) {
-                            //if (i + 1 > TextMet.lineCount) break;
-                            //tmp += pInput->LineMetric[i].height;
                             pInput->pLayout->HitTestPoint(pInput->CaretX, tmp, &Trail, &Inside, &HitMet);
                             pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &TmpMet);
                             pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
@@ -201,21 +199,9 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
             }
             break;
         }
-#if 0
-        case WM_IME_STARTCOMPOSITION: {
-            pInput->ImeComposing = TRUE;
-            break;
-        }
 
-        case WM_IME_ENDCOMPOSITION: {
-            pInput->ImeComposing = FALSE;
-            pInput->Str.erase(pInput->CaretIdx, 1);
-            //pInput->CaretIdx--;
-            break;
-        }
-#endif
         case WM_IME_COMPOSITION: {
-            //if (!pInput->ImeOneCharComplete) break;
+            int offset = 1;
             if (lParam & GCS_RESULTSTR) {
                 pInput->Str.erase(pInput->CaretIdx, 1);
                 pInput->ImeCompBoot = FALSE;
@@ -228,26 +214,19 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
                 else {
                     pInput->Str.replace(pInput->CaretIdx, 1, 1, wParam);
                 }
-                pInput->UpdateTextLayout();
-                pInput->pLayout->HitTestTextPosition(pInput->CaretIdx+1, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
-                pInput->SetCaret(HitMet.height, TRUE);
             }
+            pInput->UpdateTextLayout();
+            pInput->pLayout->HitTestTextPosition(pInput->CaretIdx+offset, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
+            pInput->SetCaret(HitMet.height, TRUE);
             break;
         }
         
-        case WM_IME_CHAR: {
-
-            break;
-        }
-
         case WM_CHAR: {
-            //DWRITE_TEXT_METRICS tm;
             if (wParam < 0x20 && wParam != VK_RETURN) break;
             pInput->Str.insert(pInput->CaretIdx, 1, wParam);
             pInput->UpdateTextLayout();
             pInput->CaretIdx++;
             pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
-            //pInput->pLayout->GetMetrics(&tm);
             pInput->SetCaret(HitMet.height, TRUE);
             break;
         }
