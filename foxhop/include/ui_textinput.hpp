@@ -92,7 +92,6 @@ private:
     std::vector<DWRITE_LINE_METRICS> LineMetric;
     DWRITE_TEXT_METRICS TextMet;
     BOOL ImeCompBoot;
-    BOOL IsSetSelect; /*텍스트 선택영역이 지정되어있는가?*/
 
 private:
     static void DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);

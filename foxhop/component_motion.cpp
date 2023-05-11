@@ -133,6 +133,7 @@ BOOL ComponentMotion::update(unsigned long ElapsedTime)
 
         for (k = 0; k < pCh->nChain; k++) {
             pVC = &pCh->arrChain[k];
+            if (!pVC->pVal) continue;
             *pVC->pVal = pVC->nStart + (pCh->fCurrent * (pVC->nEnd-pVC->nStart) ); /*타겟 값 업데이트*/
         }
     }

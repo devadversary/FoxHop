@@ -19,7 +19,6 @@ UI_Textinput::UI_Textinput(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
     CaretIdx = 0;
     StartSelectIdx = 0;
     ImeCompBoot = FALSE;
-    IsSetSelect = FALSE;
     CaretTrail = FALSE;
 
     Str.assign(L"");
@@ -101,7 +100,6 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
             long y = GET_Y_LPARAM(lParam);
             DWRITE_HIT_TEST_METRICS mat2;
 
-            pInput->IsSetSelect = FALSE;
             pInput->DragState = TRUE;
 
             pInput->pLayout->HitTestPoint((float)x, (float)y, &Trail, &Inside, &HitMet);
@@ -124,25 +122,37 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
             if (!pInput->DragState) break;
             pInput->pLayout->HitTestPoint((float)x, (float)y, &Trail, &Inside, &HitMet);
 
-            if (!pInput->IsSetSelect) pInput->IsSetSelect = TRUE;
-
             pInput->CaretTrail = Trail;
             pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &mat2);
             pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+            //pInput->StartSelectIdx = pInput->CaretIdx;
             pInput->SetCaret(HitMet.height, TRUE);
             break;
         }
 
+        case WM_KEYUP:
+            switch (wParam) {
+            case VK_SHIFT:
+                //if (pInput->DragState) break;
+                //pInput->DragState = FALSE;
+                break;
+            }
+            break;
 
         case WM_KEYDOWN: {
             if (pInput->DragState) break;
+
             switch (wParam) {
+                case VK_SHIFT:
+                    //if (pInput->DragState) break;
+                    //pInput->DragState = TRUE;
+                    break;
+
                 case VK_BACK: {
                     pInput->CaretIdx--;
-                    if (pInput->CaretIdx < 0) {
-                        pInput->CaretIdx = 0;
-                        break;
-                    }
+                    if (pInput->CaretIdx < 0) pInput->CaretIdx = 0;
+                    pInput->StartSelectIdx = pInput->CaretIdx;
+                    if (!pInput->CaretIdx) break;
 
                     pInput->Str.erase(pInput->CaretIdx, 1);
                     pInput->UpdateTextLayout();
@@ -177,6 +187,8 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
                             pInput->pLayout->HitTestPoint(pInput->CaretX, tmp, &Trail, &Inside, &HitMet);
                             pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &TmpMet);
                             pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+                            if (!(GetKeyState(VK_SHIFT) & 0x80))
+                                pInput->StartSelectIdx = pInput->CaretIdx;
                             pInput->SetCaret(HitMet.height, TRUE);
                             break;
                         }
@@ -199,6 +211,8 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
                             pInput->pLayout->HitTestPoint(pInput->CaretX, tmp, &Trail, &Inside, &HitMet);
                             pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &TmpMet);
                             pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+                            if (!(GetKeyState(VK_SHIFT) & 0x80))
+                                pInput->StartSelectIdx = pInput->CaretIdx;
                             pInput->SetCaret(HitMet.height, TRUE);
                             break;
                         }
@@ -208,20 +222,22 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
 
                 case VK_LEFT:
                     pInput->CaretIdx--;
-                    if (pInput->CaretIdx < 0) {
-                        pInput->CaretIdx = 0;
-                        break;
-                    }
+                    if (pInput->CaretIdx < 0) pInput->CaretIdx = 0;
+                    if (!pInput->CaretIdx) break;
+                    if (!(GetKeyState(VK_SHIFT) & 0x80))
+                        pInput->StartSelectIdx = pInput->CaretIdx;
+
                     pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
                     pInput->SetCaret(HitMet.height, TRUE);
                     break;
 
                 case VK_RIGHT:
                     pInput->CaretIdx++;
-                    if (pInput->CaretIdx > pInput->Str.size()) {
-                        pInput->CaretIdx--;
-                        break;
-                    }
+                    if (pInput->CaretIdx > pInput->Str.size()) pInput->CaretIdx--;
+                    if (pInput->CaretIdx >= pInput->Str.size()) break;
+                    if (!(GetKeyState(VK_SHIFT) & 0x80))
+                        pInput->StartSelectIdx = pInput->CaretIdx;
+
                     pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
                     pInput->SetCaret(HitMet.height, TRUE);
                     break;
@@ -232,7 +248,6 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
         case WM_IME_COMPOSITION: {
             int offset = 1;
             if (pInput->DragState) break;
-            pInput->IsSetSelect = FALSE;
 
             if (lParam & GCS_RESULTSTR) {
                 pInput->Str.erase(pInput->CaretIdx, 1);
@@ -256,11 +271,11 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
         case WM_CHAR: {
             if (pInput->DragState) break;
             if (wParam < 0x20 && wParam != VK_RETURN) break;
-            pInput->IsSetSelect = FALSE;
 
             pInput->Str.insert(pInput->CaretIdx, 1, wParam);
             pInput->UpdateTextLayout();
             pInput->CaretIdx++;
+            pInput->StartSelectIdx = pInput->CaretIdx;
             pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
             pInput->SetCaret(HitMet.height, TRUE);
             break;
@@ -290,7 +305,7 @@ void UI_Textinput::DrawSelectArea()
     int TmpLen;
     float CharX, CharY;
 
-    if (!IsSetSelect) return;
+    //if (!IsSetSelect) return;
     if (StartSelectIdx == CaretIdx) return;
 
     if (StartSelectIdx > CaretIdx) { si = CaretIdx; ei = StartSelectIdx; }
