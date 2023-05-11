@@ -84,6 +84,25 @@ void UI_Textinput::render()
     pBoxCaret->render(pRenderTarget);
 }
 
+BOOL UI_Textinput::DeleteSelectArea()
+{
+    int si, ei, distance;
+    DWRITE_HIT_TEST_METRICS HitMet;
+
+    if (StartSelectIdx == CaretIdx) return FALSE;
+
+    si = min(StartSelectIdx, CaretIdx);
+    ei = max(StartSelectIdx, CaretIdx);
+    distance = ei - si;
+    Str.erase(si, distance);
+    CaretIdx = si;
+    StartSelectIdx = CaretIdx;
+    UpdateTextLayout();
+    pLayout->HitTestTextPosition(CaretIdx, FALSE, &CaretX, &CaretY, &HitMet);
+    SetCaret(HitMet.height, TRUE);
+    return TRUE;
+}
+
 void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     UI_Textinput* pInput = static_cast<UI_Textinput*>(pUI);
@@ -130,29 +149,19 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
             break;
         }
 
-        case WM_KEYUP:
-            switch (wParam) {
-            case VK_SHIFT:
-                //if (pInput->DragState) break;
-                //pInput->DragState = FALSE;
-                break;
-            }
-            break;
-
         case WM_KEYDOWN: {
             if (pInput->DragState) break;
 
             switch (wParam) {
-                case VK_SHIFT:
-                    //if (pInput->DragState) break;
-                    //pInput->DragState = TRUE;
-                    break;
-
                 case VK_BACK: {
+                    if (pInput->DeleteSelectArea()) break;
                     pInput->CaretIdx--;
-                    if (pInput->CaretIdx < 0) pInput->CaretIdx = 0;
+                    if (pInput->CaretIdx < 0) {
+                        pInput->CaretIdx = 0;
+                        pInput->StartSelectIdx = pInput->CaretIdx;
+                        break;
+                    }
                     pInput->StartSelectIdx = pInput->CaretIdx;
-                    if (!pInput->CaretIdx) break;
 
                     pInput->Str.erase(pInput->CaretIdx, 1);
                     pInput->UpdateTextLayout();
@@ -162,6 +171,7 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
                 }
 
                 case VK_DELETE: {
+                    if (pInput->DeleteSelectArea()) break;
                     pInput->Str.erase(pInput->CaretIdx, 1);
                     pInput->UpdateTextLayout();
                     pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
@@ -223,7 +233,7 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
                 case VK_LEFT:
                     pInput->CaretIdx--;
                     if (pInput->CaretIdx < 0) pInput->CaretIdx = 0;
-                    if (!pInput->CaretIdx) break;
+                    //if (!pInput->CaretIdx) break;
                     if (!(GetKeyState(VK_SHIFT) & 0x80))
                         pInput->StartSelectIdx = pInput->CaretIdx;
 
@@ -234,7 +244,7 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
                 case VK_RIGHT:
                     pInput->CaretIdx++;
                     if (pInput->CaretIdx > pInput->Str.size()) pInput->CaretIdx--;
-                    if (pInput->CaretIdx >= pInput->Str.size()) break;
+                    //if (pInput->CaretIdx >= pInput->Str.size()) break;
                     if (!(GetKeyState(VK_SHIFT) & 0x80))
                         pInput->StartSelectIdx = pInput->CaretIdx;
 
@@ -248,7 +258,7 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
         case WM_IME_COMPOSITION: {
             int offset = 1;
             if (pInput->DragState) break;
-
+            pInput->DeleteSelectArea();
             if (lParam & GCS_RESULTSTR) {
                 pInput->Str.erase(pInput->CaretIdx, 1);
                 pInput->ImeCompBoot = FALSE;
@@ -271,7 +281,7 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
         case WM_CHAR: {
             if (pInput->DragState) break;
             if (wParam < 0x20 && wParam != VK_RETURN) break;
-
+            pInput->DeleteSelectArea();
             pInput->Str.insert(pInput->CaretIdx, 1, wParam);
             pInput->UpdateTextLayout();
             pInput->CaretIdx++;

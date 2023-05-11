@@ -105,6 +105,7 @@ private:
     void PauseTextlayout(D2D1_COLOR_F Color, BOOL bMotion);
     void UpdateTextLayout();
     void DrawSelectArea();
+    BOOL DeleteSelectArea();
     void OnKeyInput(UINT Message, WPARAM wParam, LPARAM lParam);
 
 public: /*반드시 있어야 되는 매서드*/
