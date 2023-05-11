@@ -40,6 +40,7 @@ public:
     D2D1_COLOR_F ColorBg;
     D2D1_COLOR_F ColorFont;
     D2D1_COLOR_F ColorCaret;
+    D2D1_COLOR_F ColorSelect;
     unsigned long PitchInit;
     unsigned long PitchPause;
     unsigned long PitchText;
@@ -61,6 +62,7 @@ public:
         ColorBg = { 1.f, 1.f, 1.f, 1.f };
         ColorFont = { 0,0,0,1 };
         ColorCaret = { 0,0,0,1 };
+        ColorSelect = { 0.2f, 0.56f, 1.f, 1.f };
         PitchInit = 0;
         PitchPause = 0;
         PitchText = 0;
@@ -79,14 +81,18 @@ private:
     PropBox* pBoxCaret;
     std::wstring Str;
     ID2D1SolidColorBrush* pTextBrush;
+    ID2D1SolidColorBrush* pSelectBrush;
     IDWriteTextFormat* pTextFormat;
     IDWriteTextLayout* pLayout;
     BOOL DragState;
     int CaretIdx;
+    BOOL CaretTrail;
     float CaretX, CaretY;
+    int StartSelectIdx;
     std::vector<DWRITE_LINE_METRICS> LineMetric;
     DWRITE_TEXT_METRICS TextMet;
     BOOL ImeCompBoot;
+    BOOL IsSetSelect; /*텍스트 선택영역이 지정되어있는가?*/
 
 private:
     static void DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
@@ -100,6 +106,7 @@ private:
     void PauseTextlayout(D2D1_COLOR_F Color, BOOL bMotion);
     void UpdateTextLayout();
     void DrawSelectArea();
+    void OnKeyInput(UINT Message, WPARAM wParam, LPARAM lParam);
 
 public: /*반드시 있어야 되는 매서드*/
     UI_Textinput(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, IDWriteTextFormat* pTextFmt, UI_Textinput_MotionParam MotionParam = UI_Textinput_MotionParam());

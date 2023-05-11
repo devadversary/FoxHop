@@ -17,13 +17,17 @@ UI_Textinput::UI_Textinput(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
     CaretX = 0;
     CaretY = 0;
     CaretIdx = 0;
+    StartSelectIdx = 0;
     ImeCompBoot = FALSE;
+    IsSetSelect = FALSE;
+    CaretTrail = FALSE;
 
     Str.assign(L"");
     pUISys->D2DA.pDWFactory->CreateTextLayout(Str.c_str(), Str.size(), pTextFormat, uiPos.x2, uiPos.y2, &pLayout);
     pLayout->SetMaxWidth(uiPos.x2);
     pLayout->SetMaxHeight(uiPos.y2);
     pRenderTarget->CreateSolidColorBrush({ 0,0,0,0 }, &pTextBrush);
+    pRenderTarget->CreateSolidColorBrush(Motion.ColorSelect, &pSelectBrush);
     pBoxBg = new PropBox(pRenderTarget);
     pBoxFrame = new PropBox(pRenderTarget);
     pBoxCaret = new PropBox(pRenderTarget);
@@ -75,6 +79,8 @@ void UI_Textinput::render()
     if (uiMotionState == eUIMotionState::eUMS_Hide) return;
     pBoxBg->render(pRenderTarget);
     pBoxFrame->render(pRenderTarget);
+
+    DrawSelectArea();
     pRenderTarget->DrawTextLayout({ uiPos.x,uiPos.y }, pLayout, pTextBrush);
     pBoxCaret->render(pRenderTarget);
 }
@@ -88,7 +94,6 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
     DWRITE_TEXT_METRICS TextMet;
     BOOL Trail, Inside;
     POSITION uiPos = pInput->uiPos;
-    float x, y;
 
     switch (Message) {
         case WM_LBUTTONDOWN: {
@@ -96,10 +101,13 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
             long y = GET_Y_LPARAM(lParam);
             DWRITE_HIT_TEST_METRICS mat2;
 
+            pInput->IsSetSelect = FALSE;
             pInput->DragState = TRUE;
+
             pInput->pLayout->HitTestPoint((float)x, (float)y, &Trail, &Inside, &HitMet);
             pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &mat2);
             pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+            pInput->StartSelectIdx = pInput->CaretIdx;
             pInput->SetCaret(HitMet.height, TRUE);
             break;
         }
@@ -108,7 +116,26 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
             pInput->DragState = FALSE;
             break;
 
+        case WM_MOUSEMOVE: {
+            long x = GET_X_LPARAM(lParam);
+            long y = GET_Y_LPARAM(lParam);
+            DWRITE_HIT_TEST_METRICS mat2;
+            
+            if (!pInput->DragState) break;
+            pInput->pLayout->HitTestPoint((float)x, (float)y, &Trail, &Inside, &HitMet);
+
+            if (!pInput->IsSetSelect) pInput->IsSetSelect = TRUE;
+
+            pInput->CaretTrail = Trail;
+            pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &mat2);
+            pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+            pInput->SetCaret(HitMet.height, TRUE);
+            break;
+        }
+
+
         case WM_KEYDOWN: {
+            if (pInput->DragState) break;
             switch (wParam) {
                 case VK_BACK: {
                     pInput->CaretIdx--;
@@ -136,6 +163,7 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
                     int i;
                     float tmp=0;
                     DWRITE_HIT_TEST_METRICS TmpMet;
+
                     pInput->pLayout->GetMetrics(&TextMet);
                     pInput->LineMetric.resize(TextMet.lineCount);
                     pInput->pLayout->GetLineMetrics(&pInput->LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
@@ -160,6 +188,7 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
                     int i;
                     float tmp = 0;
                     DWRITE_HIT_TEST_METRICS TmpMet;
+
                     pInput->pLayout->GetMetrics(&TextMet);
                     pInput->LineMetric.resize(TextMet.lineCount);
                     pInput->pLayout->GetLineMetrics(&pInput->LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
@@ -202,6 +231,9 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
 
         case WM_IME_COMPOSITION: {
             int offset = 1;
+            if (pInput->DragState) break;
+            pInput->IsSetSelect = FALSE;
+
             if (lParam & GCS_RESULTSTR) {
                 pInput->Str.erase(pInput->CaretIdx, 1);
                 pInput->ImeCompBoot = FALSE;
@@ -222,7 +254,10 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
         }
         
         case WM_CHAR: {
+            if (pInput->DragState) break;
             if (wParam < 0x20 && wParam != VK_RETURN) break;
+            pInput->IsSetSelect = FALSE;
+
             pInput->Str.insert(pInput->CaretIdx, 1, wParam);
             pInput->UpdateTextLayout();
             pInput->CaretIdx++;
@@ -242,6 +277,63 @@ void UI_Textinput::UpdateTextLayout()
     pOldLayout = pLayout;
     pLayout = pNewLayout;
     pOldLayout->Release();
+}
+
+void UI_Textinput::DrawSelectArea()
+{
+    int i;
+    float TmpHeight;
+    BOOL Trail, Inside;
+    DWRITE_HIT_TEST_METRICS TmpMet;
+    DWRITE_HIT_TEST_METRICS HitMet;
+    int si, ei;
+    int TmpLen;
+    float CharX, CharY;
+
+    if (!IsSetSelect) return;
+    if (StartSelectIdx == CaretIdx) return;
+
+    if (StartSelectIdx > CaretIdx) { si = CaretIdx; ei = StartSelectIdx; }
+    else { si = StartSelectIdx; ei = CaretIdx; }
+
+    pLayout->GetMetrics(&TextMet);
+    LineMetric.resize(TextMet.lineCount);
+    pLayout->GetLineMetrics(&LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
+
+    TmpLen = 0;
+    TmpHeight = 0;
+    for (i = 0; i < TextMet.lineCount; i++) {
+        int LineStartIdx = TmpLen;
+        int LineEndIdx = TmpLen + LineMetric[i].length-1;
+        float DrawStartX, DrawEndX;
+        float Distance;
+        int TargetIdx;
+        D2D1_RECT_F rect;
+
+        if (LineEndIdx < si || LineStartIdx > ei) {
+            TmpLen += LineMetric[i].length;
+            TmpHeight += LineMetric[i].height;
+            continue;
+        }
+
+        if (LineStartIdx <= si) TargetIdx = si;
+        else TargetIdx = LineStartIdx;
+        pLayout->HitTestTextPosition(TargetIdx, FALSE, &DrawStartX, &CharY, &TmpMet);
+
+        if (LineEndIdx >= ei) TargetIdx = ei;
+        else TargetIdx = LineEndIdx;
+        pLayout->HitTestTextPosition(TargetIdx, FALSE, &DrawEndX, &CharY, &TmpMet);
+
+        Distance = DrawEndX - DrawStartX;
+
+        rect = { uiPos.x + DrawStartX, 
+                 uiPos.y + TmpHeight,
+                 uiPos.x + DrawStartX + Distance,
+                 uiPos.y + TmpHeight + LineMetric[i].height };
+        pRenderTarget->FillRectangle(rect, pSelectBrush);
+        TmpLen += LineMetric[i].length;
+        TmpHeight += LineMetric[i].height;
+    }
 }
 
 void UI_Textinput::SetFrame(D2D1_COLOR_F Color, BOOL bMotion)
