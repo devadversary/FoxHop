@@ -99,7 +99,7 @@ private:
     void PauseFrame(unsigned long Delay);
     void SetBg(D2D1_COLOR_F Color, BOOL bMotion);
     void PauseBg(unsigned long Delay);
-    void SetCaret(float CaretHeight, BOOL bMotion);
+    void MoveCaret(float CaretHeight, BOOL bMotion);
     void PauseCaret(unsigned long Delay);
     void SetTextlayout(D2D1_COLOR_F Color, BOOL bMotion);
     void PauseTextlayout(D2D1_COLOR_F Color, BOOL bMotion);
