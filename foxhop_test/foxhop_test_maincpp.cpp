@@ -42,7 +42,8 @@ unsigned int GetElapse()
     return distance(t2, t1);
 }
 
-UI_Button* pButton = NULL;
+UI_Button* pPauseButton = NULL;
+UI_Button* pResumeButton = NULL;
 UI_Table* pTable = NULL;
 UI_Static* pStatic = NULL;
 UI_Textinput* pInput = NULL;
@@ -136,10 +137,10 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         ButtonParam.FaceColor = { 0.7,0,0,0.6 };
         ButtonParam.FrameColor = { 1,0,0,1 };
         ButtonParam.FontColor = { 1,1,1,1 };
-
+        /*
         TableParam.MotionSelect = eTableMotionPattern::eSelect_Decel;
         TableParam.PitchSelect = 300;
-        TableParam.MotionRowText = eTableMotionPattern::eText_Typing;
+        TableParam.MotionRowText = eTableMotionPattern::eViewRowTextInit_Typing;
         TableParam.PitchRowOneText = 200;
         TableParam.PitchRowAllText = 500;
         TableParam.ColorFrame = { 1,0,0,1 };
@@ -150,6 +151,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         TableParam.ColorRowBgSelect = { 1,1,1,0.8 };
         TableParam.ColorRowText = { 1,1,1,1 };
         TableParam.ColorRowTextSelect = { 0,0,0,1 };
+        */
 
         StaticParam.MotionText = eStaticMotionPattern::eText_Flick;
         StaticParam.PitchText = 200;
@@ -165,11 +167,13 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         InputParam.ColorFont = { 1,1,1,1 };
         InputParam.PitchCaretMove = 150;
 
-        pButton = new UI_Button(pUI->uiSys, NULL, {10,10,100,20}, (wchar_t*)L"Data Input Test", 0, ButtonParam);
+        pPauseButton = new UI_Button(pUI->uiSys, NULL, {10,10,100,20}, (wchar_t*)L"UI Pause", 0, ButtonParam);
+        pResumeButton = new UI_Button(pUI->uiSys, NULL, {120,10,100,20}, (wchar_t*)L"UI Resume", 200, ButtonParam);
         pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 590 , 270}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
         pStatic = new UI_Static(pUI->uiSys, NULL, {10, 320, 590, 25}, (wchar_t*)L"Done.", StaticParam);
         pInput = new UI_Textinput(pUI->uiSys, NULL, { 10, 355, 590, 150 }, pUI->uiSys->CreateTextFmt((wchar_t*)L"Consolas", 15, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_NEAR), InputParam);
-        pPanel->RegisterUI(pButton);
+        pPanel->RegisterUI(pPauseButton);
+        pPanel->RegisterUI(pResumeButton);
         pPanel->RegisterUI(pTable);
         pPanel->RegisterUI(pStatic);
         pPanel->RegisterUI(pInput);
