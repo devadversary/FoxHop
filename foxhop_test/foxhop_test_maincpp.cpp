@@ -119,7 +119,7 @@ void TestPauseButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
     switch (Message) {
     case WM_LBUTTONUP:
-        pTable->pause(1000);
+        pTable->pause(0);
         break;
     }
 }
@@ -130,7 +130,7 @@ void TestResumeButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
     switch (Message) {
     case WM_LBUTTONUP:
-        pTable->resume(1000);
+        pTable->resume(0);
         break;
     }
 }
@@ -167,13 +167,13 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         TableParam.MotionInitRowText = eTableMotionPattern::eInitRowText_Typing;
         TableParam.PitchInitRowText = 100;
         TableParam.GapInitRowText = 50;
-        /*
-        TableParam.MotionSelect = eTableMotionPattern::eSelect_Decel;
-        TableParam.PitchSelect = 300;
-        TableParam.PitchRowOneText = 200;
-        TableParam.PitchRowAllText = 500;
-        */
-        TableParam.ColorFrame = { 1,0,0,1 };
+        TableParam.MotionInitTableRowOrder = eTableMotionPattern::eInitTableRowOrder_Random;
+        TableParam.GapInitTableRowOrder = 20;
+        TableParam.RangeInitTableRowOrder = 50;
+        TableParam.MotionPauseTableRowOrder = eTableMotionPattern::ePauseTableRowOrder_Random;
+        TableParam.RangePauseTableRowOrder = 200;
+
+        TableParam.ColorFrame = { 0.8,0,0,0.8 };
         TableParam.ColorHeaderBg = { 0.6, 0, 0, 0.6 };
         TableParam.ColorHeaderText = { 1,1,1,1 };
         TableParam.ColorRowBg1 = { 0,0,0,0 };
@@ -198,9 +198,9 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
         pPauseButton = new UI_Button(pUI->uiSys, TestPauseButtonProc, {10,10,100,20}, (wchar_t*)L"UI Pause", 0, ButtonParam);
         pResumeButton = new UI_Button(pUI->uiSys, TestResumeButtonProc, {120,10,100,20}, (wchar_t*)L"UI Resume", 200, ButtonParam);
-        pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 590 , 270}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
-        pStatic = new UI_Static(pUI->uiSys, NULL, {10, 320, 590, 25}, (wchar_t*)L"Done.", StaticParam);
-        pInput = new UI_Textinput(pUI->uiSys, NULL, { 10, 355, 590, 150 }, pUI->uiSys->CreateTextFmt((wchar_t*)L"Consolas", 15, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_NEAR), InputParam);
+        pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 590 , 570}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
+        pStatic = new UI_Static(pUI->uiSys, NULL, {10, 620, 590, 25}, (wchar_t*)L"Done.", StaticParam);
+        pInput = new UI_Textinput(pUI->uiSys, NULL, { 10, 655, 590, 150 }, pUI->uiSys->CreateTextFmt((wchar_t*)L"Consolas", 15, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_NEAR), InputParam);
         pPanel->RegisterUI(pPauseButton);
         pPanel->RegisterUI(pResumeButton);
         pPanel->RegisterUI(pTable);
@@ -283,7 +283,7 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     wc.cbClsExtra = NULL;
     wc.cbWndExtra = NULL;
     RegisterClass(&wc);
-    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 630, 550, NULL, NULL, hInst, NULL);
+    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 630, 850, NULL, NULL, hInst, NULL);
     AlphaWindow(hWnd, WINDOWMODE_TRANSPARENT);
     ShowWindow(hWnd, TRUE);
     while (GetMessage(&Message, NULL, NULL, NULL)) {

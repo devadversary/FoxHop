@@ -27,6 +27,8 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     RowHgt = RowHeight ? RowHeight : TEXTSHEET_DEFAULT_ROWHEIGHT;
     ScrollComp = new ComponentMotion;
     Motion = MotionParam;
+    PinCount = 0;
+
     /* 열 정보 셋팅 */
     if (!ColumnCount) ColumnCount = 1; /*최소 1개의 열은 필요함*/
     ColCnt = ColumnCount;
@@ -168,7 +170,7 @@ void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPa
     @n            내부적으로 해당 배열을 malloc후 배열원소인 포인터는 복사된다.
     @param bEnsure 새 데이터가 추가 될 때, 해당 라인으로 자동 스크롤 된다.
 */
-void UI_Table::AddData(wchar_t* Data[], BOOL bAutoScroll = FALSE)
+void UI_Table::AddData(wchar_t* Data[], BOOL bAutoScroll)
 {
     long long TmpScrollPx;
     TABLE_ROW Row;
@@ -187,6 +189,7 @@ void UI_Table::AddData(wchar_t* Data[], BOOL bAutoScroll = FALSE)
     else MaxScrollPixel = TmpScrollPx;
 
     if (uiMotionState != eUIMotionState::eUMS_Visible) return; /*초기화모션/소멸모션 진행중엔 스크롤 X*/
+    PinCount = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
     if (bAutoScroll) SetScroll(MaxScrollPixel);
 }
 
@@ -348,30 +351,64 @@ void UI_Table::PauseHeaderText(unsigned long Delay)
 void UI_Table::ResumeRowOrder(unsigned long Delay)
 {
     MOTION_INFO mi;
-    long long ValidViewRowCnt = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
+    //long long ValidViewRowCnt = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
 
     /*UI_Table은 모션 종류에 따라 ViewData Delay만 적절히 주입해준다.
       하위 오브젝트는 ViewData 가 내부적으로 알아서 조정한다.*/
     switch (Motion.MotionInitTableRowOrder) {
         case eTableMotionPattern::eInitTableRowOrder_Default:{
-            for (int i = 0; i < ValidViewRowCnt; i++) 
+            for (int i = 0; i < PinCount; i++)
                 ViewData[i]->resume(Delay);
+            break;
+        }
+        case eTableMotionPattern::eInitTableRowOrder_Linear:{
+            for (int i = 0; i < PinCount; i++)
+                ViewData[i]->resume(Delay +( i*Motion.GapInitTableRowOrder));
+            break;
+        }
+        case eTableMotionPattern::eInitTableRowOrder_Random:{
+            unsigned long DelayOffset;
+
+            for (int i = 0; i < PinCount; i++) {
+                DelayOffset = 0;
+                DelayOffset += i*Motion.GapInitTableRowOrder;
+                DelayOffset += (rand() % Motion.RangeInitTableRowOrder);
+                ViewData[i]->resume(Delay + DelayOffset);
+            }
             break;
         }
     }
 }
 
+/**
+    @brief 행 클래스 소멸
+    @param PinCount Pause당시의 데이터 갯수. (Pause상태에서도 데이터 삽입이 되기때문)
+*/
 void UI_Table::PauseRowOrder(unsigned long Delay)
 {
     MOTION_INFO mi;
-    long long ValidViewRowCnt = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
 
     /*UI_Table은 모션 종류에 따라 ViewData Delay만 적절히 주입해준다.
       하위 오브젝트는 ViewData 가 내부적으로 알아서 조정한다.*/
     switch (Motion.MotionPauseTableRowOrder) {
         case eTableMotionPattern::ePauseTableRowOrder_Default:{
-            for (int i = 0; i < ValidViewRowCnt; i++) 
+            for (int i = 0; i < PinCount; i++)
                 ViewData[i]->pause(Delay);
+            break;
+        }
+        case eTableMotionPattern::ePauseTableRowOrder_Linear:{
+            for (int i = 0; i < PinCount; i++)
+                ViewData[i]->pause(Delay + (i * Motion.GapPauseTableRowOrder));
+            break;
+        }
+        case eTableMotionPattern::ePauseTableRowOrder_Random:{
+            unsigned long DelayOffset;
+            for (int i = 0; i < PinCount; i++) {
+                DelayOffset = 0;
+                DelayOffset += i * Motion.GapPauseTableRowOrder;
+                DelayOffset += (rand() % Motion.RangePauseTableRowOrder);
+                ViewData[i]->pause(Delay+ DelayOffset);
+            }
             break;
         }
     }
@@ -390,6 +427,7 @@ void UI_Table::resume(int nDelay)
 
 void UI_Table::pause(int nDelay)
 {
+    //PinCount = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
     uiMotionState = eUIMotionState::eUMS_PlayingHide;
     ScrollComp->clearChannel(); /*스크롤 모션 정지*/
     PauseFrame(nDelay + Motion.DelayPauseTableFrame);
@@ -619,15 +657,17 @@ void RowObject::PauseSelect(BOOL bMotion, unsigned long Delay)
         break;
 
     case eTableMotionPattern::ePauseTableSelect_Linear:
-        pSelectBox->Init(Pos, pParent->Motion.ColorRowBgSelect);
+        //pSelectBox->Init(Pos, pParent->Motion.ColorRowBgSelect);
         mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, pitch);
-        pSelectBox->addMovementMotion(mi, TRUE, Pos, { Pos.x, Pos.y,0, Pos.y2 });
+        //pSelectBox->addMovementMotion(mi, TRUE, Pos, { Pos.x, Pos.y,0, Pos.y2 });
+        pSelectBox->SetPos(mi, TRUE, Pos, { Pos.x, Pos.y,0, Pos.y2 });
         break;
 
     case eTableMotionPattern::ePauseTableSelect_Decel:
-        pSelectBox->Init(Pos, pParent->Motion.ColorRowBgSelect);
+        //pSelectBox->Init(Pos, pParent->Motion.ColorRowBgSelect);
         mi = InitMotionInfo(eMotionForm::eMotion_x3_2, Delay, pitch);
-        pSelectBox->addMovementMotion(mi, TRUE, Pos, { Pos.x, Pos.y,0, Pos.y2 });
+        //pSelectBox->addMovementMotion(mi, TRUE, Pos, { Pos.x, Pos.y,0, Pos.y2 });
+        pSelectBox->SetPos(mi, TRUE, Pos, { Pos.x, Pos.y,0, Pos.y2 });
         break;
     }
 }
@@ -741,6 +781,8 @@ void RowObject::PauseText(unsigned long Delay)
     eTableMotionPattern Patt;
     unsigned long pitch = pParent->Motion.PitchPauseRowText;
 
+    if (!ppRealData) return;
+
     switch (pParent->Motion.MotionPauseRowText) {
     case eTableMotionPattern::ePauseRowText_Default:
         for (int i = 0; i < nColumn; i++) {
@@ -791,8 +833,9 @@ void RowObject::PauseBg(unsigned long Delay)
 
 void RowObject::pause(int nDelay)
 {
-    PauseBg(nDelay);
-    PauseText(nDelay);
+    PauseBg(nDelay + pParent->Motion.DelayPauseRowBg);
+    PauseSelect(TRUE, nDelay + pParent->Motion.DelayPauseRowSelect);
+    PauseText(nDelay + pParent->Motion.DelayPauseRowText);
 }
 
 void RowObject::resume(int nDelay)

@@ -32,7 +32,11 @@ enum class eTableMotionPattern {
     ePauseTableHeaderText_Default,
 
     eInitTableRowOrder_Default,
+    eInitTableRowOrder_Linear,
+    eInitTableRowOrder_Random,
     ePauseTableRowOrder_Default,
+    ePauseTableRowOrder_Linear,
+    ePauseTableRowOrder_Random,
 
     eInitTableSelect_Default,
     eInitTableSelect_Linear,
@@ -86,9 +90,13 @@ public:
     eTableMotionPattern MotionInitTableRowOrder;
     unsigned long PitchInitTableRowOrder;
     unsigned long DelayInitTableRowOrder;
+    unsigned long GapInitTableRowOrder;
+    unsigned long RangeInitTableRowOrder;
     eTableMotionPattern MotionPauseTableRowOrder;
     unsigned long PitchPauseTableRowOrder;
     unsigned long DelayPauseTableRowOrder;
+    unsigned long GapPauseTableRowOrder;
+    unsigned long RangePauseTableRowOrder;
 
     eTableMotionPattern MotionInitRowSelect;
     unsigned long PitchInitRowSelect;
@@ -163,9 +171,13 @@ public:
         MotionInitTableRowOrder = eTableMotionPattern::eInitTableRowOrder_Default;
         PitchInitTableRowOrder = 0;
         DelayInitTableRowOrder = 0;
+        GapInitTableRowOrder = 0;
+        RangeInitTableRowOrder = 0;
         MotionPauseTableRowOrder = eTableMotionPattern::ePauseTableRowOrder_Default;
         PitchPauseTableRowOrder = 0;
         DelayPauseTableRowOrder = 0;
+        GapPauseTableRowOrder = 0;
+        RangePauseTableRowOrder = 0;
 
         MotionInitRowSelect = eTableMotionPattern::eInitTableSelect_Default;
         PitchInitRowSelect = 0;
@@ -236,7 +248,7 @@ private:
     int       ClientHeight;    /**< 헤더 높이를 제외한 순수 테이블 영역 높이*/
     int       ViewRowCnt;      /**< 화면에 보여지는 행 갯수*/
     long long PrevSelMainIdx;  /**< 이전에 선택했던 실 데이터 인덱스 (음수이면 미선택)*/
-
+    long long PinCount;
 private:
     static void DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
     
@@ -266,7 +278,7 @@ public:
 
 public: /*UI별 옵션 매서드*/
     void Resize(POSITION Pos);
-    void AddData(wchar_t* Data[], BOOL bAutoScroll);
+    void AddData(wchar_t* Data[], BOOL bAutoScroll = FALSE);
     void SetScroll(long long TargetScrollPx);
 };
 
