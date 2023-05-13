@@ -294,7 +294,6 @@ public:
     ~RowObject();
     void SetSelectBox(BOOL bSel, D2D1_COLOR_F Color, BOOL bMotion);
     void SetHighlight(D2D1_COLOR_F Color);
-    void SetBgColor(D2D1_COLOR_F Color, BOOL bMotion);
     void SetFontColor(D2D1_COLOR_F Color, BOOL bMotion);
     void OnBind(unsigned long long TargetDataIdx, int* pColWidth, BOOL bNeedUpdate = FALSE);
     void OnSelectEvent();
@@ -307,7 +306,7 @@ public:
     void PauseBg(unsigned long Delay);
 
     void ResumeSelect(unsigned long Delay);
-    void PauseSelect(unsigned long Delay);
+    void PauseSelect(BOOL bMotion, unsigned long Delay);
 
     void ResumeText(BOOL bMotion, unsigned long Delay);
     void PauseText(unsigned long Delay);
