@@ -173,12 +173,15 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
         TableParam.MotionInitRowSelect = eTableMotionPattern::eInitTableSelect_Decel ;
         TableParam.PitchInitRowSelect = 200;
+        TableParam.DelayInitRowSelect = 500;
         TableParam.MotionInitRowText = eTableMotionPattern::eInitRowText_Typing;
         TableParam.PitchInitRowText = 100;
         TableParam.GapInitRowText = 50;
+
         TableParam.MotionInitTableRowOrder = eTableMotionPattern::eInitTableRowOrder_Random;
-        TableParam.GapInitTableRowOrder = 20;
-        TableParam.RangeInitTableRowOrder = 50;
+        TableParam.DelayInitTableRowOrder = 400;
+        TableParam.GapInitTableRowOrder = 10;
+        TableParam.RangeInitTableRowOrder = 250;
 
         TableParam.MotionPauseTableFrame = eTableMotionPattern::ePauseTableFrame_ExpendAllDirFlick;
         TableParam.PitchPauseTableFrame = 300;
@@ -200,7 +203,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         TableParam.RangePauseRowText = 100;
 
         TableParam.MotionPauseTableRowOrder = eTableMotionPattern::ePauseTableRowOrder_Random;
-        TableParam.RangePauseTableRowOrder = 200;
+        TableParam.RangePauseTableRowOrder = 300;
 
         TableParam.ColorFrame = { 1,0,0,1 };
         TableParam.ColorHeaderBg = { 0.6, 0, 0, 0.6 };
