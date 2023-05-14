@@ -30,10 +30,16 @@ enum class eTableMotionPattern {
     ePauseTableBg_Default,
 
     eInitTableHeaderBg_Default,
+    eInitTableHeaderBg_Linear,
+    eInitTableHeaderBg_LinearReverse,
     ePauseTableHeaderBg_Default,
+    ePauseTableHeaderBg_Linear,
+    ePauseTableHeaderBg_LinearReverse,
 
     eInitTableHeaderText_Default,
+    eInitTableHeaderText_SlideIn,
     ePauseTableHeaderText_Default,
+    ePauseTableHeaderText_SlideOut,
 
     eInitTableRowOrder_Default,
     eInitTableRowOrder_Linear,

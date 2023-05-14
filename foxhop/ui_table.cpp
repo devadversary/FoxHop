@@ -328,6 +328,36 @@ void UI_Table::ResumeHeaderBg(unsigned long Delay)
             pBoxHeader->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorHeaderBg);
             break;
         }
+
+        case eTableMotionPattern::eInitTableHeaderBg_Linear: {
+            POSITION StartPos = uiPos;
+            POSITION EndPos = uiPos;
+
+            StartPos.y2 = HeaderHgt;
+            StartPos.x2 = 0;
+
+            EndPos.y2 = HeaderHgt;
+            pBoxHeader->Init(StartPos, Motion.ColorHeaderBg);
+            mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Motion.PitchInitTableHeaderBg);
+            pBoxHeader->SetPos(mi, TRUE, ALL_ZERO, EndPos);
+            break;
+        }
+
+        case eTableMotionPattern::eInitTableHeaderBg_LinearReverse: {
+            POSITION StartPos = uiPos;
+            POSITION EndPos = uiPos;
+
+            StartPos.y2 = HeaderHgt;
+            StartPos.x = uiPos.x+uiPos.x2;
+            StartPos.x2 = 0;
+
+            EndPos.y2 = HeaderHgt;
+
+            pBoxHeader->Init(StartPos, Motion.ColorHeaderBg);
+            mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Motion.PitchInitTableHeaderBg);
+            pBoxHeader->SetPos(mi, TRUE, ALL_ZERO, EndPos);
+            break;
+        }
     }
 }
 
@@ -341,11 +371,42 @@ void UI_Table::PauseHeaderBg(unsigned long Delay)
             pBoxHeader->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
             break;
         }
+
+        case eTableMotionPattern::ePauseTableHeaderBg_Linear: {
+            POSITION StartPos = uiPos;
+            POSITION EndPos = uiPos;
+
+            EndPos.y2 = HeaderHgt;
+            EndPos.x2 = 0;
+            StartPos.y2 = HeaderHgt;
+            pBoxHeader->Init(StartPos, Motion.ColorHeaderBg);
+            mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Motion.PitchInitTableHeaderBg);
+            pBoxHeader->SetPos(mi, TRUE, ALL_ZERO, EndPos);
+            break;
+        }
+
+        case eTableMotionPattern::ePauseTableHeaderBg_LinearReverse: {
+            POSITION StartPos = uiPos;
+            POSITION EndPos = uiPos;
+
+            EndPos.y2 = HeaderHgt;
+            EndPos.x = uiPos.x + uiPos.x2;
+            EndPos.x2 = 0;
+
+            StartPos.y2 = HeaderHgt;
+
+            pBoxHeader->Init(StartPos, Motion.ColorHeaderBg);
+            mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Motion.PitchInitTableHeaderBg);
+            pBoxHeader->SetPos(mi, TRUE, ALL_ZERO, EndPos);
+            break;
+        }
     }
 }
 
 void UI_Table::ResumeHeaderText(unsigned long Delay)
 {
+    unsigned long TextLen;
+
     switch (Motion.MotionInitTableHeaderText) {
         MOTION_INFO mi;
 
@@ -361,6 +422,30 @@ void UI_Table::ResumeHeaderText(unsigned long Delay)
                 ppTextHdr[i]->Init(uiSys->MediumTextForm, ColName[i], 0, TmpPos, ALL_ZERO, wcslen(ColName[i]));
                 mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitTableHeaderText);
                 ppTextHdr[i]->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorHeaderText);
+            }
+            break;
+        }
+
+        case eTableMotionPattern::eInitTableHeaderText_SlideIn:{
+            POSITION StartPos;
+            POSITION EndPos = uiPos;
+            int      WidthOffset = 0;
+            unsigned long DelayOffset;
+
+            EndPos.y2 = HeaderHgt;
+            for (int i = 0; i < ColCnt; i++) {
+                EndPos.x = uiPos.x + WidthOffset;
+                EndPos.x2 = ColWidth[i];
+                WidthOffset += ColWidth[i];
+                TextLen = wcslen(ColName[i]);
+                StartPos = EndPos;
+                StartPos.x += 30;
+                DelayOffset = Delay + Motion.GapInitTableHeaderText*i;
+
+                ppTextHdr[i]->Init(uiSys->MediumTextForm, ColName[i], TextLen, StartPos, ALL_ZERO, TextLen);
+                mi = InitMotionInfo(eMotionForm::eMotion_Linear1, DelayOffset, Motion.PitchInitTableHeaderText);
+                ppTextHdr[i]->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorHeaderText);
+                ppTextHdr[i]->SetPos(mi, TRUE, ALL_ZERO, EndPos);
             }
             break;
         }
@@ -383,6 +468,25 @@ void UI_Table::PauseHeaderText(unsigned long Delay)
                 WidthOffset += ColWidth[i];
                 mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseTableHeaderText);
                 ppTextHdr[i]->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            }
+            break;
+        }
+
+        case eTableMotionPattern::ePauseTableHeaderText_SlideOut:{
+            POSITION EndPos = uiPos;
+            int      WidthOffset = 0;
+            unsigned long DelayOffset;
+
+            EndPos.y2 = HeaderHgt;
+            for (int i = 0; i < ColCnt; i++) {
+                EndPos.x = uiPos.x + WidthOffset;
+                EndPos.x2 = ColWidth[i];
+                WidthOffset += ColWidth[i];
+                EndPos.x += 30;
+                DelayOffset = Delay + Motion.GapPauseTableHeaderText * i;
+                mi = InitMotionInfo(eMotionForm::eMotion_Linear1, DelayOffset, Motion.PitchPauseTableHeaderText);
+                ppTextHdr[i]->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+                ppTextHdr[i]->SetPos(mi, TRUE, ALL_ZERO, EndPos);
             }
             break;
         }
