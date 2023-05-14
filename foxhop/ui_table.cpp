@@ -55,11 +55,12 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     for (int i = 0; i < ColCnt; i++) ppTextHdr[i] = new PropText(pRenderTarget);
     pBoxFrame = new PropBox(pRenderTarget);
 
-    ResumeFrame(Motion.DelayInitTableFrame);
-    ResumeBg(Motion.DelayInitTableBg);
-    ResumeHeaderBg(Motion.DelayInitTableHeaderBg);
-    ResumeHeaderText(Motion.DelayInitTableHeaderText);
-    ResumeRowOrder(Motion.DelayInitTableRowOrder);
+    resume(0);
+    //ResumeFrame(Motion.DelayInitTableFrame);
+    //ResumeBg(Motion.DelayInitTableBg);
+    //ResumeHeaderBg(Motion.DelayInitTableHeaderBg);
+    //ResumeHeaderText(Motion.DelayInitTableHeaderText);
+    //ResumeRowOrder(Motion.DelayInitTableRowOrder);
     DefaultHandler(this, UIM_CREATE, NULL, NULL); /*UI생성 메세지 전송*/
 }
 
@@ -229,6 +230,26 @@ void UI_Table::ResumeFrame(unsigned long Delay)
             pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorFrame);
             break;
         }
+
+        case eTableMotionPattern::eInitTableFrame_Flick: {
+            pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
+            mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay, Motion.PitchInitTableFrame);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorFrame);
+            break;
+        }
+
+        case eTableMotionPattern::eInitTableFrame_ExpendAllDirFlick: {
+            unsigned long Pitch = Motion.PitchInitTableFrame;
+            POSITION StartPos;
+
+            StartPos = { uiPos.x + uiPos.x2 / 2 , uiPos.y + uiPos.y2 / 2 , 0, 0 };
+            pBoxFrame->Init(StartPos, ALL_ZERO, FALSE);
+            mi = InitMotionInfo(eMotionForm::eMotion_x3_1, Delay, Pitch);
+            pBoxFrame->SetPos(mi, TRUE, ALL_ZERO, uiPos);
+            mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay + Pitch/2, Pitch/2);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorFrame);
+            break;
+        }
     }
 }
 
@@ -242,13 +263,31 @@ void UI_Table::PauseFrame(unsigned long Delay)
             pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
             break;
         }
+
+        case eTableMotionPattern::ePauseTableFrame_Flick: {
+            mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay, Motion.PitchPauseTableFrame);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+        }
+
+        case eTableMotionPattern::ePauseTableFrame_ExpendAllDirFlick: {
+            unsigned long Pitch = Motion.PitchPauseTableFrame;
+            POSITION EndPos;
+
+            EndPos = { uiPos.x - 50 , uiPos.y - 50 , uiPos.x2 + 100, uiPos.y2 + 100 };
+            mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Pitch);
+            pBoxFrame->SetPos(mi, TRUE, ALL_ZERO, EndPos);
+            mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay+ Pitch / 2, Pitch/2);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+        }
     }
 }
 
 void UI_Table::ResumeBg(unsigned long Delay)
 {
     MOTION_INFO mi;
-
+#if 0
     switch (Motion.MotionInitTableBg) {
         case eTableMotionPattern::eInitTableBg_Default: {
             pBoxFrame->Init(uiPos, ALL_ZERO);
@@ -257,12 +296,13 @@ void UI_Table::ResumeBg(unsigned long Delay)
             break;
         }
     }
+#endif
 }
 
 void UI_Table::PauseBg(unsigned long Delay)
 {
     MOTION_INFO mi;
-
+#if 0
     switch (Motion.MotionPauseTableBg) {
         case eTableMotionPattern::ePauseTableBg_Default: {
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseTableBg);
@@ -270,6 +310,7 @@ void UI_Table::PauseBg(unsigned long Delay)
             break;
         }
     }
+#endif
 }
 
 void UI_Table::ResumeHeaderBg(unsigned long Delay)
@@ -451,6 +492,7 @@ BOOL UI_Table::update(unsigned long time)
     if (uiMotionState == eUIMotionState::eUMS_Hide) return FALSE;
 
     bUpdated = ScrollComp->update(time); /*스크롤 상태 먼저 업데이트*/
+    bUpdated |= pBoxFrame->update(time);
 
     CurrMainIndex = (long long)CurrScrollPixel / RowHgt;
     ModIndex = CurrMainIndex % ViewRowCnt;
@@ -474,7 +516,7 @@ BOOL UI_Table::update(unsigned long time)
     }
 
     /*헤더 업데이트*/
-    pBoxHeader->update(time);
+    bUpdated |= pBoxHeader->update(time);
     for (int i = 0; i < ColCnt; i++) bUpdated |= ppTextHdr[i]->update(time);
 
     if (!bUpdated) {
@@ -780,6 +822,7 @@ void RowObject::PauseText(unsigned long Delay)
     MOTION_INFO mi;
     eTableMotionPattern Patt;
     unsigned long pitch = pParent->Motion.PitchPauseRowText;
+    unsigned long DelayOffset;
 
     if (!ppRealData) return;
 
@@ -790,6 +833,27 @@ void RowObject::PauseText(unsigned long Delay)
             TmpPos = { (float)CurrentX, 0, (float)pWidth[i], Pos.y2 };
             CurrentX += pWidth[i];
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, pitch);
+            ppText[i]->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+        }
+        break;
+    
+    case eTableMotionPattern::ePauseRowText_FlickLinear:
+        for (int i = 0; i < nColumn; i++) {
+            pStr = ppRealData[i];
+            DelayOffset = pParent->Motion.GapPauseRowText * i;
+            mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay + DelayOffset , pitch);
+            ppText[i]->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+        }
+        break;
+
+    case eTableMotionPattern::ePauseRowText_FlickRandom:
+        for (int i = 0; i < nColumn; i++) {
+            //pStr = ppRealData[i];
+            //TmpPos = { (float)CurrentX, 0, (float)pWidth[i], Pos.y2 };
+            //CurrentX += pWidth[i];
+            DelayOffset = pParent->Motion.GapPauseRowText * i;
+            DelayOffset += rand() % pParent->Motion.RangePauseRowText;
+            mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay, pitch);
             ppText[i]->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
         }
         break;

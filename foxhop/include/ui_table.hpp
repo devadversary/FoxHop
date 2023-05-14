@@ -20,7 +20,11 @@ typedef struct _st_TableRow
 */
 enum class eTableMotionPattern {
     eInitTableFrame_Default = 0,
+    eInitTableFrame_Flick,
+    eInitTableFrame_ExpendAllDirFlick,
     ePauseTableFrame_Default,
+    ePauseTableFrame_Flick,
+    ePauseTableFrame_ExpendAllDirFlick,
 
     eInitTableBg_Default,
     ePauseTableBg_Default,
@@ -48,6 +52,8 @@ enum class eTableMotionPattern {
     eInitRowText_Default,
     eInitRowText_Typing,
     ePauseRowText_Default,
+    ePauseRowText_FlickLinear,
+    ePauseRowText_FlickRandom,
 
     eInitRowBg_Default,
     ePauseRowBg_Default,
@@ -83,9 +89,13 @@ public:
     eTableMotionPattern MotionInitTableHeaderText;
     unsigned long PitchInitTableHeaderText;
     unsigned long DelayInitTableHeaderText;
+    unsigned long GapInitTableHeaderText;
+    unsigned long RangeInitTableHeaderText;
     eTableMotionPattern MotionPauseTableHeaderText;
     unsigned long PitchPauseTableHeaderText;
     unsigned long DelayPauseTableHeaderText;
+    unsigned long GapPauseTableHeaderText;
+    unsigned long RangePauseTableHeaderText;
 
     eTableMotionPattern MotionInitTableRowOrder;
     unsigned long PitchInitTableRowOrder;
