@@ -118,8 +118,14 @@ BOOL UI_Panel::update(unsigned long time)
 void UI_Panel::render()
 {
     pRenderTarget->SetTransform(D2D1::Matrix3x2F::Translation(0.5f + uiPos.x, 0.5f + uiPos.y));
-    for (UI_Panel* pPanel : PanelList) pPanel->render();
-    for (UI* pUI : UIList) pUI->render();
+    for (UI_Panel* pPanel : PanelList) {
+        if (pPanel->uiMotionState == eUIMotionState::eUMS_Hide) continue;
+        pPanel->render();
+    }
+    for (UI* pUI : UIList) {
+        if (pUI->uiMotionState == eUIMotionState::eUMS_Hide) continue;
+        pUI->render();
+    }
 }
 
 /**

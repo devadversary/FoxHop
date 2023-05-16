@@ -25,46 +25,43 @@ void UI_ParamSet() {
 
 	TableParam.MotionInitTableFrame = eTableMotionPattern::eInitTableFrame_ExpendAllDirFlick;
 	TableParam.PitchInitTableFrame = 400;
+	TableParam.MotionPauseTableFrame = eTableMotionPattern::ePauseTableFrame_ExpendAllDirFlick;
+	TableParam.PitchPauseTableFrame = 400;
+	
 	TableParam.MotionInitTableHeaderBg = eTableMotionPattern::eInitTableHeaderBg_LinearReverse;
 	TableParam.PitchInitTableHeaderBg = 300;
 	TableParam.DelayInitTableHeaderBg = 300; /*이전 프레임모션 직후.*/
+	TableParam.MotionPauseTableHeaderBg = eTableMotionPattern::ePauseTableHeaderBg_Linear;
+	TableParam.PitchPauseTableHeaderBg = 200;
 
 	TableParam.MotionInitTableHeaderText = eTableMotionPattern::eInitTableHeaderText_SlideIn;
 	TableParam.PitchInitTableHeaderText = 400;
 	TableParam.GapInitTableHeaderText = 100;
 	TableParam.DelayInitTableHeaderText = 400;
-
-	TableParam.MotionInitRowSelect = eTableMotionPattern::eInitTableSelect_Decel;
-	TableParam.PitchInitRowSelect = 200;
-	TableParam.DelayInitRowSelect = 500;
-	TableParam.MotionInitRowText = eTableMotionPattern::eInitRowText_Typing;
-	TableParam.PitchInitRowText = 100;
-	TableParam.GapInitRowText = 50;
-
-	TableParam.MotionInitTableRowOrder = eTableMotionPattern::eInitTableRowOrder_Random;
-	TableParam.DelayInitTableRowOrder = 400;
-	TableParam.GapInitTableRowOrder = 10;
-	TableParam.RangeInitTableRowOrder = 250;
-
-	TableParam.MotionPauseTableFrame = eTableMotionPattern::ePauseTableFrame_ExpendAllDirFlick;
-	TableParam.PitchPauseTableFrame = 400;
-
-	TableParam.MotionPauseTableHeaderBg = eTableMotionPattern::ePauseTableHeaderBg_Linear;
-	TableParam.PitchPauseTableHeaderBg = 200;
-
 	TableParam.MotionPauseTableHeaderText = eTableMotionPattern::ePauseTableHeaderText_SlideOut;
 	TableParam.PitchPauseTableHeaderText = 400;
 	TableParam.GapPauseTableHeaderText = 100;
 	TableParam.DelayPauseTableHeaderText = 0;
 
+	TableParam.MotionInitRowSelect = eTableMotionPattern::eInitTableSelect_Decel;
+	TableParam.PitchInitRowSelect = 200;
+	TableParam.DelayInitRowSelect = 500;
 	TableParam.MotionPauseRowSelect = eTableMotionPattern::ePauseTableSelect_Decel;
 	TableParam.PitchPauseRowSelect = 200;
+	TableParam.DelayPauseRowSelect = 300;
 
+	TableParam.MotionInitRowText = eTableMotionPattern::eInitRowText_Typing;
+	TableParam.PitchInitRowText = 200;
+	TableParam.GapInitRowText = 50;
 	TableParam.MotionPauseRowText = eTableMotionPattern::ePauseRowText_FlickRandom;
 	TableParam.PitchPauseRowText = 200;
 	TableParam.GapPauseRowText = 50;
 	TableParam.RangePauseRowText = 100;
 
+	TableParam.MotionInitTableRowOrder = eTableMotionPattern::eInitTableRowOrder_Random;
+	TableParam.DelayInitTableRowOrder = 400;
+	TableParam.GapInitTableRowOrder = 10;
+	TableParam.RangeInitTableRowOrder = 250;
 	TableParam.MotionPauseTableRowOrder = eTableMotionPattern::ePauseTableRowOrder_Random;
 	TableParam.RangePauseTableRowOrder = 300;
 
@@ -89,7 +86,16 @@ void UI_ParamSet() {
 	InputParam.PitchInitFrame = 500;
 	InputParam.MotionPauseFrame = eTextinputMotionPattern::ePauseFrame_CollapseLR;
 	InputParam.PitchPauseFrame = 500;
+
 	InputParam.MotionMoveCaret = eTextinputMotionPattern::eMoveCaret_Decel;
+
+	InputParam.MotionInitText = eTextinputMotionPattern::eInitText_SlideIn;
+	InputParam.PitchInitText = 300;
+	InputParam.DelayInitText = 300;
+	InputParam.MotionPauseText = eTextinputMotionPattern::ePauseText_SlideOut;
+	InputParam.PitchPauseText = 300;
+	InputParam.DelayPauseText = 0;
+	
 	InputParam.ColorFrame = { 0.8,0,0,0.6 };
 	InputParam.ColorBg = ALL_ZERO;
 	InputParam.ColorText = { 1,1,1,1 };

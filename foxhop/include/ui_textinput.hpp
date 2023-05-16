@@ -17,7 +17,9 @@ enum class eTextinputMotionPattern {
     ePauseBg_Default,
 
     eInitText_Default,
+    eInitText_SlideIn,
     ePauseText_Default,
+    ePauseText_SlideOut,
 
     eInitCaret_Default,
     ePauseCaret_Default,

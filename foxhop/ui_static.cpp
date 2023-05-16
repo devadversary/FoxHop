@@ -55,6 +55,8 @@ void UI_Static::pause(int nDelay)
 */
 void UI_Static::resume(int nDelay)
 {
+    uiMotionState = eUIMotionState::eUMS_PlayingVisible;
+
     switch (Motion.MotionInit) {
     case eStaticMotionPattern::eInit_Default:
         pBoxBg->Init(uiPos, Motion.ColorBg);

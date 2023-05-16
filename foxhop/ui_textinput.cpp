@@ -465,11 +465,22 @@ void UI_Textinput::ResumeTextlayout(unsigned long Delay)
     MOTION_INFO mi;
 
     switch (Motion.MotionInitText) {
-    case eTextinputMotionPattern::eInitText_Default:
-        pTextLayout->Init(uiPos, ALL_ZERO);
-        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitText);
-        pTextLayout->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorText);
-        break;
+        case eTextinputMotionPattern::eInitText_Default:
+            pTextLayout->Init(uiPos, ALL_ZERO);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitText);
+            pTextLayout->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorText);
+            break;
+
+        case eTextinputMotionPattern::eInitText_SlideIn: {
+            POSITION StartPos = uiPos;
+
+            StartPos.x = uiPos.x + 50;
+            pTextLayout->Init(StartPos, ALL_ZERO);
+            mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Motion.PitchInitText);
+            pTextLayout->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorText);
+            pTextLayout->SetPos(mi, TRUE, ALL_ZERO, uiPos);
+            break;
+        }
     }
 }
 
@@ -478,9 +489,19 @@ void UI_Textinput::PauseTextlayout(unsigned long Delay)
     MOTION_INFO mi;
 
     switch (Motion.MotionPauseText) {
-    case eTextinputMotionPattern::ePauseText_Default:
-        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseText);
-        pTextLayout->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
-        break;
+        case eTextinputMotionPattern::ePauseText_Default:
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseText);
+            pTextLayout->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+
+        case eTextinputMotionPattern::ePauseText_SlideOut: {
+            POSITION EndPos = uiPos;
+
+            EndPos.x = uiPos.x + 50;
+            mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Motion.PitchPauseText);
+            pTextLayout->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            pTextLayout->SetPos(mi, TRUE, ALL_ZERO, EndPos);
+            break;
+        }
     }
 }
