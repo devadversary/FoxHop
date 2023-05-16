@@ -1,7 +1,7 @@
 #include "./include/ui_static.hpp"
 #include "./include/ui_system.hpp"
 
-UI_Static::UI_Static(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, wchar_t* Text, UI_Static_MotionParam MotionParam)
+UI_Static::UI_Static(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, IDWriteTextFormat* pFormat, wchar_t* Text, UI_Static_MotionParam MotionParam)
 {
     uiSys = pUISys;
     pRenderTarget = pUISys->D2DA.pRenTarget;
@@ -12,42 +12,102 @@ UI_Static::UI_Static(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, w
     MessageHandler = pfnCallback;
     memset(szText, 0, sizeof(szText));
     uiPos = Pos;
-
+    pTextFmt = pFormat;
     Motion = MotionParam;
+    wcscpy_s(szText, ARRAYSIZE(szText), Text);
+
     pText = new PropText(pRenderTarget);
     pBoxBg = new PropBox(pRenderTarget);
     pBoxFrame = new PropBox(pRenderTarget);
-    wcscpy_s(szText, ARRAYSIZE(szText), Text);
     resume(0);
 }
 
 UI_Static::~UI_Static() {}
 
+void UI_Static::ResumeFrame(unsigned long Delay)
+{
+    MOTION_INFO mi;
+
+    switch (Motion.MotionInitFrame) {
+    case eStaticMotionPattern::eInitFrame_Default:
+        pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
+        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+        pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorFrame);
+        break;
+    }
+}
+
+void UI_Static::PauseFrame(unsigned long Delay)
+{
+    MOTION_INFO mi;
+
+    switch (Motion.MotionPauseFrame) {
+    case eStaticMotionPattern::ePauseFrame_Default:
+        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+        pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+        break;
+    }
+}
+
+void UI_Static::ResumeBg(unsigned long Delay)
+{
+    MOTION_INFO mi;
+
+    switch (Motion.MotionInitBg) {
+    case eStaticMotionPattern::eInitBg_Default:
+        pBoxBg->Init(uiPos, ALL_ZERO);
+        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+        pBoxBg->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorBg);
+        break;
+    }
+}
+
+void UI_Static::PauseBg(unsigned long Delay)
+{
+    MOTION_INFO mi;
+
+    switch (Motion.MotionPauseBg) {
+    case eStaticMotionPattern::ePauseBg_Default:
+        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+        pBoxBg->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+        break;
+    }
+}
+
+void UI_Static::ResumeText(unsigned long Delay)
+{
+    MOTION_INFO mi;
+
+    switch (Motion.MotionInitText) {
+    case eStaticMotionPattern::eInitText_Default:
+        pText->Init(pTextFmt, szText, 0, uiPos, ALL_ZERO, wcslen(szText));
+        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitText);
+        pText->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorText);
+        break;
+    }
+}
+
+void UI_Static::PauseText(unsigned long Delay)
+{
+    MOTION_INFO mi;
+
+    switch (Motion.MotionPauseText) {
+    case eStaticMotionPattern::ePauseText_Default:
+        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitText);
+        pText->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+        break;
+    }
+}
 
 /**
     @brief 이 개체의 업데이트, 렌더링을 일시정지한다 (일종의 임시 비활성화)
 */
 void UI_Static::pause(int nDelay)
 {
-    MOTION_INFO miColor;
-
     uiMotionState = eUIMotionState::eUMS_PlayingHide;
-
-    /*TODO : 소멸 모션도 지정할 수 있도록 할 예정*/
-    switch (Motion.MotionPause) {
-    case eStaticMotionPattern::ePause_Default:
-        break;
-#if 0 /*나중에 추가할 모션*/
-    default:
-        miColor.formular = eMotionForm::eMotion_Pulse1;
-        miColor.nDelay = nDelay;
-        miColor.nPitch = 200;
-        pText->SetColor(miColor, TRUE, { 0.f,0.f,0.f,0.f }, { 0.f,0.f,0.f,0.f });
-        miColor.nDelay += 400;
-        pBoxBg->SetColor(miColor, TRUE, { 0.f,0.f,0.f,0.f }, { 0.f,0.f,0.f,0.f });
-        break;
-#endif
-    }
+    PauseFrame(nDelay + Motion.DelayPauseFrame);
+    PauseBg(nDelay + Motion.DelayPauseBg);
+    PauseText(nDelay + Motion.DelayPauseText);
 }
 
 /**
@@ -56,14 +116,9 @@ void UI_Static::pause(int nDelay)
 void UI_Static::resume(int nDelay)
 {
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
-
-    switch (Motion.MotionInit) {
-    case eStaticMotionPattern::eInit_Default:
-        pBoxBg->Init(uiPos, Motion.ColorBg);
-        pBoxFrame->Init(uiPos, Motion.ColorFrame, FALSE);
-        SetText(szText, 0);
-        break;
-    }
+    ResumeFrame(nDelay + Motion.DelayInitFrame);
+    ResumeBg(nDelay + Motion.DelayInitBg);
+    ResumeText(nDelay + Motion.DelayInitText);
 }
 
 BOOL UI_Static::update(unsigned long time)
@@ -102,22 +157,11 @@ void UI_Static::SetText(wchar_t* pStr, int nDelay)
 
     if (!pStr) return;
     wcscpy_s(szText, ARRAYSIZE(szText), pStr);
-
-    switch(Motion.MotionText) {
-    case eStaticMotionPattern::eText_Default:
-        pText->Init(uiSys->MediumTextForm, szText, 0, uiPos, Motion.ColorFont, wcslen(szText));
-        break;
-
-    case eStaticMotionPattern::eText_Flick:
-        mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, nDelay, Motion.PitchText);
-        pText->Init(uiSys->MediumTextForm, szText, 0, uiPos, {0,0,0,0}, wcslen(szText));
-        pText->addColorMotion(mi, TRUE, {0,0,0,0}, Motion.ColorFont);
-        break;
-    }
+    ResumeText(nDelay);
 }
 
 /**
-    @brief 기본 버튼 메세지 핸들러
+    @brief 기본 메세지 핸들러
     @remark 사용자 지정 프로시저는 기본 핸들러 실행 후 호출된다.
 */
 void UI_Static::DefaultStaticProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)

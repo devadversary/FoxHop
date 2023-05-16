@@ -74,13 +74,30 @@ void UI_ParamSet() {
 	TableParam.ColorRowText = { 1,1,1,1 };
 	TableParam.ColorRowTextSelect = { 0,0,0,1 };
 
-	StaticParam.MotionText = eStaticMotionPattern::eText_Flick;
-	StaticParam.PitchText = 200;
+	StaticParam.MotionInitFrame = eStaticMotionPattern::eInitFrame_Default;
+	StaticParam.PitchInitFrame = 0;
+	StaticParam.DelayInitFrame = 0;
+	StaticParam.MotionPauseFrame = eStaticMotionPattern::ePauseFrame_Default;
+	StaticParam.PitchPauseFrame = 0;
+	StaticParam.DelayPauseFrame = 0;
+
+	StaticParam.MotionInitBg = eStaticMotionPattern::eInitBg_Default;
+	StaticParam.PitchInitBg = 0;
+	StaticParam.DelayInitBg = 0;
+	StaticParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_Default;
+	StaticParam.PitchPauseBg = 0;
+	StaticParam.DelayPauseBg = 0;
+
+	StaticParam.MotionInitText = eStaticMotionPattern::eInitText_Default;
+	StaticParam.PitchInitText = 0;
+	StaticParam.DelayInitText = 0;
+	StaticParam.MotionPauseText = eStaticMotionPattern::ePauseText_Default;
+	StaticParam.PitchPauseText = 0;
+	StaticParam.DelayPauseText = 0;
+
 	StaticParam.ColorFrame = { 0.8,0,0,0.5 };
-	StaticParam.ColorBg = { 0.7,0,0,0.3 };
-	//StaticParam.ColorFrame = { 0,0,0,0 };
-	StaticParam.ColorBg = { 0,0,0,0 };
-	StaticParam.ColorFont = { 1,1,1,1 };
+	StaticParam.ColorBg = { 0.7,0,0,0.5 };
+	StaticParam.ColorText = { 1,1,1,1 };
 
 	InputParam.MotionInitFrame = eTextinputMotionPattern::eInitFrame_ExpendLR;
 	InputParam.PitchInitFrame = 500;
@@ -96,7 +113,7 @@ void UI_ParamSet() {
 	InputParam.PitchPauseText = 300;
 	InputParam.DelayPauseText = 0;
 	
-	InputParam.ColorFrame = { 0.8,0,0,0.6 };
+	InputParam.ColorFrame = { 0.8,0,0,0.8 };
 	InputParam.ColorBg = ALL_ZERO;
 	InputParam.ColorText = { 1,1,1,1 };
 	InputParam.ColorCaret = { 0.8,0.8,0.8,1 };

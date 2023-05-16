@@ -8,37 +8,69 @@
     @brief 스태틱 모션 타입
 */
 enum class eStaticMotionPattern {
-    eInit_Default = 0,   /**< 생성 : 모션 없음*/
+    eInitFrame_Default = 0,   /**< 생성 : 모션 없음*/
+    ePauseFrame_Default = 0,   /**< 생성 : 모션 없음*/
+    
+    eInitBg_Default = 0,   /**< 생성 : 모션 없음*/
+    ePauseBg_Default = 0,   /**< 생성 : 모션 없음*/
 
-    ePause_Default = 0,  /**< 소멸 : 모션 없음*/
-
-    eText_Default = 0,   /**< 텍스트 : 모션 없음*/
-    eText_Flick,   /**< 텍스트 : 모션 없음*/
+    eInitText_Default = 0,  /**< 소멸 : 모션 없음*/
+    ePauseText_Default = 0,  /**< 소멸 : 모션 없음*/
 };
 
 class UI_Static_MotionParam {
 public:
-    eStaticMotionPattern MotionInit;
-    eStaticMotionPattern MotionPause;
-    eStaticMotionPattern MotionText;
+    eStaticMotionPattern MotionInitFrame;
+    unsigned long        PitchInitFrame;
+    unsigned long        DelayInitFrame;
+    eStaticMotionPattern MotionPauseFrame;
+    unsigned long        PitchPauseFrame;
+    unsigned long        DelayPauseFrame;
+
+    eStaticMotionPattern MotionInitBg;
+    unsigned long        PitchInitBg;
+    unsigned long        DelayInitBg;
+    eStaticMotionPattern MotionPauseBg;
+    unsigned long        PitchPauseBg;
+    unsigned long        DelayPauseBg;
+    
+    eStaticMotionPattern MotionInitText;
+    unsigned long        PitchInitText;
+    unsigned long        DelayInitText;
+    eStaticMotionPattern MotionPauseText;
+    unsigned long        PitchPauseText;
+    unsigned long        DelayPauseText;
+
     D2D1_COLOR_F ColorFrame;
     D2D1_COLOR_F ColorBg;
-    D2D1_COLOR_F ColorFont;
-    unsigned long PitchInit;
-    unsigned long PitchPause;
-    unsigned long PitchText;
+    D2D1_COLOR_F ColorText;
 
 public:
     UI_Static_MotionParam() {
-        MotionInit = eStaticMotionPattern::eInit_Default;
-        MotionPause = eStaticMotionPattern::ePause_Default;
-        MotionText = eStaticMotionPattern::eText_Default;
+        MotionInitFrame = eStaticMotionPattern::eInitFrame_Default;
+        PitchInitFrame = 0;
+        DelayInitFrame = 0;
+        MotionPauseFrame = eStaticMotionPattern::ePauseFrame_Default;
+        PitchPauseFrame = 0;
+        DelayPauseFrame = 0;
+        
+        MotionInitBg = eStaticMotionPattern::eInitBg_Default;
+        PitchInitBg = 0;
+        DelayInitBg = 0;
+        MotionPauseBg = eStaticMotionPattern::ePauseBg_Default;
+        PitchPauseBg = 0;
+        DelayPauseBg = 0;
+
+        MotionInitText = eStaticMotionPattern::eInitText_Default;
+        PitchInitText = 0;
+        DelayInitText = 0;
+        MotionPauseText = eStaticMotionPattern::ePauseText_Default;
+        PitchPauseText = 0;
+        DelayPauseText = 0;
+
         ColorFrame = { 0,0,0,1 };
         ColorBg = { 0.94f, 0.94f, 0.94f, 1.f };
-        ColorFont = { 0,0,0,1 };
-        PitchInit = 0;
-        PitchPause = 0;
-        PitchText = 0;
+        ColorText = { 0,0,0,1 };
     }
 };
 
@@ -51,12 +83,19 @@ private:
     PropText* pText;
     PropBox*  pBoxBg;
     PropBox*  pBoxFrame;
+    IDWriteTextFormat* pTextFmt;
 
 private:
     static void DefaultStaticProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
+    void ResumeFrame(unsigned long Delay);
+    void PauseFrame(unsigned long Delay);
+    void ResumeBg(unsigned long Delay);
+    void PauseBg(unsigned long Delay);
+    void ResumeText(unsigned long Delay);
+    void PauseText(unsigned long Delay);
 
 public: /*반드시 있어야 되는 매서드*/
-    UI_Static(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, wchar_t* Text, UI_Static_MotionParam MotionParam = UI_Static_MotionParam());
+    UI_Static(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, IDWriteTextFormat* pFormat, wchar_t* Text, UI_Static_MotionParam MotionParam = UI_Static_MotionParam());
     ~UI_Static();
     void pause(int nDelay);
     void resume(int nDelay);

@@ -172,7 +172,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pPauseButton = new UI_Button(pUI->uiSys, TestPauseButtonProc, {10,10,100,20}, (wchar_t*)L"UI Pause", 0, ButtonParam);
         pResumeButton = new UI_Button(pUI->uiSys, TestResumeButtonProc, {120,10,100,20}, (wchar_t*)L"UI Resume", 200, ButtonParam);
         pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 590 , 570}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
-        pStatic = new UI_Static(pUI->uiSys, NULL, {10, 620, 590, 25}, (wchar_t*)L"Done.", StaticParam);
+        pStatic = new UI_Static(pUI->uiSys, NULL, {10, 620, 590, 25}, pUI->uiSys->MediumTextForm ,(wchar_t*)L"Done.", StaticParam);
         pInput = new UI_Textinput(pUI->uiSys, NULL, { 10, 655, 590, 150 }, pUI->uiSys->CreateTextFmt((wchar_t*)L"Consolas", 15, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_NEAR), InputParam);
         pPanel->RegisterUI(pPauseButton);
         pPanel->RegisterUI(pResumeButton);

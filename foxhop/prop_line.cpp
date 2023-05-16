@@ -94,14 +94,6 @@ void PropLine::SetColor(MOTION_INFO MotionInfo, BOOL bCurrent, D2D1_COLOR_F Star
     addColorMotion(MotionInfo, FALSE, TmpColor, EndColor);
 }
 
-void PropLine::setRuntime(int t)
-{
-    CurPos = InitPos;
-    CurColor = InitColor;
-    ComMotionMovement.setRuntime(t);
-    ComMotionColor.setRuntime(t);
-}
-
 /**
     @brief 개별 업데이트한다
 */
