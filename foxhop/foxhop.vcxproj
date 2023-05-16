@@ -149,6 +149,7 @@
     <ClCompile Include="component_motion.cpp" />
     <ClCompile Include="d2dassist.cpp" />
     <ClCompile Include="alphawindow.cpp" />
+    <ClCompile Include="prop_textlayout.cpp" />
     <ClCompile Include="ui_textinput.cpp" />
     <ClCompile Include="ui_table.cpp" />
     <ClCompile Include="prop_box.cpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="include\prop_line.hpp" />
     <ClInclude Include="include\prop_text.hpp" />
     <ClInclude Include="include\object_pool.hpp" />
+    <ClInclude Include="include\prop_textlayout.hpp" />
     <ClInclude Include="include\ui_base.hpp" />
     <ClInclude Include="include\ui_button.hpp" />
     <ClInclude Include="include\ui_fraggedline.hpp" />

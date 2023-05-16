@@ -50,7 +50,8 @@ UI_Panel* UISystem::InitMainPanel(HWND hWnd, pfnUIHandler MainPanelProc)
     pos.y = 0;
     pos.width = (float)WindowSize.right;
     pos.height = (float)WindowSize.bottom;
-    return new UI_Panel(this, this->D2DA.pRenTarget, MainPanelProc, pos, TRUE);
+    pMainPanel = new UI_Panel(this, this->D2DA.pRenTarget, MainPanelProc, pos, TRUE);
+    return pMainPanel;
 }
 
 /**
@@ -58,7 +59,9 @@ UI_Panel* UISystem::InitMainPanel(HWND hWnd, pfnUIHandler MainPanelProc)
 */
 BOOL UISystem::SendUIMessage(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
-    if (!pUI || !pUI->DefaultHandler) return FALSE;
+    if (!pUI || !pUI->DefaultHandler) {
+        return FALSE;
+    }
     pUI->DefaultHandler(pUI, Message, wParam, lParam);
     return TRUE;
 }

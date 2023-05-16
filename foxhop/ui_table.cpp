@@ -56,11 +56,6 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     pBoxFrame = new PropBox(pRenderTarget);
 
     resume(0);
-    //ResumeFrame(Motion.DelayInitTableFrame);
-    //ResumeBg(Motion.DelayInitTableBg);
-    //ResumeHeaderBg(Motion.DelayInitTableHeaderBg);
-    //ResumeHeaderText(Motion.DelayInitTableHeaderText);
-    //ResumeRowOrder(Motion.DelayInitTableRowOrder);
     DefaultHandler(this, UIM_CREATE, NULL, NULL); /*UI积己 皋技瘤 傈价*/
 }
 
@@ -243,11 +238,11 @@ void UI_Table::ResumeFrame(unsigned long Delay)
             POSITION StartPos;
 
             StartPos = { uiPos.x + uiPos.x2 / 2 , uiPos.y + uiPos.y2 / 2 , 0, 0 };
-            pBoxFrame->Init(StartPos, ALL_ZERO, FALSE);
-            mi = InitMotionInfo(eMotionForm::eMotion_x3_1, Delay, Pitch);
+            pBoxFrame->Init(StartPos, Motion.ColorFrame, FALSE);
+            mi = InitMotionInfo(eMotionForm::eMotion_x3_2, Delay, Pitch);
             pBoxFrame->SetPos(mi, TRUE, ALL_ZERO, uiPos);
             mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay + Pitch/2, Pitch/2);
-            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorFrame);
+            pBoxFrame->SetColor(mi, FALSE, ALL_ZERO, Motion.ColorFrame);
             break;
         }
     }

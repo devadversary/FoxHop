@@ -8,65 +8,96 @@
     @brief 스태틱 모션 타입
 */
 enum class eTextinputMotionPattern {
-    eBgInit_Default = 0,   /**< 생성 : 모션 없음*/
-    eBgPause_Default = 100,
+    eInitFrame_Default,  /**< 소멸 : 모션 없음*/
+    ePauseFrame_Default,  /**< 소멸 : 모션 없음*/
 
-    eFrameInit_Default = 200,  /**< 소멸 : 모션 없음*/
-    eFramePause_Default = 300,  /**< 소멸 : 모션 없음*/
+    eInitBg_Default,   /**< 생성 : 모션 없음*/
+    ePauseBg_Default,
 
-    eTextInit_Default = 400,   /**< 텍스트 : 모션 없음*/
-    eTextPause_Default = 500,
+    eInitText_Default,   /**< 텍스트 : 모션 없음*/
+    ePauseText_Default,
 
-    eCaretInit_Default = 600,
+    eInitCaret_Default,
+    ePauseCaret_Default,
 
-    eCaretMove_Default = 700,
-    eCaretMove_Decel,
-
-    eCaretPause_Default = 800,
+    eMoveCaret_Default,
+    eMoveCaret_Decel,
 };
 
 class UI_Textinput_MotionParam {
 public:
-    eTextinputMotionPattern MotionBgInit;
-    eTextinputMotionPattern MotionBgPause;
-    eTextinputMotionPattern MotionFrameInit;
-    eTextinputMotionPattern MotionFramePause;
-    eTextinputMotionPattern MotionTextInit;
-    eTextinputMotionPattern MotionTextPause;
-    eTextinputMotionPattern MotionCaretInit;
-    eTextinputMotionPattern MotionCaretMove;
-    eTextinputMotionPattern MotionCaretPause;
+    eTextinputMotionPattern MotionInitBg;
+    unsigned long PitchInitBg;
+    unsigned long DelayInitBg;
+    eTextinputMotionPattern MotionPauseBg;
+    unsigned long PitchPauseBg;
+    unsigned long DelayPauseBg;
+
+    eTextinputMotionPattern MotionInitFrame;
+    unsigned long PitchInitFrame;
+    unsigned long DelayInitFrame;
+    eTextinputMotionPattern MotionPauseFrame;
+    unsigned long PitchPauseFrame;
+    unsigned long DelayPauseFrame;
+
+    eTextinputMotionPattern MotionInitText;
+    unsigned long PitchInitText;
+    unsigned long DelayInitText;
+    eTextinputMotionPattern MotionPauseText;
+    unsigned long PitchPauseText;
+    unsigned long DelayPauseText;
+
+    eTextinputMotionPattern MotionInitCaret;
+    unsigned long PitchInitCaret;
+    unsigned long DelayInitCaret;
+    eTextinputMotionPattern MotionPauseCaret;
+    unsigned long PitchPauseCaret;
+    unsigned long DelayPauseCaret;
+    eTextinputMotionPattern MotionMoveCaret;
+    unsigned long PitchMoveCaret;
+    float CaretWidth;
+
     D2D1_COLOR_F ColorFrame;
     D2D1_COLOR_F ColorBg;
-    D2D1_COLOR_F ColorFont;
+    D2D1_COLOR_F ColorText;
     D2D1_COLOR_F ColorCaret;
     D2D1_COLOR_F ColorSelect;
-    unsigned long PitchInit;
-    unsigned long PitchPause;
-    unsigned long PitchText;
-    unsigned long PitchCaretMove;
-    float CaretWidth;
 
 public:
     UI_Textinput_MotionParam() {
-        MotionBgInit = eTextinputMotionPattern::eBgInit_Default;
-        MotionBgPause = eTextinputMotionPattern::eBgPause_Default;
-        MotionFrameInit = eTextinputMotionPattern::eFrameInit_Default;
-        MotionFramePause = eTextinputMotionPattern::eFramePause_Default;
-        MotionTextInit = eTextinputMotionPattern::eTextInit_Default;
-        MotionTextPause = eTextinputMotionPattern::eTextPause_Default;
-        MotionCaretInit = eTextinputMotionPattern::eCaretInit_Default;
-        MotionCaretMove = eTextinputMotionPattern::eCaretMove_Default;
-        MotionCaretPause = eTextinputMotionPattern::eCaretPause_Default;
+        MotionInitBg = eTextinputMotionPattern::eInitBg_Default;
+        PitchInitBg = 0;
+        DelayInitBg = 0;
+        MotionPauseBg = eTextinputMotionPattern::ePauseBg_Default;
+        PitchPauseBg = 0;
+        DelayPauseBg = 0;
+
+        MotionInitFrame = eTextinputMotionPattern::eInitFrame_Default;
+        PitchInitFrame = 0;
+        DelayInitFrame = 0;
+        MotionPauseFrame = eTextinputMotionPattern::ePauseFrame_Default;
+        PitchPauseFrame = 0;
+        DelayPauseFrame = 0;
+
+        MotionInitText = eTextinputMotionPattern::eInitText_Default;
+        PitchInitText = 0;
+        DelayInitText = 0;
+        MotionPauseText = eTextinputMotionPattern::ePauseText_Default;
+        PitchPauseText = 0;
+        DelayPauseText = 0;
+
+        MotionInitCaret = eTextinputMotionPattern::eInitCaret_Default;
+        PitchInitCaret = 0;
+        DelayInitCaret = 0;
+        MotionPauseCaret = eTextinputMotionPattern::ePauseCaret_Default;
+        PitchPauseCaret = 0;
+        DelayPauseCaret = 0;
+
         ColorFrame = { 0.f,0.f,0.f,1.f };
         ColorBg = { 1.f, 1.f, 1.f, 1.f };
-        ColorFont = { 0,0,0,1 };
+        ColorText = { 0,0,0,1 };
         ColorCaret = { 0,0,0,1 };
         ColorSelect = { 0.2f, 0.56f, 1.f, 1.f };
-        PitchInit = 0;
-        PitchPause = 0;
-        PitchText = 0;
-        PitchCaretMove = 0;
         CaretWidth = 2;
     }
 };
@@ -79,15 +110,14 @@ private:
     PropBox* pBoxBg;
     PropBox* pBoxFrame;
     PropBox* pBoxCaret;
-    std::wstring Str;
-    ID2D1SolidColorBrush* pTextBrush;
+    PropTextLayout* pTextLayout;
     ID2D1SolidColorBrush* pSelectBrush;
     IDWriteTextFormat* pTextFormat;
-    IDWriteTextLayout* pLayout;
     BOOL DragState;
     int CaretIdx;
     BOOL CaretTrail;
     float CaretX, CaretY;
+    float CaretH;
     int StartSelectIdx;
     std::vector<DWRITE_LINE_METRICS> LineMetric;
     DWRITE_TEXT_METRICS TextMet;
@@ -95,15 +125,17 @@ private:
 
 private:
     static void DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
-    void SetFrame(D2D1_COLOR_F Color, BOOL bMotion);
+
+    void ResumeFrame(unsigned long Delay);
     void PauseFrame(unsigned long Delay);
-    void SetBg(D2D1_COLOR_F Color, BOOL bMotion);
+    void ResumeBg(unsigned long Delay);
     void PauseBg(unsigned long Delay);
-    void MoveCaret(float CaretHeight, BOOL bMotion);
+    void ResumeCaret(unsigned long Delay);
     void PauseCaret(unsigned long Delay);
-    void SetTextlayout(D2D1_COLOR_F Color, BOOL bMotion);
-    void PauseTextlayout(D2D1_COLOR_F Color, BOOL bMotion);
-    void UpdateTextLayout();
+    void MoveCaret(float CaretHeight, BOOL bMotion);
+    void ResumeTextlayout(unsigned long Delay);
+    void PauseTextlayout(unsigned long Delay);
+
     void DrawSelectArea();
     BOOL DeleteSelectArea();
     void OnKeyInput(UINT Message, WPARAM wParam, LPARAM lParam);

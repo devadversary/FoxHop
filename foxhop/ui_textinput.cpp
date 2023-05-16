@@ -20,16 +20,12 @@ UI_Textinput::UI_Textinput(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
     StartSelectIdx = 0;
     ImeCompBoot = FALSE;
     CaretTrail = FALSE;
-
-    Str.assign(L"");
-    pUISys->D2DA.pDWFactory->CreateTextLayout(Str.c_str(), Str.size(), pTextFormat, uiPos.x2, uiPos.y2, &pLayout);
-    pLayout->SetMaxWidth(uiPos.x2);
-    pLayout->SetMaxHeight(uiPos.y2);
-    pRenderTarget->CreateSolidColorBrush({ 0,0,0,0 }, &pTextBrush);
+    CaretH = 0;
     pRenderTarget->CreateSolidColorBrush(Motion.ColorSelect, &pSelectBrush);
     pBoxBg = new PropBox(pRenderTarget);
     pBoxFrame = new PropBox(pRenderTarget);
     pBoxCaret = new PropBox(pRenderTarget);
+    pTextLayout = new PropTextLayout(pRenderTarget, pTextFormat, pUISys->D2DA.pDWFactory, uiPos.x2, uiPos.y2);
     resume(0);
 }
 
@@ -40,15 +36,21 @@ UI_Textinput::~UI_Textinput()
 
 void UI_Textinput::pause(int nDelay)
 {
-
+    uiMotionState = eUIMotionState::eUMS_PlayingHide;
+    PauseFrame(nDelay + Motion.DelayPauseFrame);
+    PauseBg(nDelay + Motion.DelayPauseBg);
+    PauseTextlayout(nDelay + Motion.DelayPauseText);
+    PauseCaret(nDelay + Motion.DelayPauseCaret);
 }
 
 void UI_Textinput::resume(int nDelay)
 {
-    SetBg(Motion.ColorBg, TRUE);
-    SetFrame(Motion.ColorFrame, TRUE);
-    SetTextlayout(Motion.ColorFont, TRUE);
-    pBoxCaret->Init({uiPos.x, uiPos.y, Motion.CaretWidth, 0}, Motion.ColorFont);
+    uiMotionState = eUIMotionState::eUMS_PlayingVisible;
+    ResumeFrame(nDelay + Motion.DelayInitFrame);
+    ResumeBg(nDelay + Motion.DelayInitBg);
+    ResumeTextlayout(nDelay + Motion.DelayInitText);
+    ResumeCaret(nDelay + Motion.DelayInitCaret);
+    //pBoxCaret->Init({uiPos.x, uiPos.y, Motion.CaretWidth, 0}, Motion.ColorFont);
 }
 
 BOOL UI_Textinput::update(unsigned long time)
@@ -59,7 +61,7 @@ BOOL UI_Textinput::update(unsigned long time)
 
     bUpdated |= pBoxFrame->update(time);
     bUpdated |= pBoxBg->update(time);
-    //bUpdated |= pText->update(time);
+    bUpdated |= pTextLayout->update(time);
     pBoxCaret->update(time); /*캐럿의 모션은 업데이트 여부에 포함시키지 않는다.*/
 
     if (!bUpdated) {
@@ -78,9 +80,8 @@ void UI_Textinput::render()
     if (uiMotionState == eUIMotionState::eUMS_Hide) return;
     pBoxBg->render(pRenderTarget);
     pBoxFrame->render(pRenderTarget);
-
     DrawSelectArea();
-    pRenderTarget->DrawTextLayout({ uiPos.x,uiPos.y }, pLayout, pTextBrush);
+    pTextLayout->render(pRenderTarget);
     pBoxCaret->render(pRenderTarget);
 }
 
@@ -90,17 +91,121 @@ BOOL UI_Textinput::DeleteSelectArea()
     DWRITE_HIT_TEST_METRICS HitMet;
 
     if (StartSelectIdx == CaretIdx) return FALSE;
-
-    si = min(StartSelectIdx, CaretIdx);
-    ei = max(StartSelectIdx, CaretIdx);
-    distance = ei - si;
-    Str.erase(si, distance);
-    CaretIdx = si;
+    pTextLayout->EraseText(StartSelectIdx, CaretIdx);
+    CaretIdx = min(StartSelectIdx, CaretIdx);
     StartSelectIdx = CaretIdx;
-    UpdateTextLayout();
-    pLayout->HitTestTextPosition(CaretIdx, FALSE, &CaretX, &CaretY, &HitMet);
+    pTextLayout->pLayout->HitTestTextPosition(CaretIdx, FALSE, &CaretX, &CaretY, &HitMet);
     MoveCaret(HitMet.height, TRUE);
     return TRUE;
+}
+
+void UI_Textinput::OnKeyInput(UINT Message, WPARAM wParam, LPARAM lParam)
+{
+    DWRITE_HIT_TEST_METRICS HitMet;
+    BOOL Trail, Inside;
+
+    switch (Message) {
+        case WM_KEYDOWN: {
+            if (DragState) break;
+
+            switch (wParam) {
+            case VK_BACK: {
+                if (DeleteSelectArea()) break;
+                CaretIdx--;
+                if (CaretIdx < 0) {
+                    CaretIdx = 0;
+                    StartSelectIdx = CaretIdx;
+                    break;
+                }
+                StartSelectIdx = CaretIdx;
+
+                pTextLayout->EraseText(CaretIdx, CaretIdx+1);
+                pTextLayout->pLayout->HitTestTextPosition(CaretIdx, FALSE, &CaretX, &CaretY, &HitMet);
+                MoveCaret(HitMet.height, TRUE);
+                break;
+            }
+
+            case VK_DELETE: {
+                if (DeleteSelectArea()) break;
+                pTextLayout->EraseText(CaretIdx, CaretIdx + 1);
+                pTextLayout->pLayout->HitTestTextPosition(CaretIdx, FALSE, &CaretX, &CaretY, &HitMet);
+                MoveCaret(HitMet.height, TRUE);
+                break;
+            }
+
+            case VK_UP: {
+                int i;
+                float tmp = 0;
+                DWRITE_HIT_TEST_METRICS TmpMet;
+
+                pTextLayout->pLayout->GetMetrics(&TextMet);
+                LineMetric.resize(TextMet.lineCount);
+                pTextLayout->pLayout->GetLineMetrics(&LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
+                for (i = 0; i < TextMet.lineCount; i++) {
+                    tmp += LineMetric[i].height;
+                    /*행 높이 합산중, 캐럿Y좌표를 넘는순간*/
+                    if (tmp > CaretY) {
+                        tmp -= LineMetric[i].height;
+                        if (i < 1) break;
+                        tmp -= LineMetric[i - 1].height;
+                        pTextLayout->pLayout->HitTestPoint(CaretX, tmp, &Trail, &Inside, &HitMet);
+                        pTextLayout->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &CaretX, &CaretY, &TmpMet);
+                        CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+                        if (!(GetKeyState(VK_SHIFT) & 0x80))
+                            StartSelectIdx = CaretIdx;
+                        MoveCaret(HitMet.height, TRUE);
+                        break;
+                    }
+                }
+                break;
+            }
+
+            case VK_DOWN: {
+                float tmp = 0;
+                DWRITE_HIT_TEST_METRICS TmpMet;
+
+                pTextLayout->pLayout->GetMetrics(&TextMet);
+                LineMetric.resize(TextMet.lineCount);
+                pTextLayout->pLayout->GetLineMetrics(&LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
+                for (int i = 0; i < TextMet.lineCount; i++) {
+                    tmp += LineMetric[i].height;
+                    /*행 높이 합산중, 캐럿Y좌표를 넘는순간*/
+                    if (tmp > CaretY) {
+                        pTextLayout->pLayout->HitTestPoint(CaretX, tmp, &Trail, &Inside, &HitMet);
+                        pTextLayout->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &CaretX, &CaretY, &TmpMet);
+                        CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+                        if (!(GetKeyState(VK_SHIFT) & 0x80))
+                            StartSelectIdx = CaretIdx;
+                        MoveCaret(HitMet.height, TRUE);
+                        break;
+                    }
+                }
+                break;
+            }
+
+            case VK_LEFT:
+                CaretIdx--;
+                if (CaretIdx < 0) CaretIdx = 0;
+                if (!(GetKeyState(VK_SHIFT) & 0x80))
+                    StartSelectIdx = CaretIdx;
+
+                pTextLayout->pLayout->HitTestTextPosition(CaretIdx, FALSE, &CaretX, &CaretY, &HitMet);
+                MoveCaret(HitMet.height, TRUE);
+                break;
+
+            case VK_RIGHT:
+                CaretIdx++;
+                if (CaretIdx > pTextLayout->Str.size()) CaretIdx--;
+                if (!(GetKeyState(VK_SHIFT) & 0x80))
+                    StartSelectIdx = CaretIdx;
+
+                pTextLayout->pLayout->HitTestTextPosition(CaretIdx, FALSE, &CaretX, &CaretY, &HitMet);
+                MoveCaret(HitMet.height, TRUE);
+                break;
+            }
+            break;
+        }
+    }
 }
 
 void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -108,8 +213,8 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
     UI_Textinput* pInput = static_cast<UI_Textinput*>(pUI);
     IDWriteTextLayout* pNewLayout;
     IDWriteTextLayout* pOldLayout;
-    DWRITE_HIT_TEST_METRICS HitMet;
     DWRITE_TEXT_METRICS TextMet;
+    DWRITE_HIT_TEST_METRICS HitMet;
     BOOL Trail, Inside;
     POSITION uiPos = pInput->uiPos;
 
@@ -121,11 +226,11 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
 
             pInput->DragState = TRUE;
 
-            pInput->pLayout->HitTestPoint((float)x, (float)y, &Trail, &Inside, &HitMet);
-            pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &mat2);
-            pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+            pInput->pTextLayout->pLayout->HitTestPoint((float)x, (float)y, &Trail, &Inside, &mat2);
+            pInput->pTextLayout->pLayout->HitTestTextPosition(mat2.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &mat2);
+            pInput->CaretIdx = mat2.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
             pInput->StartSelectIdx = pInput->CaretIdx;
-            pInput->MoveCaret(HitMet.height, TRUE);
+            pInput->MoveCaret(mat2.height, TRUE);
             break;
         }
 
@@ -139,134 +244,34 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
             DWRITE_HIT_TEST_METRICS mat2;
             
             if (!pInput->DragState) break;
-            pInput->pLayout->HitTestPoint((float)x, (float)y, &Trail, &Inside, &HitMet);
+            pInput->pTextLayout->pLayout->HitTestPoint((float)x, (float)y, &Trail, &Inside, &mat2);
 
             pInput->CaretTrail = Trail;
-            pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &mat2);
-            pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
-            pInput->MoveCaret(HitMet.height, TRUE);
+            pInput->pTextLayout->pLayout->HitTestTextPosition(mat2.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &mat2);
+            pInput->CaretIdx = mat2.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+            pInput->MoveCaret(mat2.height, TRUE);
             break;
         }
 
-        case WM_KEYDOWN: {
-            if (pInput->DragState) break;
-
-            switch (wParam) {
-                case VK_BACK: {
-                    if (pInput->DeleteSelectArea()) break;
-                    pInput->CaretIdx--;
-                    if (pInput->CaretIdx < 0) {
-                        pInput->CaretIdx = 0;
-                        pInput->StartSelectIdx = pInput->CaretIdx;
-                        break;
-                    }
-                    pInput->StartSelectIdx = pInput->CaretIdx;
-
-                    pInput->Str.erase(pInput->CaretIdx, 1);
-                    pInput->UpdateTextLayout();
-                    pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
-                    pInput->MoveCaret(HitMet.height, TRUE);
-                    break;
-                }
-
-                case VK_DELETE: {
-                    if (pInput->DeleteSelectArea()) break;
-                    pInput->Str.erase(pInput->CaretIdx, 1);
-                    pInput->UpdateTextLayout();
-                    pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
-                    pInput->MoveCaret(HitMet.height, TRUE);
-                    break;
-                }
-
-                case VK_UP: {
-                    int i;
-                    float tmp=0;
-                    DWRITE_HIT_TEST_METRICS TmpMet;
-
-                    pInput->pLayout->GetMetrics(&TextMet);
-                    pInput->LineMetric.resize(TextMet.lineCount);
-                    pInput->pLayout->GetLineMetrics(&pInput->LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
-                    for (i=0; i < TextMet.lineCount; i++) {
-                        tmp += pInput->LineMetric[i].height;
-                        /*행 높이 합산중, 캐럿Y좌표를 넘는순간*/
-                        if (tmp > pInput->CaretY) {
-                            tmp -= pInput->LineMetric[i].height;
-                            if (i < 1) break;
-                            tmp -= pInput->LineMetric[i-1].height;
-                            pInput->pLayout->HitTestPoint(pInput->CaretX, tmp, &Trail, &Inside, &HitMet);
-                            pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &TmpMet);
-                            pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
-                            if (!(GetKeyState(VK_SHIFT) & 0x80))
-                                pInput->StartSelectIdx = pInput->CaretIdx;
-                            pInput->MoveCaret(HitMet.height, TRUE);
-                            break;
-                        }
-                    }
-                    break;
-                }
-
-                case VK_DOWN: {
-                    float tmp = 0;
-                    DWRITE_HIT_TEST_METRICS TmpMet;
-
-                    pInput->pLayout->GetMetrics(&TextMet);
-                    pInput->LineMetric.resize(TextMet.lineCount);
-                    pInput->pLayout->GetLineMetrics(&pInput->LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
-                    for (int i = 0; i < TextMet.lineCount; i++) {
-                        tmp += pInput->LineMetric[i].height;
-                        /*행 높이 합산중, 캐럿Y좌표를 넘는순간*/
-                        if (tmp > pInput->CaretY) {
-                            pInput->pLayout->HitTestPoint(pInput->CaretX, tmp, &Trail, &Inside, &HitMet);
-                            pInput->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &TmpMet);
-                            pInput->CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
-                            if (!(GetKeyState(VK_SHIFT) & 0x80))
-                                pInput->StartSelectIdx = pInput->CaretIdx;
-                            pInput->MoveCaret(HitMet.height, TRUE);
-                            break;
-                        }
-                    }
-                    break;
-                }
-
-                case VK_LEFT:
-                    pInput->CaretIdx--;
-                    if (pInput->CaretIdx < 0) pInput->CaretIdx = 0;
-                    if (!(GetKeyState(VK_SHIFT) & 0x80))
-                        pInput->StartSelectIdx = pInput->CaretIdx;
-
-                    pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
-                    pInput->MoveCaret(HitMet.height, TRUE);
-                    break;
-
-                case VK_RIGHT:
-                    pInput->CaretIdx++;
-                    if (pInput->CaretIdx > pInput->Str.size()) pInput->CaretIdx--;
-                    if (!(GetKeyState(VK_SHIFT) & 0x80))
-                        pInput->StartSelectIdx = pInput->CaretIdx;
-
-                    pInput->pLayout->HitTestTextPosition(pInput->CaretIdx, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
-                    pInput->MoveCaret(HitMet.height, TRUE);
-                    break;
-            }
+        case WM_KEYDOWN:
+            pInput->OnKeyInput(Message, wParam, lParam);
             break;
-        }
 
         case WM_IME_COMPOSITION: {
             if (pInput->DragState) break;
             pInput->DeleteSelectArea();
             if (lParam & GCS_RESULTSTR) {
-                pInput->Str.erase(pInput->CaretIdx, 1);
+                pInput->pTextLayout->EraseText(pInput->CaretIdx, pInput->CaretIdx+1);
                 pInput->ImeCompBoot = FALSE;
             }
             if (lParam & GCS_COMPSTR) {
                 if (!pInput->ImeCompBoot) {
-                    pInput->Str.insert(pInput->CaretIdx, 1, wParam);
+                    pInput->pTextLayout->InsertChar(pInput->CaretIdx, wParam);
                     pInput->ImeCompBoot = TRUE;
                 }
-                else pInput->Str.replace(pInput->CaretIdx, 1, 1, wParam);
+                else pInput->pTextLayout->ReplaceChar(pInput->CaretIdx, wParam);
             }
-            pInput->UpdateTextLayout();
-            pInput->pLayout->HitTestTextPosition(pInput->CaretIdx + 1, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
+            pInput->pTextLayout->pLayout->HitTestTextPosition(pInput->CaretIdx + 1, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
             pInput->MoveCaret(HitMet.height, TRUE);
             break;
         }
@@ -275,26 +280,14 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
             if (pInput->DragState) break;
             if (wParam < 0x20 && wParam != VK_RETURN) break;
             pInput->DeleteSelectArea();
-            pInput->Str.insert(pInput->CaretIdx, 1, wParam);
+            pInput->pTextLayout->InsertChar(pInput->CaretIdx, wParam);
             pInput->CaretIdx++;
             pInput->StartSelectIdx = pInput->CaretIdx;
-            pInput->UpdateTextLayout();
-            pInput->pLayout->HitTestTextPosition(pInput->CaretIdx + pInput->ImeCompBoot, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
+            pInput->pTextLayout->pLayout->HitTestTextPosition(pInput->CaretIdx + pInput->ImeCompBoot, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
             pInput->MoveCaret(HitMet.height, TRUE);
             break;
         }
     }
-}
-
-void UI_Textinput::UpdateTextLayout()
-{
-    IDWriteTextLayout* pNewLayout;
-    IDWriteTextLayout* pOldLayout;
-
-    uiSys->D2DA.pDWFactory->CreateTextLayout(Str.c_str(), Str.size(), pTextFormat, uiPos.x2, uiPos.y2, &pNewLayout);
-    pOldLayout = pLayout;
-    pLayout = pNewLayout;
-    pOldLayout->Release();
 }
 
 void UI_Textinput::DrawSelectArea()
@@ -308,15 +301,14 @@ void UI_Textinput::DrawSelectArea()
     int TmpLen;
     float CharX, CharY;
 
-    //if (!IsSetSelect) return;
+    if (uiMotionState != eUIMotionState::eUMS_Visible) return; /*온전한 UI 상태에서만*/
     if (StartSelectIdx == CaretIdx) return;
-
     if (StartSelectIdx > CaretIdx) { si = CaretIdx; ei = StartSelectIdx; }
     else { si = StartSelectIdx; ei = CaretIdx; }
 
-    pLayout->GetMetrics(&TextMet);
+    pTextLayout->pLayout->GetMetrics(&TextMet);
     LineMetric.resize(TextMet.lineCount);
-    pLayout->GetLineMetrics(&LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
+    pTextLayout->pLayout->GetLineMetrics(&LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
 
     TmpLen = 0;
     TmpHeight = 0;
@@ -336,11 +328,11 @@ void UI_Textinput::DrawSelectArea()
 
         if (LineStartIdx <= si) TargetIdx = si;
         else TargetIdx = LineStartIdx;
-        pLayout->HitTestTextPosition(TargetIdx, FALSE, &DrawStartX, &CharY, &TmpMet);
+        pTextLayout->pLayout->HitTestTextPosition(TargetIdx, FALSE, &DrawStartX, &CharY, &TmpMet);
 
         if (LineEndIdx >= ei) TargetIdx = ei;
         else TargetIdx = LineEndIdx;
-        pLayout->HitTestTextPosition(TargetIdx, Str.size() == TargetIdx ? TRUE : FALSE, &DrawEndX, &CharY, &TmpMet);
+        pTextLayout->pLayout->HitTestTextPosition(TargetIdx, pTextLayout->Str.size() == TargetIdx ? TRUE : FALSE, &DrawEndX, &CharY, &TmpMet);
 
         Distance = DrawEndX - DrawStartX;
 
@@ -354,46 +346,54 @@ void UI_Textinput::DrawSelectArea()
     }
 }
 
-void UI_Textinput::SetFrame(D2D1_COLOR_F Color, BOOL bMotion)
+void UI_Textinput::ResumeFrame(unsigned long Delay)
 {
-    eTextinputMotionPattern Patt;
-    if (bMotion) Patt = eTextinputMotionPattern::eFrameInit_Default;
-    else Patt = Motion.MotionFrameInit;
 
-    switch (Patt) {
-    case eTextinputMotionPattern::eFrameInit_Default:
-        pBoxFrame->Init(uiPos, Color, FALSE);
+    switch (Motion.MotionInitFrame) {
+    case eTextinputMotionPattern::eInitFrame_Default:
+        pBoxFrame->Init(uiPos, Motion.ColorFrame, FALSE);
         break;
     }
 }
 
 void UI_Textinput::PauseFrame(unsigned long Delay)
 {
-    switch (Motion.MotionFramePause) {
-    case eTextinputMotionPattern::eFramePause_Default:
+    switch (Motion.MotionPauseFrame) {
+    case eTextinputMotionPattern::ePauseFrame_Default:
         pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
         break;
     }
 }
 
-void UI_Textinput::SetBg(D2D1_COLOR_F Color, BOOL bMotion)
+void UI_Textinput::ResumeBg(unsigned long Delay)
 {
     eTextinputMotionPattern Patt;
-    if (bMotion) Patt = eTextinputMotionPattern::eBgInit_Default;
-    else Patt = Motion.MotionBgInit;
 
-    switch (Patt) {
-    case eTextinputMotionPattern::eBgInit_Default:
-        pBoxBg->Init(uiPos, Color);
+    switch (Motion.MotionInitBg) {
+    case eTextinputMotionPattern::eInitBg_Default:
+        pBoxBg->Init(uiPos, Motion.ColorBg);
         break;
     }
 }
 
 void UI_Textinput::PauseBg(unsigned long Delay)
 {
-    switch (Motion.MotionBgPause) {
-    case eTextinputMotionPattern::eBgPause_Default:
+    switch (Motion.MotionPauseBg) {
+    case eTextinputMotionPattern::ePauseBg_Default:
         pBoxBg->Init(uiPos, ALL_ZERO);
+        break;
+    }
+}
+
+void UI_Textinput::ResumeCaret(unsigned long Delay)
+{
+    MOTION_INFO mi;
+
+    switch (Motion.MotionInitCaret) {
+    case eTextinputMotionPattern::eInitCaret_Default:
+        pBoxCaret->Init({ uiPos.x, uiPos.y, Motion.CaretWidth, CaretH}, ALL_ZERO);
+        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitCaret);
+        pBoxCaret->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorCaret);
         break;
     }
 }
@@ -404,17 +404,18 @@ void UI_Textinput::MoveCaret(float CaretHeight, BOOL bMotion)
     MOTION_INFO mi;
     POSITION CaretPos = {uiPos.x+CaretX, uiPos.y+CaretY, Motion.CaretWidth, CaretHeight };
 
-    if (bMotion) patt = Motion.MotionCaretMove;
-    else patt = eTextinputMotionPattern::eCaretMove_Default;
+    if (bMotion) patt = Motion.MotionMoveCaret;
+    else patt = eTextinputMotionPattern::eMoveCaret_Default;
+    CaretH = CaretHeight;
 
     switch (patt) {
-    case eTextinputMotionPattern::eCaretMove_Default:
+    case eTextinputMotionPattern::eMoveCaret_Default:
         mi = InitMotionInfo(eMotionForm::eMotion_None, 0, 0);
         pBoxCaret->SetPos(mi, TRUE, ALL_ZERO, CaretPos);
         break;
 
-    case eTextinputMotionPattern::eCaretMove_Decel:
-        mi = InitMotionInfo(eMotionForm::eMotion_x3_2, 0, Motion.PitchCaretMove);
+    case eTextinputMotionPattern::eMoveCaret_Decel:
+        mi = InitMotionInfo(eMotionForm::eMotion_x3_2, 0, Motion.PitchMoveCaret);
         pBoxCaret->SetPos(mi, TRUE, ALL_ZERO, CaretPos);
         break;
     }
@@ -422,10 +423,37 @@ void UI_Textinput::MoveCaret(float CaretHeight, BOOL bMotion)
 
 void UI_Textinput::PauseCaret(unsigned long Delay)
 {
+    MOTION_INFO mi;
 
+    switch (Motion.MotionPauseCaret) {
+    case eTextinputMotionPattern::ePauseCaret_Default:
+        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseCaret);
+        pBoxCaret->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+        break;
+    }
 }
 
-void UI_Textinput::SetTextlayout(D2D1_COLOR_F Color, BOOL bMotion)
+void UI_Textinput::ResumeTextlayout(unsigned long Delay)
 {
-    pTextBrush->SetColor(Color);
+    MOTION_INFO mi;
+
+    switch (Motion.MotionInitText) {
+    case eTextinputMotionPattern::eInitText_Default:
+        pTextLayout->Init(uiPos, ALL_ZERO);
+        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitText);
+        pTextLayout->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorText);
+        break;
+    }
+}
+
+void UI_Textinput::PauseTextlayout(unsigned long Delay)
+{
+    MOTION_INFO mi;
+
+    switch (Motion.MotionPauseText) {
+    case eTextinputMotionPattern::ePauseText_Default:
+        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseText);
+        pTextLayout->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+        break;
+    }
 }

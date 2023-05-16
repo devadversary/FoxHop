@@ -21,6 +21,9 @@
   <ItemGroup>
     <ClCompile Include="foxhop_test_maincpp.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="uiparam.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
