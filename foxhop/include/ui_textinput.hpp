@@ -8,13 +8,15 @@
     @brief 스태틱 모션 타입
 */
 enum class eTextinputMotionPattern {
-    eInitFrame_Default,  /**< 소멸 : 모션 없음*/
-    ePauseFrame_Default,  /**< 소멸 : 모션 없음*/
+    eInitFrame_Default,
+    eInitFrame_ExpendLR,
+    ePauseFrame_Default,
+    ePauseFrame_CollapseLR,
 
-    eInitBg_Default,   /**< 생성 : 모션 없음*/
+    eInitBg_Default,
     ePauseBg_Default,
 
-    eInitText_Default,   /**< 텍스트 : 모션 없음*/
+    eInitText_Default,
     ePauseText_Default,
 
     eInitCaret_Default,

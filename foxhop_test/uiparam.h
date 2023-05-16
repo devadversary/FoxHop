@@ -85,6 +85,10 @@ void UI_ParamSet() {
 	StaticParam.ColorBg = { 0,0,0,0 };
 	StaticParam.ColorFont = { 1,1,1,1 };
 
+	InputParam.MotionInitFrame = eTextinputMotionPattern::eInitFrame_ExpendLR;
+	InputParam.PitchInitFrame = 500;
+	InputParam.MotionPauseFrame = eTextinputMotionPattern::ePauseFrame_CollapseLR;
+	InputParam.PitchPauseFrame = 500;
 	InputParam.MotionMoveCaret = eTextinputMotionPattern::eMoveCaret_Decel;
 	InputParam.ColorFrame = { 0.8,0,0,0.6 };
 	InputParam.ColorBg = ALL_ZERO;

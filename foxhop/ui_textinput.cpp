@@ -348,20 +348,47 @@ void UI_Textinput::DrawSelectArea()
 
 void UI_Textinput::ResumeFrame(unsigned long Delay)
 {
+    MOTION_INFO mi;
 
     switch (Motion.MotionInitFrame) {
-    case eTextinputMotionPattern::eInitFrame_Default:
-        pBoxFrame->Init(uiPos, Motion.ColorFrame, FALSE);
-        break;
+        case eTextinputMotionPattern::eInitFrame_Default:
+            pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitFrame);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorFrame);
+            break;
+
+        case eTextinputMotionPattern::eInitFrame_ExpendLR: {
+            POSITION StartPos = { uiPos.x+uiPos.x2/2 , uiPos.y , 0, uiPos.y2};
+
+            pBoxFrame->Init(StartPos, ALL_ZERO, FALSE);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorFrame);
+            mi = InitMotionInfo(eMotionForm::eMotion_x3_2, Delay, Motion.PitchInitFrame);
+            pBoxFrame->SetPos(mi, TRUE, ALL_ZERO, uiPos);
+            break;
+        }
     }
 }
 
 void UI_Textinput::PauseFrame(unsigned long Delay)
 {
+    MOTION_INFO mi;
+
     switch (Motion.MotionPauseFrame) {
-    case eTextinputMotionPattern::ePauseFrame_Default:
-        pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
-        break;
+        case eTextinputMotionPattern::ePauseFrame_Default:
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseFrame);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+
+        case eTextinputMotionPattern::ePauseFrame_CollapseLR: {
+            POSITION EndPos = { uiPos.x + uiPos.x2 / 2 , uiPos.y , 0, uiPos.y2 };
+
+            mi = InitMotionInfo(eMotionForm::eMotion_x3_1, Delay, Motion.PitchPauseFrame);
+            pBoxFrame->SetPos(mi, TRUE, ALL_ZERO, EndPos);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay+ Motion.PitchPauseFrame, 0);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+        }
     }
 }
 

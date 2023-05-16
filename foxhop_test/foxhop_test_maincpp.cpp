@@ -138,6 +138,7 @@ void TestPauseButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     switch (Message) {
     case WM_LBUTTONUP:
         pTable->pause(0);
+        pInput->pause(200);
         break;
     }
 }
@@ -149,6 +150,7 @@ void TestResumeButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     switch (Message) {
     case WM_LBUTTONUP:
         pTable->resume(0);
+        pInput->resume(200);
         break;
     }
 }
