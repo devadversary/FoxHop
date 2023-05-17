@@ -5,7 +5,6 @@ PropText::PropText(ID2D1RenderTarget* pRT)
     pRT->CreateSolidColorBrush({ 0,0,0,0 }, &Brush);
     CurColor = { 0,0,0,0 };
     CurPos = { 0,0,0,0 };
-    InitLen = 0;
     CurLen = 0;
     InitColor = { 0,0,0,0 };
     InitPos = { 0,0,0,0 };
@@ -28,7 +27,6 @@ void PropText::Init(IDWriteTextFormat* pTexFmt, wchar_t* pText, int nTextLen, PO
     pTextFmt = pTexFmt; /*폰트 출력 정보 개체별로 지정*/
     InitPos = CurPos = StartPos;
     InitColor = CurColor = StartColor;
-    InitLen = StartLen;
     CurLen = (float)StartLen;
     pStr = pText;
     nStrLen = wcslen(pText);
@@ -93,14 +91,14 @@ void PropText::SetColor(MOTION_INFO MotionInfo, BOOL bCurrent, D2D1_COLOR_F Star
     addColorMotion(MotionInfo, FALSE, TmpColor, EndColor);
 }
 
-/**
-    @brief 문자열을 셋팅하고 길이 조절 모션을 넣어준다
-    @remark 변경된 텍스트를 바로 적용 하기 때문에 길이조절 한정 bCurrent 인자가 없다
-*/
-void PropText::SetText(MOTION_INFO MotionInfo, wchar_t* pText, int nStartTextLen, int nEndTextLen)
+void PropText::SetLen(MOTION_INFO MotionInfo, BOOL bCurrent, unsigned long StartLen, unsigned long EndLen)
 {
+    unsigned long TmpLen;
+
     ComMotionStrLen.clearChannel();
-    addLenMotion(MotionInfo, FALSE, nStartTextLen, nEndTextLen);
+    if (bCurrent) TmpLen = CurLen;
+    else TmpLen = StartLen;
+    addLenMotion(MotionInfo, FALSE, TmpLen, EndLen);
 }
 
 /**

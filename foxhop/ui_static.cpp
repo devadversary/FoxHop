@@ -29,11 +29,23 @@ void UI_Static::ResumeFrame(unsigned long Delay)
     MOTION_INFO mi;
 
     switch (Motion.MotionInitFrame) {
-    case eStaticMotionPattern::eInitFrame_Default:
-        pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
-        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
-        pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorFrame);
-        break;
+        case eStaticMotionPattern::eInitFrame_Default:
+            pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorFrame);
+            break;
+
+        case eStaticMotionPattern::eInitFrame_ExpendCenter: {
+            POSITION StartPos = uiPos;
+            StartPos.x += uiPos.x2 / 2;
+            StartPos.x2 = 0;
+            pBoxFrame->Init(StartPos, ALL_ZERO, FALSE);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorFrame);
+            mi = InitMotionInfo(eMotionForm::eMotion_x3_2, Delay, Motion.PitchInitFrame);
+            pBoxFrame->SetPos(mi, TRUE, ALL_ZERO, uiPos);
+            break;
+        }
     }
 }
 
@@ -42,10 +54,22 @@ void UI_Static::PauseFrame(unsigned long Delay)
     MOTION_INFO mi;
 
     switch (Motion.MotionPauseFrame) {
-    case eStaticMotionPattern::ePauseFrame_Default:
-        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
-        pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
-        break;
+        case eStaticMotionPattern::ePauseFrame_Default:
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+
+        case eStaticMotionPattern::ePauseFrame_CollapseCenter: {
+            POSITION EndPos = uiPos;
+            EndPos.x += uiPos.x2 / 2;
+            EndPos.x2 = 0;
+            mi = InitMotionInfo(eMotionForm::eMotion_x3_1, Delay, Motion.PitchPauseFrame);
+            pBoxFrame->SetPos(mi, TRUE, ALL_ZERO, EndPos);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay+Motion.PitchPauseFrame, 0);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+        }
+
     }
 }
 
@@ -54,11 +78,24 @@ void UI_Static::ResumeBg(unsigned long Delay)
     MOTION_INFO mi;
 
     switch (Motion.MotionInitBg) {
-    case eStaticMotionPattern::eInitBg_Default:
-        pBoxBg->Init(uiPos, ALL_ZERO);
-        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
-        pBoxBg->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorBg);
-        break;
+        case eStaticMotionPattern::eInitBg_Default:
+            pBoxBg->Init(uiPos, ALL_ZERO);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+            pBoxBg->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorBg);
+            break;
+
+        case eStaticMotionPattern::eInitBg_ExpendRight: {
+            POSITION StartPos = uiPos;
+
+            StartPos.x2 = 0;
+            pBoxBg->Init(StartPos, ALL_ZERO);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+            pBoxBg->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorBg);
+            mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Motion.PitchInitBg);
+            pBoxBg->SetPos(mi, TRUE, ALL_ZERO, uiPos);
+            break;
+        }
+
     }
 }
 
@@ -67,10 +104,23 @@ void UI_Static::PauseBg(unsigned long Delay)
     MOTION_INFO mi;
 
     switch (Motion.MotionPauseBg) {
-    case eStaticMotionPattern::ePauseBg_Default:
-        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
-        pBoxBg->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
-        break;
+        case eStaticMotionPattern::ePauseBg_Default:
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+            pBoxBg->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+
+        case eStaticMotionPattern::ePauseBg_CollapseLeft: {
+            POSITION EndPos = uiPos;
+
+            EndPos.x += uiPos.x2;
+            EndPos.x2 = 0;
+            mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Motion.PitchPauseBg);
+            pBoxBg->SetPos(mi, TRUE, ALL_ZERO, EndPos);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay + Motion.PitchPauseBg, 0);
+            pBoxBg->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+        }
+
     }
 }
 
@@ -79,11 +129,19 @@ void UI_Static::ResumeText(unsigned long Delay)
     MOTION_INFO mi;
 
     switch (Motion.MotionInitText) {
-    case eStaticMotionPattern::eInitText_Default:
-        pText->Init(pTextFmt, szText, 0, uiPos, ALL_ZERO, wcslen(szText));
-        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitText);
-        pText->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorText);
-        break;
+        case eStaticMotionPattern::eInitText_Default:
+            pText->Init(pTextFmt, szText, 0, uiPos, ALL_ZERO, wcslen(szText));
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitText);
+            pText->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorText);
+            break;
+
+        case eStaticMotionPattern::eInitText_Typing:
+            pText->Init(pTextFmt, szText, 0, uiPos, ALL_ZERO, 0);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+            pText->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorText);
+            mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Motion.PitchInitText);
+            pText->SetLen(mi, TRUE, NULL, wcslen(szText));
+            break;
     }
 }
 
@@ -92,10 +150,15 @@ void UI_Static::PauseText(unsigned long Delay)
     MOTION_INFO mi;
 
     switch (Motion.MotionPauseText) {
-    case eStaticMotionPattern::ePauseText_Default:
-        mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitText);
-        pText->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
-        break;
+        case eStaticMotionPattern::ePauseText_Default:
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseText);
+            pText->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+
+        case eStaticMotionPattern::ePauseText_Flick:
+            mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay, Motion.PitchPauseText);
+            pText->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
     }
 }
 

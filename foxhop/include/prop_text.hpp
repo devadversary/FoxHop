@@ -14,7 +14,6 @@ private:
     IDWriteTextFormat*    pTextFmt;     /**< 텍스트가 그려질 형식 지정(폰트, 정렬, 자간 등)*/
     POSITION              InitPos;      /**< 현재 오브젝트의 포지션*/
     D2D1_COLOR_F          InitColor;    /**< 현재 오브젝트의 RGBA 값*/
-    int                   InitLen;      /**< 현재 출력중인 문자열 길이*/
     POSITION              CurPos;       /**< 현재 오브젝트의 포지션*/
     D2D1_COLOR_F          CurColor;     /**< 현재 오브젝트의 RGBA 값*/
     float                 CurLen;       /**< 현재 출력중인 문자열 길이 (정수변환해야함)*/
@@ -31,7 +30,7 @@ public:
 
     void SetPos(MOTION_INFO MotionInfo, BOOL bCurrent, POSITION StartPos, POSITION EndPos);
     void SetColor(MOTION_INFO MotionInfo, BOOL bCurrent, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor);
-    void SetText(MOTION_INFO MotionInfo, wchar_t* pText, int nStartTextLen, int nEndTextLen);
+    void SetLen(MOTION_INFO MotionInfo, BOOL bCurrent, unsigned long StartLen, unsigned long EndLen);
 
     BOOL update(unsigned long time);
     void render(ID2D1RenderTarget* pRT);

@@ -8,14 +8,20 @@
     @brief 스태틱 모션 타입
 */
 enum class eStaticMotionPattern {
-    eInitFrame_Default = 0,   /**< 생성 : 모션 없음*/
-    ePauseFrame_Default = 0,   /**< 생성 : 모션 없음*/
+    eInitFrame_Default,
+    eInitFrame_ExpendCenter,
+    ePauseFrame_Default,
+    ePauseFrame_CollapseCenter,
     
-    eInitBg_Default = 0,   /**< 생성 : 모션 없음*/
-    ePauseBg_Default = 0,   /**< 생성 : 모션 없음*/
+    eInitBg_Default,
+    eInitBg_ExpendRight,
+    ePauseBg_Default,
+    ePauseBg_CollapseLeft,
 
-    eInitText_Default = 0,  /**< 소멸 : 모션 없음*/
-    ePauseText_Default = 0,  /**< 소멸 : 모션 없음*/
+    eInitText_Default,
+    eInitText_Typing,
+    ePauseText_Default,
+    ePauseText_Flick,
 };
 
 class UI_Static_MotionParam {

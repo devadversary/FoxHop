@@ -74,28 +74,28 @@ void UI_ParamSet() {
 	TableParam.ColorRowText = { 1,1,1,1 };
 	TableParam.ColorRowTextSelect = { 0,0,0,1 };
 
-	StaticParam.MotionInitFrame = eStaticMotionPattern::eInitFrame_Default;
-	StaticParam.PitchInitFrame = 0;
+	StaticParam.MotionInitFrame = eStaticMotionPattern::eInitFrame_ExpendCenter;
+	StaticParam.PitchInitFrame = 400;
 	StaticParam.DelayInitFrame = 0;
-	StaticParam.MotionPauseFrame = eStaticMotionPattern::ePauseFrame_Default;
-	StaticParam.PitchPauseFrame = 0;
-	StaticParam.DelayPauseFrame = 0;
+	StaticParam.MotionPauseFrame = eStaticMotionPattern::ePauseFrame_CollapseCenter;
+	StaticParam.PitchPauseFrame = 400;
+	StaticParam.DelayPauseFrame = 300;
 
-	StaticParam.MotionInitBg = eStaticMotionPattern::eInitBg_Default;
-	StaticParam.PitchInitBg = 0;
-	StaticParam.DelayInitBg = 0;
-	StaticParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_Default;
-	StaticParam.PitchPauseBg = 0;
+	StaticParam.MotionInitBg = eStaticMotionPattern::eInitBg_ExpendRight;
+	StaticParam.PitchInitBg = 300;
+	StaticParam.DelayInitBg = 300;
+	StaticParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_CollapseLeft;
+	StaticParam.PitchPauseBg = 300;
 	StaticParam.DelayPauseBg = 0;
 
-	StaticParam.MotionInitText = eStaticMotionPattern::eInitText_Default;
-	StaticParam.PitchInitText = 0;
-	StaticParam.DelayInitText = 0;
-	StaticParam.MotionPauseText = eStaticMotionPattern::ePauseText_Default;
-	StaticParam.PitchPauseText = 0;
+	StaticParam.MotionInitText = eStaticMotionPattern::eInitText_Typing;
+	StaticParam.PitchInitText = 200;
+	StaticParam.DelayInitText = 400;
+	StaticParam.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
+	StaticParam.PitchPauseText = 200;
 	StaticParam.DelayPauseText = 0;
 
-	StaticParam.ColorFrame = { 0.8,0,0,0.5 };
+	StaticParam.ColorFrame = { 0.8,0,0,0.8 };
 	StaticParam.ColorBg = { 0.7,0,0,0.5 };
 	StaticParam.ColorText = { 1,1,1,1 };
 
