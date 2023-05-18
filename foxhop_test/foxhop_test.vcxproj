@@ -20,8 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="foxhop_test_maincpp.cpp" />
+    <ClCompile Include="tree.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="tree.hpp" />
     <ClInclude Include="uiparam.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

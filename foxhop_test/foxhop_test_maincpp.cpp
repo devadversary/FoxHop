@@ -13,16 +13,19 @@
 #include "../foxhop/include/ui_fraggedline.hpp"
 #include "../foxhop/include/ui_table.hpp"
 #include "../foxhop/include/ui_textinput.hpp"
+#include "tree.hpp"
 #include "uiparam.h"
 #include <process.h>
 #pragma comment (lib,"ws2_32.lib")
 #pragma comment (lib, "../bin/debug/foxhop.lib")
 #define CLASSNAME TEXT("TestModule")
 
+TREE hTree;
 UISystem* uiSys = NULL;
 UI_Button* pPauseButton = NULL;
 UI_Button* pResumeButton = NULL;
 UI_Table* pTable = NULL;
+UI_Table* pTable2 = NULL;
 UI_Static* pStatic = NULL;
 UI_Textinput* pInput = NULL;
 
@@ -50,6 +53,13 @@ unsigned int GetElapse()
     return distance(t2, t1);
 }
 
+typedef struct _st_ipcount
+{
+    unsigned long long TableIdx;
+    unsigned long long Count;
+    wchar_t CountStr[16];
+}IP_COUNT;
+
 unsigned int thread_test(void* pTemp)
 {
     SOCKET sock;
@@ -63,6 +73,9 @@ unsigned int thread_test(void* pTemp)
     int nPacket = 0;
     char hostname[1024];
     DWORD enable = 1, wrt;
+    NODE_TREE* pNode;
+    IP_COUNT* pInfo;
+
     gethostname(hostname, sizeof(hostname));
     HOSTENT* ent = gethostbyname(hostname);
     memcpy(&saddr.sin_addr, ent->h_addr_list[0], sizeof(IN_ADDR));
@@ -87,6 +100,23 @@ unsigned int thread_test(void* pTemp)
         wsprintfW(tmpData, L"%d", rx);
         tabledata[2] = _wcsdup(tmpData);
         pTable->AddData(tabledata, TRUE);
+
+        pNode = TREE_Search(&hTree, &peer.sin_addr, sizeof(peer.sin_addr));
+        if (!pNode) {
+            IP_COUNT* pCount = (IP_COUNT*)malloc(sizeof(IP_COUNT));
+            wchar_t* CountStr;
+
+            pCount->TableIdx = hTree.nElements;
+            pCount->Count = 0;
+            pNode = TREE_Input(&hTree, &peer.sin_addr, sizeof(peer.sin_addr), pCount);
+            wsprintf(pCount->CountStr, L"%d", pCount->Count);
+            pTable2->AddData2(TRUE, FALSE, tabledata[1], pCount->CountStr);
+        }
+        pInfo = (IP_COUNT*)pNode->pParam;
+        pInfo->Count++;
+        wsprintf(pInfo->CountStr, L"%d", pInfo->Count);
+        pTable2->HighlightData(pInfo->TableIdx, {0.55,1,0.45,1});
+
     }
     return 0;
 }
@@ -98,7 +128,8 @@ unsigned int thread_update_render(void* pTemp)
 
     while (1) {
         uiSys->D2DA.pRenTarget->BeginDraw();
-        uiSys->D2DA.pRenTarget->Clear({ 0,0,0,0.7 });
+        //uiSys->D2DA.pRenTarget->Clear({ 0,0,0,0.7 });
+        uiSys->D2DA.pRenTarget->Clear({ 1,1,1,1 });
         pMainPanel->update(GetElapse());
         pMainPanel->render();
         uiSys->D2DA.pRenTarget->EndDraw();
@@ -140,6 +171,7 @@ void TestPauseButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pTable->pause(0);
         pStatic->pause(200);
         pInput->pause(300);
+        pTable2->pause(300);
         break;
     }
 }
@@ -153,6 +185,7 @@ void TestResumeButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pTable->resume(0);
         pStatic->resume(200);
         pInput->resume(300);
+        pTable2->resume(300);
         break;
     }
 }
@@ -163,20 +196,25 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     UI_Panel* pPanel = (UI_Panel*)pUI;
 
     wchar_t* ColData[3] = { (wchar_t*)L"No.", (wchar_t*)L"IP", (wchar_t*)L"Length" };
+    wchar_t* ColData2[2] = { (wchar_t*)L"IP", (wchar_t*)L"Count"};
     unsigned int ColWidth[3] = {80,150,120};
+    unsigned int ColWidth2[3] = {150, 80};
     unsigned int ThreadID;
 
     switch(Message) {
     case UIM_CREATE:
-        UI_ParamSet();
+        UI_ParamSet2();
+        TREE_Init(&hTree);
         pPauseButton = new UI_Button(pUI->uiSys, TestPauseButtonProc, {10,10,100,20}, (wchar_t*)L"UI Pause", 0, ButtonParam);
         pResumeButton = new UI_Button(pUI->uiSys, TestResumeButtonProc, {120,10,100,20}, (wchar_t*)L"UI Resume", 200, ButtonParam);
-        pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 590 , 570}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
-        pStatic = new UI_Static(pUI->uiSys, NULL, {10, 620, 590, 25}, pUI->uiSys->MediumTextForm ,(wchar_t*)L"Done.", StaticParam);
-        pInput = new UI_Textinput(pUI->uiSys, NULL, { 10, 655, 590, 150 }, pUI->uiSys->CreateTextFmt((wchar_t*)L"Consolas", 15, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_NEAR), InputParam);
+        pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 450 , 570}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
+        pStatic = new UI_Static(pUI->uiSys, NULL, {10, 620, 450, 25}, pUI->uiSys->MediumTextForm ,(wchar_t*)L"Done.", StaticParam);
+        pInput = new UI_Textinput(pUI->uiSys, NULL, { 10, 655, 450, 150 }, pUI->uiSys->CreateTextFmt((wchar_t*)L"Consolas", 15, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_NEAR), InputParam);
+        pTable2 = new UI_Table(pUI->uiSys, NULL, {470, 40, 230 , 760}, 2, ColData2, ColWidth2, 30, 20, FALSE, TableParam);
         pPanel->RegisterUI(pPauseButton);
         pPanel->RegisterUI(pResumeButton);
         pPanel->RegisterUI(pTable);
+        pPanel->RegisterUI(pTable2);
         pPanel->RegisterUI(pStatic);
         pPanel->RegisterUI(pInput);
         _beginthreadex(NULL, NULL, thread_test, 0, 0, &ThreadID);
@@ -242,7 +280,7 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     wc.cbClsExtra = NULL;
     wc.cbWndExtra = NULL;
     RegisterClass(&wc);
-    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 630, 850, NULL, NULL, hInst, NULL);
+    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 725, 855, NULL, NULL, hInst, NULL);
     AlphaWindow(hWnd, WINDOWMODE_TRANSPARENT);
     ShowWindow(hWnd, TRUE);
     while (GetMessage(&Message, NULL, NULL, NULL)) {

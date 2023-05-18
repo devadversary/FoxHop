@@ -55,16 +55,15 @@ enum class eTableMotionPattern {
     ePauseTableSelect_Linear,
     ePauseTableSelect_Decel,
 
+    eInitRowBg_Default,
+    ePauseRowBg_Default,
     eInitRowText_Default,
     eInitRowText_Typing,
     ePauseRowText_Default,
     ePauseRowText_FlickLinear,
     ePauseRowText_FlickRandom,
 
-    eInitRowBg_Default,
-    ePauseRowBg_Default,
-
-    eInitRowHighlight_Flick,
+    eInitRowHighlight_Blink,
 };
 
 class RowObject;
@@ -138,6 +137,9 @@ public:
     eTableMotionPattern MotionPauseRowBg;
     unsigned long PitchPauseRowBg;
     unsigned long DelayPauseRowBg;
+
+    eTableMotionPattern MotionInitRowHighlight;
+    unsigned long PitchInitRowHighlight;
 
     unsigned long PitchScroll;
 
@@ -220,6 +222,9 @@ public:
         PitchPauseRowBg = 0;
         DelayPauseRowBg = 0;
 
+        MotionInitRowHighlight = eTableMotionPattern::eInitRowHighlight_Blink;
+        PitchInitRowHighlight = 200;
+
         PitchScroll = 200;
 
         ColorFrame = { 0.f ,0.f, 0.f, 1.f };
@@ -283,6 +288,16 @@ private:
     void ResumeRowOrder(unsigned long Delay);
     void PauseRowOrder(unsigned long Delay);
 
+private:
+    long long DataIdx2ViewRowIdx(long long DataIdx);
+    //RowObject* DataIdx2ViewRow(long long DataIdx);
+    BOOL DataIdxIsInScreen(long long DataIdx);
+
+    void SetViewRowBg();
+    void SetViewRowData();
+    void SetViewRowSelect();
+    void SetViewRowHighlight();
+
 public:
     UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, unsigned int ColumnCount, wchar_t** ColumnNameList, unsigned int* ColumnWidth, unsigned int HeaderHeight, unsigned int RowHeight, BOOL MultiSelect, UI_Table_MotionParam MotionParam = UI_Table_MotionParam());
     ~UI_Table() {};
@@ -295,6 +310,10 @@ public:
 public: /*UI별 옵션 매서드*/
     void Resize(POSITION Pos);
     void AddData(wchar_t* Data[], BOOL bAutoScroll = FALSE);
+    void AddData2(BOOL bMotion, BOOL bAutoScroll, wchar_t* ...);
+    void EditData(BOOL bMotion, unsigned long long RowIdx, wchar_t* ...);
+    void HighlightData(unsigned long long DataIdx, D2D1_COLOR_F HightlightColor);
+
     void SetScroll(long long TargetScrollPx);
 };
 

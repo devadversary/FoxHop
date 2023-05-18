@@ -1,5 +1,6 @@
 #include "./include/ui_table.hpp"
 #include "./include/ui_system.hpp"
+#include <cstdarg>
 
 #define TEXTSHEET_DEFAULT_WIDTH     150 /*열 가로폭 기본 픽셀*/
 #define TEXTSHEET_DEFAULT_ROWHEIGHT 20  /*행 세로폭 기본 픽셀*/
@@ -113,7 +114,7 @@ void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPa
         if (MainDataPoolSize == 0) break;
         idx = ((long long)pTable->CurrScrollPixel + y) / pTable->RowHgt;
         if (idx >= MainDataPoolSize) break;
-        OrderIdx = idx % pTable->ViewRowCnt;
+        OrderIdx = idx % pTable->ViewRowCnt; /*선택한 인덱스로부터 화면에 보이는 뷰 인덱스 계산*/
         MainIdx = pTable->ViewData[OrderIdx]->MainDataIdx; /*선택된 행*/
         pTable->MainDataPool[MainIdx].bSelected ^= 1; /*TRUE / FALSE 교대 : 선택 표기 완료*/
         bSel = pTable->MainDataPool[MainIdx].bSelected;
@@ -160,6 +161,21 @@ void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPa
     if (UserHandler) UserHandler(pUI, Message, wParam, lParam);
 }
 
+long long UI_Table::DataIdx2ViewRowIdx(long long DataIdx)
+{
+    if (DataCount <= DataIdx) return -1;
+    return DataIdx % ViewRowCnt;
+}
+
+BOOL UI_Table::DataIdxIsInScreen(long long DataIdx)
+{
+    if (DataCount <= DataIdx) return FALSE;
+    if (CurrMainIndex > DataIdx) return FALSE;
+    if (CurrMainIndex + ViewRowCnt < DataIdx) return FALSE;
+    return TRUE;
+}
+
+
 /**
     @brief 테이블에 데이터를 추가한다.
     @param ppData 반드시 열 갯수에 맞는 배열을 넘겨줘야 한다. (wchar* [x])
@@ -177,7 +193,7 @@ void UI_Table::AddData(wchar_t* Data[], BOOL bAutoScroll)
     Row.ppData = (wchar_t**)malloc(AllocSize);
     memcpy_s(Row.ppData, AllocSize, Data, AllocSize);
     Row.bTextMotionPlayed = bAutoScroll ? FALSE : TRUE;
-    MainDataPool.push_back(Row);
+    MainDataPool.emplace_back(Row);
     DataCount++;
 
     TmpScrollPx = (DataCount * RowHgt) - ClientHeight;
@@ -189,7 +205,64 @@ void UI_Table::AddData(wchar_t* Data[], BOOL bAutoScroll)
     if (bAutoScroll) SetScroll(MaxScrollPixel);
 }
 
-/**
+void UI_Table::AddData2(BOOL bMotion, BOOL bAutoScroll, wchar_t* ...)
+{
+    va_list args;
+    wchar_t* pStr;
+
+
+    long long TmpScrollPx;
+    TABLE_ROW Row;
+    size_t    AllocSize;
+
+    Row.bSelected = FALSE;
+    AllocSize = sizeof(wchar_t*) * ColCnt;
+    Row.ppData = (wchar_t**)malloc(AllocSize);
+
+    va_start(args, bAutoScroll);
+    for (int i = 0; i < ColCnt; i++) {
+        pStr = va_arg(args, wchar_t*);
+        Row.ppData[i] = pStr;
+    }
+    va_end(args);
+
+    //memcpy_s(Row.ppData, AllocSize, Data, AllocSize);
+    Row.bTextMotionPlayed = bMotion ? FALSE : TRUE;
+    MainDataPool.emplace_back(Row);
+    DataCount++;
+
+    TmpScrollPx = (DataCount * RowHgt) - ClientHeight;
+    if (TmpScrollPx <= 0) MaxScrollPixel = 0; /*음수는 없다.*/
+    else MaxScrollPixel = TmpScrollPx;
+
+    if (uiMotionState != eUIMotionState::eUMS_Visible) return; /*초기화모션/소멸모션 진행중엔 스크롤 X*/
+    PinCount = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
+    if (bAutoScroll) SetScroll(MaxScrollPixel);
+}
+
+void UI_Table::EditData(BOOL bMotion, unsigned long long RowIdx, wchar_t* ...)
+{
+    RowObject* pViewRow;
+    va_list arglist;
+
+    va_start(arglist, RowIdx);
+    for (int i = 0; i < ColCnt; i++) {
+    }
+    va_end(arglist);
+}
+
+void UI_Table::HighlightData(unsigned long long DataIdx, D2D1_COLOR_F HightlightColor)
+{
+    RowObject* pRow;
+    long long Idx;
+
+    if (!DataIdxIsInScreen(DataIdx)) return;
+    Idx = DataIdx2ViewRowIdx(DataIdx);
+    if (Idx < 0) return;
+    ViewData[Idx]->SetHighlight(HightlightColor);
+}
+
+/** 
     @brief 지정 픽셀값으로 스크롤을 옮긴다
     @remark 허용 스크롤값을 벗어날경우 내부에서 알아서 적정 값으로 관리한다.
 */
@@ -778,7 +851,15 @@ void RowObject::PauseSelect(BOOL bMotion, unsigned long Delay)
 
 void RowObject::SetHighlight(D2D1_COLOR_F Color)
 {
-    //
+    MOTION_INFO mi;
+
+    switch (pParent->Motion.MotionInitRowHighlight) {
+    case eTableMotionPattern::eInitRowHighlight_Blink:
+        pHighlightBox->Init(Pos, Color);
+        mi = InitMotionInfo(eMotionForm::eMotion_x3_2, 0, pParent->Motion.PitchInitRowHighlight);
+        pHighlightBox->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+        break;
+    }
 }
 
 void RowObject::SetFontColor(D2D1_COLOR_F Color, BOOL bMotion)
@@ -990,9 +1071,8 @@ void RowObject::render()
     ID2D1RenderTarget* pRT = uiSys->D2DA.pRenTarget;
 
     pBackgroundBox->render(pRT);
-    //pMouseoverBox->render(pRT);
     pSelectBox->render(pRT);
-    //pHighlightBox->render(pRT);
+    pHighlightBox->render(pRT);
     for (int i = 0; i < nColumn; i++) {
         ppText[i]->render(pRT);
         //ppColLine[i]->render(pRT);
