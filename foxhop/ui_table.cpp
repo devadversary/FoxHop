@@ -178,34 +178,10 @@ BOOL UI_Table::DataIdxIsInScreen(long long DataIdx)
 
 /**
     @brief 테이블에 데이터를 추가한다.
-    @param ppData 반드시 열 갯수에 맞는 배열을 넘겨줘야 한다. (wchar* [x])
-    @n            내부적으로 해당 배열을 malloc후 배열원소인 포인터는 복사된다.
-    @param bEnsure 새 데이터가 추가 될 때, 해당 라인으로 자동 스크롤 된다.
+    @param bMotion 애니메이션 진행 여부
+    @param bAutoScroll 새 데이터가 추가 될 때, 해당 라인으로 자동 스크롤 된다.
 */
-void UI_Table::AddData(wchar_t* Data[], BOOL bAutoScroll)
-{
-    long long TmpScrollPx;
-    TABLE_ROW Row;
-    size_t    AllocSize;
-
-    Row.bSelected = FALSE;
-    AllocSize = sizeof(wchar_t*) * ColCnt;
-    Row.ppData = (wchar_t**)malloc(AllocSize);
-    memcpy_s(Row.ppData, AllocSize, Data, AllocSize);
-    Row.bTextMotionPlayed = bAutoScroll ? FALSE : TRUE;
-    MainDataPool.emplace_back(Row);
-    DataCount++;
-
-    TmpScrollPx = (DataCount * RowHgt) - ClientHeight;
-    if (TmpScrollPx <= 0) MaxScrollPixel = 0; /*음수는 없다.*/
-    else MaxScrollPixel = TmpScrollPx;
-
-    if (uiMotionState != eUIMotionState::eUMS_Visible) return; /*초기화모션/소멸모션 진행중엔 스크롤 X*/
-    PinCount = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
-    if (bAutoScroll) SetScroll(MaxScrollPixel);
-}
-
-void UI_Table::AddData2(BOOL bMotion, BOOL bAutoScroll, wchar_t* ...)
+void UI_Table::AddData(BOOL bMotion, BOOL bAutoScroll, wchar_t* ...)
 {
     va_list args;
     wchar_t* pStr;
@@ -226,7 +202,6 @@ void UI_Table::AddData2(BOOL bMotion, BOOL bAutoScroll, wchar_t* ...)
     }
     va_end(args);
 
-    //memcpy_s(Row.ppData, AllocSize, Data, AllocSize);
     Row.bTextMotionPlayed = bMotion ? FALSE : TRUE;
     MainDataPool.emplace_back(Row);
     DataCount++;
@@ -244,9 +219,14 @@ void UI_Table::EditData(BOOL bMotion, unsigned long long RowIdx, wchar_t* ...)
 {
     RowObject* pViewRow;
     va_list arglist;
+    wchar_t* pStr;
+
+    if (RowIdx >= DataCount) return;
 
     va_start(arglist, RowIdx);
     for (int i = 0; i < ColCnt; i++) {
+        pStr = va_arg(arglist, wchar_t*);
+        MainDataPool[RowIdx].ppData[i] = pStr;
     }
     va_end(arglist);
 }
@@ -290,6 +270,7 @@ void UI_Table::SetScroll(long long TargetScrollPx)
 void UI_Table::ResumeFrame(unsigned long Delay)
 {
     MOTION_INFO mi;
+    D2D1_COLOR_F StartColor, EndColor;
 
     switch (Motion.MotionInitTableFrame) {
         case eTableMotionPattern::eInitTableFrame_Default: {
@@ -324,6 +305,7 @@ void UI_Table::ResumeFrame(unsigned long Delay)
 void UI_Table::PauseFrame(unsigned long Delay)
 {
     MOTION_INFO mi;
+    D2D1_COLOR_F StartColor, EndColor;
 
     switch (Motion.MotionPauseTableFrame) {
         case eTableMotionPattern::ePauseTableFrame_Default: {
@@ -787,6 +769,7 @@ void RowObject::ResumeSelect(unsigned long Delay)
 {
     unsigned long pitch = pParent->Motion.PitchInitRowSelect;
     MOTION_INFO mi;
+    D2D1_COLOR_F StartColor, EndColor;
     TABLE_ROW* pRealData;
 
     if (MainDataIdx < 0) return;
@@ -852,17 +835,20 @@ void RowObject::PauseSelect(BOOL bMotion, unsigned long Delay)
 void RowObject::SetHighlight(D2D1_COLOR_F Color)
 {
     MOTION_INFO mi;
+    D2D1_COLOR_F EndColor;
 
     switch (pParent->Motion.MotionInitRowHighlight) {
     case eTableMotionPattern::eInitRowHighlight_Blink:
         pHighlightBox->Init(Pos, Color);
-        mi = InitMotionInfo(eMotionForm::eMotion_x3_2, 0, pParent->Motion.PitchInitRowHighlight);
-        pHighlightBox->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+        mi = InitMotionInfo(eMotionForm::eMotion_Linear1, 0, pParent->Motion.PitchInitRowHighlight);
+        EndColor = Color;
+        EndColor.a = 0;
+        pHighlightBox->SetColor(mi, TRUE, ALL_ZERO, EndColor);
         break;
     }
 }
 
-void RowObject::SetFontColor(D2D1_COLOR_F Color, BOOL bMotion)
+void RowObject::SetDataTextColor(D2D1_COLOR_F Color, BOOL bMotion)
 {
     MOTION_INFO mi;
     mi = InitMotionInfo(eMotionForm::eMotion_None, 0, 0);
@@ -884,8 +870,8 @@ void RowObject::OnBind(unsigned long long TargetDataIdx, int* pColWidth, BOOL bN
     /*이미 Bind 되어있으면 최초 한번만 Resume 되므로
       나중에 Pause시에 이 루틴을 크게 의식 하지 않아도 된다.*/
     ResumeText(pTableData->bTextMotionPlayed ? FALSE : TRUE, 0); /*바인드는 무조건 딜레이 없이*/
-    if (pTableData->bSelected) SetFontColor(pParent->Motion.ColorRowTextSelect, FALSE);
-    else                       SetFontColor(pParent->Motion.ColorRowText, FALSE);
+    if (pTableData->bSelected) SetDataTextColor(pParent->Motion.ColorRowTextSelect, FALSE);
+    else                       SetDataTextColor(pParent->Motion.ColorRowText, FALSE);
 
     if (pTableData->bSelected) ResumeSelect(0);
     else PauseSelect(FALSE, 0);
@@ -902,7 +888,7 @@ void RowObject::OnSelectEvent() {
     bSel = pTableData->bSelected;
     if (bSel) ResumeSelect(0);
     else PauseSelect(TRUE, 0);
-    SetFontColor(bSel ? pParent->Motion.ColorRowTextSelect : pParent->Motion.ColorRowText, FALSE);
+    SetDataTextColor(bSel ? pParent->Motion.ColorRowTextSelect : pParent->Motion.ColorRowText, FALSE);
 };
 
 /**

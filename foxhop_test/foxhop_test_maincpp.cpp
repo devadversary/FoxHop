@@ -68,7 +68,10 @@ unsigned int thread_test(void* pTemp)
     SOCKADDR_IN peer = {0,};
     int peersize = sizeof(SOCKADDR);
     int rx;
-    wchar_t* tabledata[3];
+
+    wchar_t* Num;
+    wchar_t* ipStr;
+    wchar_t* DataLen;
     wchar_t tmpData[1234];
     int nPacket = 0;
     char hostname[1024];
@@ -94,12 +97,12 @@ unsigned int thread_test(void* pTemp)
         }
         nPacket++;
         wsprintfW(tmpData, L"%06d", nPacket);
-        tabledata[0] = _wcsdup(tmpData);
+        Num = _wcsdup(tmpData);
         mbstowcs(tmpData, inet_ntoa(peer.sin_addr), ARRAYSIZE(tmpData));
-        tabledata[1] = _wcsdup(tmpData);
+        ipStr = _wcsdup(tmpData);
         wsprintfW(tmpData, L"%d", rx);
-        tabledata[2] = _wcsdup(tmpData);
-        pTable->AddData(tabledata, TRUE);
+        DataLen = _wcsdup(tmpData);
+        pTable->AddData(TRUE, TRUE, Num, ipStr, DataLen);
 
         pNode = TREE_Search(&hTree, &peer.sin_addr, sizeof(peer.sin_addr));
         if (!pNode) {
@@ -110,7 +113,7 @@ unsigned int thread_test(void* pTemp)
             pCount->Count = 0;
             pNode = TREE_Input(&hTree, &peer.sin_addr, sizeof(peer.sin_addr), pCount);
             wsprintf(pCount->CountStr, L"%d", pCount->Count);
-            pTable2->AddData2(TRUE, FALSE, tabledata[1], pCount->CountStr);
+            pTable2->AddData(TRUE, FALSE, ipStr, pCount->CountStr);
         }
         pInfo = (IP_COUNT*)pNode->pParam;
         pInfo->Count++;
@@ -205,8 +208,8 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     case UIM_CREATE:
         UI_ParamSet2();
         TREE_Init(&hTree);
-        pPauseButton = new UI_Button(pUI->uiSys, TestPauseButtonProc, {10,10,100,20}, (wchar_t*)L"UI Pause", 0, ButtonParam);
-        pResumeButton = new UI_Button(pUI->uiSys, TestResumeButtonProc, {120,10,100,20}, (wchar_t*)L"UI Resume", 200, ButtonParam);
+        pPauseButton = new UI_Button(pUI->uiSys, TestPauseButtonProc, {10,10,100,20}, (wchar_t*)L"UI Pause", 500, ButtonParam);
+        pResumeButton = new UI_Button(pUI->uiSys, TestResumeButtonProc, {120,10,100,20}, (wchar_t*)L"UI Resume", 800, ButtonParam);
         pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 450 , 570}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
         pStatic = new UI_Static(pUI->uiSys, NULL, {10, 620, 450, 25}, pUI->uiSys->MediumTextForm ,(wchar_t*)L"Done.", StaticParam);
         pInput = new UI_Textinput(pUI->uiSys, NULL, { 10, 655, 450, 150 }, pUI->uiSys->CreateTextFmt((wchar_t*)L"Consolas", 15, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_NEAR), InputParam);
@@ -232,28 +235,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
     switch (Message) {
     case WM_CREATE:
         uiSys = new UISystem(hWnd);        
-        //SetTimer(hWnd, 666, 1, NULL);
         pMainPanel = uiSys->InitMainPanel(hWnd, MainPanelProc);
-        break;
-
-    case WM_TIMER:
-        //InvalidateRect(hWnd, NULL, FALSE);
         break;
 
     case WM_SIZE:
         uiSys->D2DA.pRenTarget->Resize({LOWORD(lParam),HIWORD(lParam)});
         break;
-
-        /*
-    case WM_PAINT:
-        uiSys->D2DA.pRenTarget->BeginDraw();
-        uiSys->D2DA.pRenTarget->Clear({0,0,0,0.7});
-        //uiSys->D2DA.pRenTarget->Clear({1,1,1,0.9});
-        pMainPanel->update(GetElapse());
-        pMainPanel->render();
-        uiSys->D2DA.pRenTarget->EndDraw();
-        break;
-        */
 
     case WM_DESTROY:
         PostQuitMessage(0);

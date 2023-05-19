@@ -149,7 +149,7 @@
     <ClCompile Include="component_motion.cpp" />
     <ClCompile Include="d2dassist.cpp" />
     <ClCompile Include="alphawindow.cpp" />
-    <ClCompile Include="include\ui_linechart.cpp" />
+    <ClCompile Include="ui_linechart.cpp" />
     <ClCompile Include="prop_textlayout.cpp" />
     <ClCompile Include="ui_textinput.cpp" />
     <ClCompile Include="ui_table.cpp" />

@@ -309,8 +309,8 @@ public:
 
 public: /*UI별 옵션 매서드*/
     void Resize(POSITION Pos);
-    void AddData(wchar_t* Data[], BOOL bAutoScroll = FALSE);
-    void AddData2(BOOL bMotion, BOOL bAutoScroll, wchar_t* ...);
+    //void AddData(wchar_t* Data[], BOOL bAutoScroll = FALSE);
+    void AddData(BOOL bMotion, BOOL bAutoScroll, wchar_t* ...);
     void EditData(BOOL bMotion, unsigned long long RowIdx, wchar_t* ...);
     void HighlightData(unsigned long long DataIdx, D2D1_COLOR_F HightlightColor);
 
@@ -341,7 +341,7 @@ public:
     ~RowObject();
     void SetSelectBox(BOOL bSel, D2D1_COLOR_F Color, BOOL bMotion);
     void SetHighlight(D2D1_COLOR_F Color);
-    void SetFontColor(D2D1_COLOR_F Color, BOOL bMotion);
+    void SetDataTextColor(D2D1_COLOR_F Color, BOOL bMotion);
     void OnBind(unsigned long long TargetDataIdx, int* pColWidth, BOOL bNeedUpdate = FALSE);
     void OnSelectEvent();
     void pause(int nDelay);
