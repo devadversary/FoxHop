@@ -231,15 +231,17 @@ void UI_Table::EditData(BOOL bMotion, unsigned long long RowIdx, wchar_t* ...)
     vidx = DataIdx2ViewRowIdx(RowIdx);
     if (vidx < 0) return;
 
+    AcquireSRWLockExclusive(&lock);
     pRow = ViewData[vidx];
 
     va_start(arglist, RowIdx);
     for (int i = 0; i < ColCnt; i++) {
         pStr = va_arg(arglist, wchar_t*);
         MainDataPool[RowIdx].ppData[i] = pStr;
-        //pRow->;
     }
     va_end(arglist);
+    pRow->SetText(MainDataPool[RowIdx].ppData, ColCnt);
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Table::HighlightData(unsigned long long DataIdx, D2D1_COLOR_F HightlightColor)
@@ -896,6 +898,11 @@ void RowObject::SetTextColor(D2D1_COLOR_F Color, BOOL bMotion)
     MOTION_INFO mi;
     mi = InitMotionInfo(eMotionForm::eMotion_None, 0, 0);
     for (int i = 0; i < nColumn; i++) ppText[i]->SetColor(mi, FALSE, Color, Color);
+}
+
+void RowObject::SetText(wchar_t** ppData, int nCnt)
+{
+    for (int i = 0; i < nCnt; i++) ppText[i]->SetText(ppData[i]);
 }
 
 void RowObject::OnBind(unsigned long long TargetDataIdx, int* pColWidth, BOOL bNeedUpdate) {

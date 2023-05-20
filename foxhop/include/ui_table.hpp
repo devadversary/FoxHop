@@ -343,7 +343,7 @@ public:
     void SetSelectBox(BOOL bSel, D2D1_COLOR_F Color, BOOL bMotion);
     void SetHighlight(D2D1_COLOR_F Color);
     void SetTextColor(D2D1_COLOR_F Color, BOOL bMotion);
-    void SetText(wchar_t** ppText);
+    void SetText(wchar_t** ppText, int nCnt);
     void OnBind(unsigned long long TargetDataIdx, int* pColWidth, BOOL bNeedUpdate = FALSE);
     void OnSelectEvent();
     void pause(int nDelay);

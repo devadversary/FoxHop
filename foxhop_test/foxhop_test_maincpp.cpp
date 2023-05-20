@@ -118,6 +118,7 @@ unsigned int thread_test(void* pTemp)
         pInfo = (IP_COUNT*)pNode->pParam;
         pInfo->Count++;
         wsprintf(pInfo->CountStr, L"%d", pInfo->Count);
+        pTable2->EditData(FALSE, pInfo->TableIdx, ipStr, pInfo->CountStr);
         pTable2->HighlightData(pInfo->TableIdx, {0.55,1,0.45,1});
 
     }
