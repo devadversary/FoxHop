@@ -249,7 +249,8 @@ public:
     UI_Table_MotionParam Motion;
 
 private:
-    ComponentMotion*        ScrollComp;   /**< 스크롤 모션 진행을 위한 컴포넌트*/
+    SRWLOCK lock;
+    ComponentMotion* ScrollComp;   /**< 스크롤 모션 진행을 위한 컴포넌트*/
     PropBox*  pBoxHeader;
     PropText** ppTextHdr;
     PropBox*  pBoxFrame;
@@ -341,7 +342,8 @@ public:
     ~RowObject();
     void SetSelectBox(BOOL bSel, D2D1_COLOR_F Color, BOOL bMotion);
     void SetHighlight(D2D1_COLOR_F Color);
-    void SetDataTextColor(D2D1_COLOR_F Color, BOOL bMotion);
+    void SetTextColor(D2D1_COLOR_F Color, BOOL bMotion);
+    void SetText(wchar_t** ppText);
     void OnBind(unsigned long long TargetDataIdx, int* pColWidth, BOOL bNeedUpdate = FALSE);
     void OnSelectEvent();
     void pause(int nDelay);

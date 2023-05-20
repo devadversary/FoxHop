@@ -1,6 +1,6 @@
 #include "./include/prop_text.hpp"
 
-PropText::PropText(ID2D1RenderTarget* pRT)
+PropText::PropText(ID2D1RenderTarget* pRT, int MaxLength)
 {
     pRT->CreateSolidColorBrush({ 0,0,0,0 }, &Brush);
     CurColor = { 0,0,0,0 };
@@ -9,7 +9,9 @@ PropText::PropText(ID2D1RenderTarget* pRT)
     InitColor = { 0,0,0,0 };
     InitPos = { 0,0,0,0 };
     nStrLen = 0;
-    pStr = NULL;
+    MaxLen = MaxLength;
+    pStr = (wchar_t*)malloc(sizeof(wchar_t) * (MaxLength+1));
+    pStr[0] = 0;
     pTextFmt = NULL;
 }
 
@@ -28,8 +30,9 @@ void PropText::Init(IDWriteTextFormat* pTexFmt, wchar_t* pText, int nTextLen, PO
     InitPos = CurPos = StartPos;
     InitColor = CurColor = StartColor;
     CurLen = (float)StartLen;
-    pStr = pText;
     nStrLen = wcslen(pText);
+    wcscpy_s(pStr, MaxLen, pText);
+    //pStr = pText;
     ComMotionColor.clearChannel();
     ComMotionMovement.clearChannel();
     ComMotionStrLen.clearChannel();
@@ -99,6 +102,13 @@ void PropText::SetLen(MOTION_INFO MotionInfo, BOOL bCurrent, unsigned long Start
     if (bCurrent) TmpLen = CurLen;
     else TmpLen = StartLen;
     addLenMotion(MotionInfo, FALSE, TmpLen, EndLen);
+}
+
+void PropText::SetText(wchar_t* Str)
+{
+    ComMotionStrLen.clearChannel();
+    wcscpy_s(pStr, MaxLen, Str);
+    CurLen = wcslen(pStr);
 }
 
 /**

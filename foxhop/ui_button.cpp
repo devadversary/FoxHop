@@ -16,7 +16,7 @@ UI_Button::UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, w
 
     MBoxFace       = new PropBox(pRenderTarget);
     MBoxHighlight  = new PropBox(pRenderTarget);
-    MText          = new PropText(pRenderTarget);
+    MText          = new PropText(pRenderTarget, MAX_BUTTONNAME-1);
     Motion         = MotionParam;
 
     InputMotion(eButtonAction::eAction_Init, nDelay, NULL);

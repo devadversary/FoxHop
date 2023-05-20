@@ -16,7 +16,7 @@ UI_Static::UI_Static(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, I
     Motion = MotionParam;
     wcscpy_s(szText, ARRAYSIZE(szText), Text);
 
-    pText = new PropText(pRenderTarget);
+    pText = new PropText(pRenderTarget, UISTATIC_MAX_TEXTLEN);
     pBoxBg = new PropBox(pRenderTarget);
     pBoxFrame = new PropBox(pRenderTarget);
     resume(0);

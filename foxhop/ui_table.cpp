@@ -44,6 +44,8 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
         else ColWidth[i] = ColumnWidth[i];
     }
 
+    InitializeSRWLock(&lock);
+
     /*행 생성*/
     ClientHeight = (int)Pos.y2 - HeaderHgt;
     ViewRowCnt = (ClientHeight / RowHgt) + 2; /*자투리 영역도 온전한 1개 취급*/
@@ -53,7 +55,7 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     }
 
     pBoxHeader = new PropBox(pRenderTarget);
-    for (int i = 0; i < ColCnt; i++) ppTextHdr[i] = new PropText(pRenderTarget);
+    for (int i = 0; i < ColCnt; i++) ppTextHdr[i] = new PropText(pRenderTarget, 512);
     pBoxFrame = new PropBox(pRenderTarget);
 
     resume(0);
@@ -202,6 +204,7 @@ void UI_Table::AddData(BOOL bMotion, BOOL bAutoScroll, wchar_t* ...)
     }
     va_end(args);
 
+    AcquireSRWLockExclusive(&lock);
     Row.bTextMotionPlayed = bMotion ? FALSE : TRUE;
     MainDataPool.emplace_back(Row);
     DataCount++;
@@ -209,6 +212,7 @@ void UI_Table::AddData(BOOL bMotion, BOOL bAutoScroll, wchar_t* ...)
     TmpScrollPx = (DataCount * RowHgt) - ClientHeight;
     if (TmpScrollPx <= 0) MaxScrollPixel = 0; /*음수는 없다.*/
     else MaxScrollPixel = TmpScrollPx;
+    ReleaseSRWLockExclusive(&lock);
 
     if (uiMotionState != eUIMotionState::eUMS_Visible) return; /*초기화모션/소멸모션 진행중엔 스크롤 X*/
     PinCount = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
@@ -220,13 +224,20 @@ void UI_Table::EditData(BOOL bMotion, unsigned long long RowIdx, wchar_t* ...)
     RowObject* pViewRow;
     va_list arglist;
     wchar_t* pStr;
+    RowObject* pRow;
+    long long vidx;
 
     if (RowIdx >= DataCount) return;
+    vidx = DataIdx2ViewRowIdx(RowIdx);
+    if (vidx < 0) return;
+
+    pRow = ViewData[vidx];
 
     va_start(arglist, RowIdx);
     for (int i = 0; i < ColCnt; i++) {
         pStr = va_arg(arglist, wchar_t*);
         MainDataPool[RowIdx].ppData[i] = pStr;
+        //pRow->;
     }
     va_end(arglist);
 }
@@ -239,7 +250,10 @@ void UI_Table::HighlightData(unsigned long long DataIdx, D2D1_COLOR_F Hightlight
     if (!DataIdxIsInScreen(DataIdx)) return;
     Idx = DataIdx2ViewRowIdx(DataIdx);
     if (Idx < 0) return;
+
+    AcquireSRWLockExclusive(&lock);
     ViewData[Idx]->SetHighlight(HightlightColor);
+    ReleaseSRWLockExclusive(&lock);
 }
 
 /** 
@@ -250,6 +264,8 @@ void UI_Table::SetScroll(long long TargetScrollPx)
 {
     MOTION_PATTERN patt;
     MOTION_INFO    mi;
+
+    AcquireSRWLockExclusive(&lock);
 
     /*스크롤 경계 관리*/
     if (TargetScrollPx < 0)
@@ -265,13 +281,15 @@ void UI_Table::SetScroll(long long TargetScrollPx)
     patt = InitMotionPattern(mi, NULL);
     AddChain(&patt, &CurrScrollPixel, CurrScrollPixel, (float)TargetScrollPx);
     ScrollComp->addChannel(patt);
+
+    ReleaseSRWLockExclusive(&lock);
 };
 
 void UI_Table::ResumeFrame(unsigned long Delay)
 {
     MOTION_INFO mi;
     D2D1_COLOR_F StartColor, EndColor;
-
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitTableFrame) {
         case eTableMotionPattern::eInitTableFrame_Default: {
             pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
@@ -300,13 +318,15 @@ void UI_Table::ResumeFrame(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Table::PauseFrame(unsigned long Delay)
 {
     MOTION_INFO mi;
     D2D1_COLOR_F StartColor, EndColor;
-
+    
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseTableFrame) {
         case eTableMotionPattern::ePauseTableFrame_Default: {
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseTableFrame);
@@ -332,12 +352,15 @@ void UI_Table::PauseFrame(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Table::ResumeBg(unsigned long Delay)
 {
     MOTION_INFO mi;
+
 #if 0
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitTableBg) {
         case eTableMotionPattern::eInitTableBg_Default: {
             pBoxFrame->Init(uiPos, ALL_ZERO);
@@ -346,6 +369,7 @@ void UI_Table::ResumeBg(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 #endif
 }
 
@@ -353,6 +377,7 @@ void UI_Table::PauseBg(unsigned long Delay)
 {
     MOTION_INFO mi;
 #if 0
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseTableBg) {
         case eTableMotionPattern::ePauseTableBg_Default: {
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseTableBg);
@@ -360,6 +385,7 @@ void UI_Table::PauseBg(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 #endif
 }
 
@@ -367,6 +393,7 @@ void UI_Table::ResumeHeaderBg(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitTableHeaderBg) {
         case eTableMotionPattern::eInitTableHeaderBg_Default: {
             POSITION TmpPos = uiPos;
@@ -409,12 +436,14 @@ void UI_Table::ResumeHeaderBg(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Table::PauseHeaderBg(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseTableHeaderBg) {
         case eTableMotionPattern::ePauseTableHeaderBg_Default: {
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseTableHeaderBg);
@@ -451,12 +480,14 @@ void UI_Table::PauseHeaderBg(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Table::ResumeHeaderText(unsigned long Delay)
 {
     unsigned long TextLen;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitTableHeaderText) {
         MOTION_INFO mi;
 
@@ -500,12 +531,14 @@ void UI_Table::ResumeHeaderText(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Table::PauseHeaderText(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseTableHeaderText) {
         case eTableMotionPattern::ePauseTableHeaderText_Default:{
             POSITION TmpPos = uiPos;
@@ -541,6 +574,7 @@ void UI_Table::PauseHeaderText(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Table::ResumeRowOrder(unsigned long Delay)
@@ -550,6 +584,7 @@ void UI_Table::ResumeRowOrder(unsigned long Delay)
 
     /*UI_Table은 모션 종류에 따라 ViewData Delay만 적절히 주입해준다.
       하위 오브젝트는 ViewData 가 내부적으로 알아서 조정한다.*/
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitTableRowOrder) {
         case eTableMotionPattern::eInitTableRowOrder_Default:{
             for (int i = 0; i < PinCount; i++)
@@ -573,6 +608,7 @@ void UI_Table::ResumeRowOrder(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 /**
@@ -585,6 +621,7 @@ void UI_Table::PauseRowOrder(unsigned long Delay)
 
     /*UI_Table은 모션 종류에 따라 ViewData Delay만 적절히 주입해준다.
       하위 오브젝트는 ViewData 가 내부적으로 알아서 조정한다.*/
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseTableRowOrder) {
         case eTableMotionPattern::ePauseTableRowOrder_Default:{
             for (int i = 0; i < PinCount; i++)
@@ -607,6 +644,7 @@ void UI_Table::PauseRowOrder(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 
@@ -624,7 +662,9 @@ void UI_Table::pause(int nDelay)
 {
     //PinCount = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
     uiMotionState = eUIMotionState::eUMS_PlayingHide;
+    AcquireSRWLockExclusive(&lock);
     ScrollComp->clearChannel(); /*스크롤 모션 정지*/
+    ReleaseSRWLockExclusive(&lock);
     PauseFrame(nDelay + Motion.DelayPauseTableFrame);
     PauseBg(nDelay + Motion.DelayPauseTableBg);
     PauseHeaderBg(nDelay + Motion.DelayPauseTableHeaderBg);
@@ -645,6 +685,7 @@ BOOL UI_Table::update(unsigned long time)
 
     if (uiMotionState == eUIMotionState::eUMS_Hide) return FALSE;
 
+    AcquireSRWLockExclusive(&lock);
     bUpdated = ScrollComp->update(time); /*스크롤 상태 먼저 업데이트*/
     bUpdated |= pBoxFrame->update(time);
 
@@ -672,14 +713,13 @@ BOOL UI_Table::update(unsigned long time)
     /*헤더 업데이트*/
     bUpdated |= pBoxHeader->update(time);
     for (int i = 0; i < ColCnt; i++) bUpdated |= ppTextHdr[i]->update(time);
-
+    ReleaseSRWLockExclusive(&lock);
     if (!bUpdated) {
         if (uiMotionState == eUIMotionState::eUMS_PlayingHide)
             uiMotionState = eUIMotionState::eUMS_Hide;
 
         else if (uiMotionState == eUIMotionState::eUMS_PlayingVisible)
             uiMotionState = eUIMotionState::eUMS_Visible;
-        return FALSE;
     }
     return bUpdated;
 }
@@ -701,6 +741,7 @@ void UI_Table::render()
     ClipRect.right = Pos.x + Pos.x2;
     ClipRect.bottom = Pos.y + Pos.y2;
 
+    AcquireSRWLockShared(&lock);
     pRenderTarget->PushAxisAlignedClip(ClipRect, D2D1_ANTIALIAS_MODE::D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
     pRenderTarget->GetTransform(&OldMat); /*기존 행렬 백업*/
     TmpMat = OldMat;
@@ -728,6 +769,7 @@ void UI_Table::render()
     pBoxHeader->render(pRenderTarget);
     for (int i = 0; i < ColCnt; i++) ppTextHdr[i]->render(pRenderTarget);
     pBoxFrame->render(pRenderTarget);
+    ReleaseSRWLockShared(&lock);
 }
 
 /**
@@ -744,7 +786,7 @@ RowObject::RowObject(UISystem* pUISys, UI_Table* pParentTable, POSITION pos, uns
     ppColLine = (PropLine**)malloc(sizeof(PropLine*) * ColCnt);
     if (!ppText || !ppColLine) return;
     for (int i = 0; i < ColCnt; i++) {
-        ppText[i] = new PropText(pParent->pRenderTarget);
+        ppText[i] = new PropText(pParent->pRenderTarget, 512);
         ppColLine[i] = new PropLine(pParent->pRenderTarget);
     }
     pBackgroundBox = new PropBox(pParent->pRenderTarget);
@@ -848,7 +890,7 @@ void RowObject::SetHighlight(D2D1_COLOR_F Color)
     }
 }
 
-void RowObject::SetDataTextColor(D2D1_COLOR_F Color, BOOL bMotion)
+void RowObject::SetTextColor(D2D1_COLOR_F Color, BOOL bMotion)
 {
     MOTION_INFO mi;
     mi = InitMotionInfo(eMotionForm::eMotion_None, 0, 0);
@@ -870,8 +912,8 @@ void RowObject::OnBind(unsigned long long TargetDataIdx, int* pColWidth, BOOL bN
     /*이미 Bind 되어있으면 최초 한번만 Resume 되므로
       나중에 Pause시에 이 루틴을 크게 의식 하지 않아도 된다.*/
     ResumeText(pTableData->bTextMotionPlayed ? FALSE : TRUE, 0); /*바인드는 무조건 딜레이 없이*/
-    if (pTableData->bSelected) SetDataTextColor(pParent->Motion.ColorRowTextSelect, FALSE);
-    else                       SetDataTextColor(pParent->Motion.ColorRowText, FALSE);
+    if (pTableData->bSelected) SetTextColor(pParent->Motion.ColorRowTextSelect, FALSE);
+    else                       SetTextColor(pParent->Motion.ColorRowText, FALSE);
 
     if (pTableData->bSelected) ResumeSelect(0);
     else PauseSelect(FALSE, 0);
@@ -888,7 +930,7 @@ void RowObject::OnSelectEvent() {
     bSel = pTableData->bSelected;
     if (bSel) ResumeSelect(0);
     else PauseSelect(TRUE, 0);
-    SetDataTextColor(bSel ? pParent->Motion.ColorRowTextSelect : pParent->Motion.ColorRowText, FALSE);
+    SetTextColor(bSel ? pParent->Motion.ColorRowTextSelect : pParent->Motion.ColorRowText, FALSE);
 };
 
 /**
