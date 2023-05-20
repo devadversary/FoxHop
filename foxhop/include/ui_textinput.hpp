@@ -111,6 +111,7 @@ public:
     UI_Textinput_MotionParam Motion;
 
 private:
+    SRWLOCK lock;
     PropBox* pBoxBg;
     PropBox* pBoxFrame;
     PropBox* pBoxCaret;

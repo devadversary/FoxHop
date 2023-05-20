@@ -11,6 +11,7 @@ UI_Textinput::UI_Textinput(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
     MessageHandler = pfnCallback;
     uiPos = Pos;
 
+    InitializeSRWLock(&lock);
     Motion = MotionParam;
     pTextFormat = pTextFmt;
     DragState = FALSE;
@@ -59,10 +60,12 @@ BOOL UI_Textinput::update(unsigned long time)
 
     if (uiMotionState == eUIMotionState::eUMS_Hide) return FALSE;
 
+    AcquireSRWLockExclusive(&lock);
     bUpdated |= pBoxFrame->update(time);
     bUpdated |= pBoxBg->update(time);
     bUpdated |= pTextLayout->update(time);
     pBoxCaret->update(time); /*캐럿의 모션은 업데이트 여부에 포함시키지 않는다.*/
+    ReleaseSRWLockExclusive(&lock);
 
     if (!bUpdated) {
         if (uiMotionState == eUIMotionState::eUMS_PlayingHide)
@@ -78,11 +81,13 @@ BOOL UI_Textinput::update(unsigned long time)
 void UI_Textinput::render()
 {
     if (uiMotionState == eUIMotionState::eUMS_Hide) return;
+    AcquireSRWLockShared(&lock);
     pBoxBg->render(pRenderTarget);
     pBoxFrame->render(pRenderTarget);
     DrawSelectArea();
     pTextLayout->render(pRenderTarget);
     pBoxCaret->render(pRenderTarget);
+    ReleaseSRWLockShared(&lock);
 }
 
 BOOL UI_Textinput::DeleteSelectArea()
@@ -91,10 +96,12 @@ BOOL UI_Textinput::DeleteSelectArea()
     DWRITE_HIT_TEST_METRICS HitMet;
 
     if (StartSelectIdx == CaretIdx) return FALSE;
+    AcquireSRWLockExclusive(&lock);
     pTextLayout->EraseText(StartSelectIdx, CaretIdx);
     CaretIdx = min(StartSelectIdx, CaretIdx);
     StartSelectIdx = CaretIdx;
     pTextLayout->pLayout->HitTestTextPosition(CaretIdx, FALSE, &CaretX, &CaretY, &HitMet);
+    ReleaseSRWLockExclusive(&lock);
     MoveCaret(HitMet.height, TRUE);
     return TRUE;
 }
@@ -111,24 +118,29 @@ void UI_Textinput::OnKeyInput(UINT Message, WPARAM wParam, LPARAM lParam)
             switch (wParam) {
             case VK_BACK: {
                 if (DeleteSelectArea()) break;
+                AcquireSRWLockExclusive(&lock);
                 CaretIdx--;
                 if (CaretIdx < 0) {
                     CaretIdx = 0;
                     StartSelectIdx = CaretIdx;
+                    ReleaseSRWLockExclusive(&lock);
                     break;
                 }
                 StartSelectIdx = CaretIdx;
 
                 pTextLayout->EraseText(CaretIdx, CaretIdx+1);
                 pTextLayout->pLayout->HitTestTextPosition(CaretIdx, FALSE, &CaretX, &CaretY, &HitMet);
+                ReleaseSRWLockExclusive(&lock);
                 MoveCaret(HitMet.height, TRUE);
                 break;
             }
 
             case VK_DELETE: {
                 if (DeleteSelectArea()) break;
+                AcquireSRWLockExclusive(&lock);
                 pTextLayout->EraseText(CaretIdx, CaretIdx + 1);
                 pTextLayout->pLayout->HitTestTextPosition(CaretIdx, FALSE, &CaretX, &CaretY, &HitMet);
+                ReleaseSRWLockExclusive(&lock);
                 MoveCaret(HitMet.height, TRUE);
                 break;
             }
@@ -137,10 +149,11 @@ void UI_Textinput::OnKeyInput(UINT Message, WPARAM wParam, LPARAM lParam)
                 int i;
                 float tmp = 0;
                 DWRITE_HIT_TEST_METRICS TmpMet;
-
+                AcquireSRWLockExclusive(&lock);
                 pTextLayout->pLayout->GetMetrics(&TextMet);
                 LineMetric.resize(TextMet.lineCount);
                 pTextLayout->pLayout->GetLineMetrics(&LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
+                ReleaseSRWLockExclusive(&lock);
                 for (i = 0; i < TextMet.lineCount; i++) {
                     tmp += LineMetric[i].height;
                     /*행 높이 합산중, 캐럿Y좌표를 넘는순간*/
@@ -148,15 +161,18 @@ void UI_Textinput::OnKeyInput(UINT Message, WPARAM wParam, LPARAM lParam)
                         tmp -= LineMetric[i].height;
                         if (i < 1) break;
                         tmp -= LineMetric[i - 1].height;
+                        AcquireSRWLockExclusive(&lock);
                         pTextLayout->pLayout->HitTestPoint(CaretX, tmp, &Trail, &Inside, &HitMet);
                         pTextLayout->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &CaretX, &CaretY, &TmpMet);
                         CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
                         if (!(GetKeyState(VK_SHIFT) & 0x80))
                             StartSelectIdx = CaretIdx;
+                        ReleaseSRWLockExclusive(&lock);
                         MoveCaret(HitMet.height, TRUE);
                         break;
                     }
                 }
+                
                 break;
             }
 
@@ -164,18 +180,22 @@ void UI_Textinput::OnKeyInput(UINT Message, WPARAM wParam, LPARAM lParam)
                 float tmp = 0;
                 DWRITE_HIT_TEST_METRICS TmpMet;
 
+                AcquireSRWLockExclusive(&lock);
                 pTextLayout->pLayout->GetMetrics(&TextMet);
                 LineMetric.resize(TextMet.lineCount);
                 pTextLayout->pLayout->GetLineMetrics(&LineMetric[0], TextMet.lineCount, &TextMet.lineCount);
+                ReleaseSRWLockExclusive(&lock);
                 for (int i = 0; i < TextMet.lineCount; i++) {
                     tmp += LineMetric[i].height;
                     /*행 높이 합산중, 캐럿Y좌표를 넘는순간*/
                     if (tmp > CaretY) {
+                        AcquireSRWLockExclusive(&lock);
                         pTextLayout->pLayout->HitTestPoint(CaretX, tmp, &Trail, &Inside, &HitMet);
                         pTextLayout->pLayout->HitTestTextPosition(HitMet.textPosition, Trail, &CaretX, &CaretY, &TmpMet);
                         CaretIdx = HitMet.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
                         if (!(GetKeyState(VK_SHIFT) & 0x80))
                             StartSelectIdx = CaretIdx;
+                        ReleaseSRWLockExclusive(&lock);
                         MoveCaret(HitMet.height, TRUE);
                         break;
                     }
@@ -184,22 +204,26 @@ void UI_Textinput::OnKeyInput(UINT Message, WPARAM wParam, LPARAM lParam)
             }
 
             case VK_LEFT:
+                AcquireSRWLockExclusive(&lock);
                 CaretIdx--;
                 if (CaretIdx < 0) CaretIdx = 0;
                 if (!(GetKeyState(VK_SHIFT) & 0x80))
                     StartSelectIdx = CaretIdx;
 
                 pTextLayout->pLayout->HitTestTextPosition(CaretIdx, FALSE, &CaretX, &CaretY, &HitMet);
+                ReleaseSRWLockExclusive(&lock);
                 MoveCaret(HitMet.height, TRUE);
                 break;
 
             case VK_RIGHT:
+                AcquireSRWLockExclusive(&lock);
                 CaretIdx++;
                 if (CaretIdx > pTextLayout->Str.size()) CaretIdx--;
                 if (!(GetKeyState(VK_SHIFT) & 0x80))
                     StartSelectIdx = CaretIdx;
 
                 pTextLayout->pLayout->HitTestTextPosition(CaretIdx, FALSE, &CaretX, &CaretY, &HitMet);
+                ReleaseSRWLockExclusive(&lock);
                 MoveCaret(HitMet.height, TRUE);
                 break;
             }
@@ -225,11 +249,12 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
             DWRITE_HIT_TEST_METRICS mat2;
 
             pInput->DragState = TRUE;
-
+            AcquireSRWLockExclusive(&pInput->lock);
             pInput->pTextLayout->pLayout->HitTestPoint((float)x, (float)y, &Trail, &Inside, &mat2);
             pInput->pTextLayout->pLayout->HitTestTextPosition(mat2.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &mat2);
             pInput->CaretIdx = mat2.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
             pInput->StartSelectIdx = pInput->CaretIdx;
+            ReleaseSRWLockExclusive(&pInput->lock);
             pInput->MoveCaret(mat2.height, TRUE);
             break;
         }
@@ -244,11 +269,12 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
             DWRITE_HIT_TEST_METRICS mat2;
             
             if (!pInput->DragState) break;
+            AcquireSRWLockExclusive(&pInput->lock);
             pInput->pTextLayout->pLayout->HitTestPoint((float)x, (float)y, &Trail, &Inside, &mat2);
-
             pInput->CaretTrail = Trail;
             pInput->pTextLayout->pLayout->HitTestTextPosition(mat2.textPosition, Trail, &pInput->CaretX, &pInput->CaretY, &mat2);
             pInput->CaretIdx = mat2.textPosition + Trail; /*문자열 중간이 아닌 끄트머리일땐 문자열 인덱스도 끄트머리여야 한다.*/
+            ReleaseSRWLockExclusive(&pInput->lock);
             pInput->MoveCaret(mat2.height, TRUE);
             break;
         }
@@ -260,6 +286,7 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
         case WM_IME_COMPOSITION: {
             if (pInput->DragState) break;
             pInput->DeleteSelectArea();
+            AcquireSRWLockExclusive(&pInput->lock);
             if (lParam & GCS_RESULTSTR) {
                 pInput->pTextLayout->EraseText(pInput->CaretIdx, pInput->CaretIdx+1);
                 pInput->ImeCompBoot = FALSE;
@@ -272,6 +299,7 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
                 else pInput->pTextLayout->ReplaceChar(pInput->CaretIdx, wParam);
             }
             pInput->pTextLayout->pLayout->HitTestTextPosition(pInput->CaretIdx + 1, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
+            ReleaseSRWLockExclusive(&pInput->lock);
             pInput->MoveCaret(HitMet.height, TRUE);
             break;
         }
@@ -280,10 +308,12 @@ void UI_Textinput::DefaultTextinputProc(UI* pUI, UINT Message, WPARAM wParam, LP
             if (pInput->DragState) break;
             if (wParam < 0x20 && wParam != VK_RETURN) break;
             pInput->DeleteSelectArea();
+            AcquireSRWLockExclusive(&pInput->lock);
             pInput->pTextLayout->InsertChar(pInput->CaretIdx, wParam);
             pInput->CaretIdx++;
             pInput->StartSelectIdx = pInput->CaretIdx;
             pInput->pTextLayout->pLayout->HitTestTextPosition(pInput->CaretIdx + pInput->ImeCompBoot, FALSE, &pInput->CaretX, &pInput->CaretY, &HitMet);
+            ReleaseSRWLockExclusive(&pInput->lock);
             pInput->MoveCaret(HitMet.height, TRUE);
             break;
         }
@@ -350,6 +380,7 @@ void UI_Textinput::ResumeFrame(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitFrame) {
         case eTextinputMotionPattern::eInitFrame_Default:
             pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
@@ -368,12 +399,13 @@ void UI_Textinput::ResumeFrame(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Textinput::PauseFrame(unsigned long Delay)
 {
     MOTION_INFO mi;
-
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseFrame) {
         case eTextinputMotionPattern::ePauseFrame_Default:
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseFrame);
@@ -390,32 +422,38 @@ void UI_Textinput::PauseFrame(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Textinput::ResumeBg(unsigned long Delay)
 {
     eTextinputMotionPattern Patt;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitBg) {
     case eTextinputMotionPattern::eInitBg_Default:
         pBoxBg->Init(uiPos, Motion.ColorBg);
         break;
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Textinput::PauseBg(unsigned long Delay)
 {
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseBg) {
     case eTextinputMotionPattern::ePauseBg_Default:
         pBoxBg->Init(uiPos, ALL_ZERO);
         break;
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Textinput::ResumeCaret(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitCaret) {
     case eTextinputMotionPattern::eInitCaret_Default:
         pBoxCaret->Init({ uiPos.x, uiPos.y, Motion.CaretWidth, CaretH}, ALL_ZERO);
@@ -423,6 +461,7 @@ void UI_Textinput::ResumeCaret(unsigned long Delay)
         pBoxCaret->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorCaret);
         break;
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Textinput::MoveCaret(float CaretHeight, BOOL bMotion)
@@ -434,7 +473,7 @@ void UI_Textinput::MoveCaret(float CaretHeight, BOOL bMotion)
     if (bMotion) patt = Motion.MotionMoveCaret;
     else patt = eTextinputMotionPattern::eMoveCaret_Default;
     CaretH = CaretHeight;
-
+    AcquireSRWLockExclusive(&lock);
     switch (patt) {
     case eTextinputMotionPattern::eMoveCaret_Default:
         mi = InitMotionInfo(eMotionForm::eMotion_None, 0, 0);
@@ -446,24 +485,28 @@ void UI_Textinput::MoveCaret(float CaretHeight, BOOL bMotion)
         pBoxCaret->SetPos(mi, TRUE, ALL_ZERO, CaretPos);
         break;
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Textinput::PauseCaret(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseCaret) {
     case eTextinputMotionPattern::ePauseCaret_Default:
         mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseCaret);
         pBoxCaret->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
         break;
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Textinput::ResumeTextlayout(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitText) {
         case eTextinputMotionPattern::eInitText_Default:
             pTextLayout->Init(uiPos, ALL_ZERO);
@@ -482,12 +525,13 @@ void UI_Textinput::ResumeTextlayout(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Textinput::PauseTextlayout(unsigned long Delay)
 {
     MOTION_INFO mi;
-
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseText) {
         case eTextinputMotionPattern::ePauseText_Default:
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseText);
@@ -504,4 +548,5 @@ void UI_Textinput::PauseTextlayout(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
