@@ -212,7 +212,7 @@ void UI_Table::AddData(BOOL bMotion, BOOL bAutoScroll, wchar_t* ...)
     TmpScrollPx = (DataCount * RowHgt) - ClientHeight;
     if (TmpScrollPx <= 0) MaxScrollPixel = 0; /*음수는 없다.*/
     else MaxScrollPixel = TmpScrollPx;
-    PinCount = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
+    //PinCount = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
     ReleaseSRWLockExclusive(&lock);
 
     if (uiMotionState != eUIMotionState::eUMS_Visible) return; /*초기화모션/소멸모션 진행중엔 스크롤 X*/
@@ -230,9 +230,7 @@ void UI_Table::EditData(BOOL bMotion, unsigned long long RowIdx, wchar_t* ...)
     if (RowIdx >= DataCount) return;
     vidx = DataIdx2ViewRowIdx(RowIdx);
     if (vidx < 0) return;
-
     AcquireSRWLockExclusive(&lock);
-    pRow = ViewData[vidx];
 
     va_start(arglist, RowIdx);
     for (int i = 0; i < ColCnt; i++) {
@@ -240,7 +238,11 @@ void UI_Table::EditData(BOOL bMotion, unsigned long long RowIdx, wchar_t* ...)
         MainDataPool[RowIdx].ppData[i] = pStr;
     }
     va_end(arglist);
-    pRow->SetText(MainDataPool[RowIdx].ppData, ColCnt);
+
+    if (DataIdxIsInScreen(RowIdx)) {
+        pRow = ViewData[vidx];
+        pRow->SetText(MainDataPool[RowIdx].ppData, ColCnt);
+    }
     ReleaseSRWLockExclusive(&lock);
 }
 
@@ -705,6 +707,7 @@ BOOL UI_Table::update(unsigned long time)
         pViewRow = ViewData[UpdateIdx];
         pViewRow->OnBind(CurrBindIndex, ColWidth);
     }
+    PinCount = ValidViewRowCnt;
 
     /*뷰 행 업데이트*/
     for (int i = 0; i < ValidViewRowCnt; i++) {
@@ -758,10 +761,10 @@ void UI_Table::render()
     ModIndex = CurrMainIndex% ViewRowCnt;
 
     MainDataPoolSize = MainDataPool.size();
-    for (int i = 0; i < ValidViewRowCnt; i++) {
+    for (int i = 0; i < PinCount; i++) {
         if (MainDataPoolSize <= CurrMainIndex + i) break; /*딱뎀시 자투리 X*/
         pRenderTarget->SetTransform(TmpMat);
-        idx = (ModIndex + i) % ValidViewRowCnt;
+        idx = (ModIndex + i) % PinCount;
         ViewData[idx]->render(); /*행 렌더링*/
         TmpMat.dy += (float)RowHgt;
     }
