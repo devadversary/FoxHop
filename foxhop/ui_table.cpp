@@ -212,10 +212,10 @@ void UI_Table::AddData(BOOL bMotion, BOOL bAutoScroll, wchar_t* ...)
     TmpScrollPx = (DataCount * RowHgt) - ClientHeight;
     if (TmpScrollPx <= 0) MaxScrollPixel = 0; /*음수는 없다.*/
     else MaxScrollPixel = TmpScrollPx;
+    PinCount = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
     ReleaseSRWLockExclusive(&lock);
 
     if (uiMotionState != eUIMotionState::eUMS_Visible) return; /*초기화모션/소멸모션 진행중엔 스크롤 X*/
-    PinCount = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
     if (bAutoScroll) SetScroll(MaxScrollPixel);
 }
 
@@ -265,8 +265,10 @@ void UI_Table::SetScroll(long long TargetScrollPx)
     MOTION_PATTERN patt;
     MOTION_INFO    mi;
 
+    /*초기화 / 소멸 모션 진행중엔 스크롤 X*/
+    if (uiMotionState != eUIMotionState::eUMS_Visible) return;
+    
     AcquireSRWLockExclusive(&lock);
-
     /*스크롤 경계 관리*/
     if (TargetScrollPx < 0)
         TargetScrollPx = 0;
@@ -276,7 +278,6 @@ void UI_Table::SetScroll(long long TargetScrollPx)
 
     /*스크롤 모션 진행 재시작*/
     ScrollComp->clearChannel();
-    if (uiMotionState != eUIMotionState::eUMS_Visible) return; /*초기화 / 소멸 모션 진행중엔 스크롤 X*/
     mi = InitMotionInfo(eMotionForm::eMotion_x3_2, 0, Motion.PitchScroll);
     patt = InitMotionPattern(mi, NULL);
     AddChain(&patt, &CurrScrollPixel, CurrScrollPixel, (float)TargetScrollPx);
