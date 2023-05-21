@@ -11,6 +11,7 @@
 
 UI_Button_MotionParam ButtonParam;
 UI_Table_MotionParam TableParam;
+UI_Static_MotionParam TitleParam;
 UI_Static_MotionParam StaticParam;
 UI_Textinput_MotionParam InputParam;
 
@@ -25,8 +26,8 @@ void UI_ParamSet() {
 
 	TableParam.MotionInitTableFrame = eTableMotionPattern::eInitTableFrame_ExpendAllDirFlick;
 	TableParam.PitchInitTableFrame = 400;
-	TableParam.MotionPauseTableFrame = eTableMotionPattern::ePauseTableFrame_ExpendAllDirFlick;
-	TableParam.PitchPauseTableFrame = 400;
+	TableParam.MotionPauseTableFrame = eTableMotionPattern::ePauseTableFrame_Flick;
+	TableParam.PitchPauseTableFrame = 150;
 	
 	TableParam.MotionInitTableHeaderBg = eTableMotionPattern::eInitTableHeaderBg_LinearReverse;
 	TableParam.PitchInitTableHeaderBg = 300;
@@ -73,6 +74,22 @@ void UI_ParamSet() {
 	TableParam.ColorRowBgSelect = { 1,1,1,0.8 };
 	TableParam.ColorRowText = { 1,1,1,1 };
 	TableParam.ColorRowTextSelect = { 0,0,0,1 };
+
+	TitleParam.MotionInitBg = eStaticMotionPattern::eInitBg_ExpendRight;
+	TitleParam.PitchInitBg = 300;
+	TitleParam.MotionInitText = eStaticMotionPattern::eInitText_Typing;
+	TitleParam.DelayInitText = 300;
+	TitleParam.PitchInitText = 300;
+
+	TitleParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_CollapseLeft;
+	TitleParam.PitchPauseBg = 300;
+	TitleParam.DelayPauseBg = 300;
+	TitleParam.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
+	TitleParam.PitchPauseText = 150;
+
+	TitleParam.ColorBg = { 0.3, 0.3, 0.3, 0.5 };
+	TitleParam.ColorFrame = { 0,0,0,0 };
+	TitleParam.ColorText = { 1,1,1,1 };
 
 	StaticParam.MotionInitFrame = eStaticMotionPattern::eInitFrame_ExpendCenter;
 	StaticParam.PitchInitFrame = 400;
@@ -182,6 +199,22 @@ void UI_ParamSet2() {
 	TableParam.ColorRowBgSelect = { 0,0,0,1 };
 	TableParam.ColorRowText = { 0,0,0,1 };
 	TableParam.ColorRowTextSelect = { 1,1,1,1 };
+
+	TitleParam.MotionInitBg = eStaticMotionPattern::eInitBg_ExpendRight;
+	TitleParam.PitchInitBg = 300;
+	TitleParam.MotionInitText = eStaticMotionPattern::eInitText_Typing;
+	TitleParam.DelayInitText = 300;
+	TitleParam.PitchInitText = 300;
+
+	TitleParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_CollapseLeft;
+	TitleParam.PitchPauseBg = 300;
+	TitleParam.DelayPauseBg = 300;
+	TitleParam.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
+	TitleParam.PitchPauseText = 150;
+
+	TitleParam.ColorBg = { 0.25,0.3,0.5,1 };
+	TitleParam.ColorFrame = { 0,0,0,0 };
+	TitleParam.ColorText = { 1,1,1,1 };
 
 	StaticParam.MotionInitFrame = eStaticMotionPattern::eInitFrame_ExpendCenter;
 	StaticParam.PitchInitFrame = 400;

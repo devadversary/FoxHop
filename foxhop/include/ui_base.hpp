@@ -4,6 +4,7 @@
 #include "object_pool.hpp"
 #include "prop_box.hpp"
 #include "prop_line.hpp"
+#include "prop_circle.hpp"
 #include "prop_text.hpp"
 #include "prop_textlayout.hpp"
 

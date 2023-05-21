@@ -24,6 +24,8 @@ TREE hTree;
 UISystem* uiSys = NULL;
 UI_Button* pPauseButton = NULL;
 UI_Button* pResumeButton = NULL;
+UI_Static* pTitle1 = NULL;
+UI_Static* pTitle2 = NULL;
 UI_Table* pTable = NULL;
 UI_Table* pTable2 = NULL;
 UI_Static* pStatic = NULL;
@@ -132,8 +134,8 @@ unsigned int thread_update_render(void* pTemp)
 
     while (1) {
         uiSys->D2DA.pRenTarget->BeginDraw();
-        //uiSys->D2DA.pRenTarget->Clear({ 0,0,0,0.7 });
-        uiSys->D2DA.pRenTarget->Clear({ 1,1,1,1 });
+        uiSys->D2DA.pRenTarget->Clear({ 0,0,0,0.7 });
+        //uiSys->D2DA.pRenTarget->Clear({ 1,1,1,1 });
         pMainPanel->update(GetElapse());
         pMainPanel->render();
         uiSys->D2DA.pRenTarget->EndDraw();
@@ -174,6 +176,8 @@ void TestPauseButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONUP:
         pTable->pause(0);
         pStatic->pause(200);
+        pTitle1->pause(500);
+        pTitle2->pause(700);
         pInput->pause(300);
         pTable2->pause(300);
         break;
@@ -188,6 +192,8 @@ void TestResumeButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONUP:
         pTable->resume(0);
         pStatic->resume(200);
+        pTitle1->resume(500);
+        pTitle2->resume(700);
         pInput->resume(300);
         pTable2->resume(300);
         break;
@@ -204,19 +210,26 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     unsigned int ColWidth[3] = {80,150,120};
     unsigned int ColWidth2[3] = {150, 80};
     unsigned int ThreadID;
+    IDWriteTextFormat* pFmt;
 
     switch(Message) {
     case UIM_CREATE:
-        UI_ParamSet2();
+        UI_ParamSet();
         TREE_Init(&hTree);
         pPauseButton = new UI_Button(pUI->uiSys, TestPauseButtonProc, {10,10,100,20}, (wchar_t*)L"UI Pause", 500, ButtonParam);
         pResumeButton = new UI_Button(pUI->uiSys, TestResumeButtonProc, {120,10,100,20}, (wchar_t*)L"UI Resume", 800, ButtonParam);
-        pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 40, 450 , 570}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
+        pFmt = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 30, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+        //pFmt = pUI->uiSys->CreateTextFmt((wchar_t*)L"monoMMM_5", 19, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+        pTitle1 = new UI_Static(pUI->uiSys, NULL, { 10, 40, 450, 40 }, pFmt, (wchar_t*)L"PACKET MONITORING", TitleParam);
+        pTitle2 = new UI_Static(pUI->uiSys, NULL, { 470, 40, 230, 40 }, pFmt, (wchar_t*)L"CONNECTION ANALYZE", TitleParam);
+        pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 90, 450 , 520}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
         pStatic = new UI_Static(pUI->uiSys, NULL, {10, 620, 450, 25}, pUI->uiSys->MediumTextForm ,(wchar_t*)L"Done.", StaticParam);
         pInput = new UI_Textinput(pUI->uiSys, NULL, { 10, 655, 450, 150 }, pUI->uiSys->CreateTextFmt((wchar_t*)L"Consolas", 15, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_NEAR), InputParam);
-        pTable2 = new UI_Table(pUI->uiSys, NULL, {470, 40, 230 , 760}, 2, ColData2, ColWidth2, 30, 20, FALSE, TableParam);
+        pTable2 = new UI_Table(pUI->uiSys, NULL, {470, 90, 230 , 715}, 2, ColData2, ColWidth2, 30, 25, FALSE, TableParam);
         pPanel->RegisterUI(pPauseButton);
         pPanel->RegisterUI(pResumeButton);
+        pPanel->RegisterUI(pTitle1);
+        pPanel->RegisterUI(pTitle2);
         pPanel->RegisterUI(pTable);
         pPanel->RegisterUI(pTable2);
         pPanel->RegisterUI(pStatic);
@@ -268,7 +281,8 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     wc.cbClsExtra = NULL;
     wc.cbWndExtra = NULL;
     RegisterClass(&wc);
-    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 725, 855, NULL, NULL, hInst, NULL);
+    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), NULL, NULL, hInst, NULL);
+    //hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 725, 855, NULL, NULL, hInst, NULL);
     AlphaWindow(hWnd, WINDOWMODE_TRANSPARENT);
     ShowWindow(hWnd, TRUE);
     while (GetMessage(&Message, NULL, NULL, NULL)) {

@@ -49,7 +49,6 @@ public:
         PitchPauseFrame = 0;
         DelayPauseFrame = 0;
 
-
         ColorFrame = { 0.f,0.f,0.f,1.f };
         ColorBg = { 1.f, 1.f, 1.f, 1.f };
     }
@@ -60,6 +59,7 @@ public:
     UI_LineChart_MotionParam Motion;
 
 private:
+    SRWLOCK lock;
     PropBox* pBoxBg;
     PropBox* pBoxFrame;
 

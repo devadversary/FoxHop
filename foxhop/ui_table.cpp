@@ -251,6 +251,7 @@ void UI_Table::HighlightData(unsigned long long DataIdx, D2D1_COLOR_F Hightlight
     RowObject* pRow;
     long long Idx;
 
+    if (uiMotionState != eUIMotionState::eUMS_Visible) return;
     if (!DataIdxIsInScreen(DataIdx)) return;
     Idx = DataIdx2ViewRowIdx(DataIdx);
     if (Idx < 0) return;
@@ -748,8 +749,8 @@ void UI_Table::render()
     ClipRect.bottom = Pos.y + Pos.y2;
 
     AcquireSRWLockShared(&lock);
-    pRenderTarget->PushAxisAlignedClip(ClipRect, D2D1_ANTIALIAS_MODE::D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
     pRenderTarget->GetTransform(&OldMat); /*기존 행렬 백업*/
+    pRenderTarget->PushAxisAlignedClip(ClipRect, D2D1_ANTIALIAS_MODE::D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
     TmpMat = OldMat;
     TmpMat.dx += Pos.x;
     TmpMat.dy += HeaderHgt;
@@ -769,8 +770,8 @@ void UI_Table::render()
         TmpMat.dy += (float)RowHgt;
     }
 
-    pRenderTarget->SetTransform(OldMat); /*기존 행렬 복구*/
     pRenderTarget->PopAxisAlignedClip();
+    pRenderTarget->SetTransform(OldMat); /*기존 행렬 복구*/
 
     pBoxHeader->render(pRenderTarget);
     for (int i = 0; i < ColCnt; i++) ppTextHdr[i]->render(pRenderTarget);

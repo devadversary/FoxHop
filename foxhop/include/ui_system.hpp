@@ -19,6 +19,7 @@
 
 /*TODO : 추후에 폰트를 쉽게 변경 가능하도록 하드코딩을 제거할 수 있는 구조로 변경할것.*/
 #define UISYSTEM_FONTNAME_DEFAULT (L"Consolas") /*UI시스템이 기본적으로 사용하는 폰트 이름*/
+//#define UISYSTEM_FONTNAME_DEFAULT (L"Agency FB") /*UI시스템이 기본적으로 사용하는 폰트 이름*/
 //#define UISYSTEM_FONTNAME_DEFAULT (L"굴림") /*UI시스템이 기본적으로 사용하는 폰트 이름*/
 //#define UISYSTEM_FONTNAME_DEFAULT (L"monoMMM_5") /*UI시스템이 기본적으로 사용하는 폰트 이름*/
 #define DEFAULT_MAXUI (256) /*UISystem 초기화시, nMaxUI 를 0으로 설정시 적용할 기본 UI 갯수*/

@@ -117,7 +117,7 @@ BOOL UI_Panel::update(unsigned long time)
 */
 void UI_Panel::render()
 {
-    pRenderTarget->SetTransform(D2D1::Matrix3x2F::Translation(0.5f + uiPos.x, 0.5f + uiPos.y));
+    pRenderTarget->SetTransform(D2D1::Matrix3x2F::Translation(uiPos.x+0.5f, uiPos.y+0.5f));
     for (UI_Panel* pPanel : PanelList) {
         if (pPanel->uiMotionState == eUIMotionState::eUMS_Hide) continue;
         pPanel->render();
@@ -210,7 +210,7 @@ void UI_Panel::DefaultMouseHandler(UI* pUI, UINT Message, WPARAM wParam, LPARAM 
     /*이전 컨트롤이 아닌 다른 영역일때*/
     /*패널 UI부터 체크*/
     for (UI_Panel* pPanel : PanelList) {
-        if (pPanel->uiMotionState == eUIMotionState::eUMS_Hide) continue;
+        if (pPanel->uiMotionState != eUIMotionState::eUMS_Visible) continue;
         if (IsInRect(pPanel->uiPos, pt)) {
             pMouseOverUI = pPanel;
             if (Message == WM_LBUTTONDOWN) {

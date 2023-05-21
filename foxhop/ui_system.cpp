@@ -20,7 +20,8 @@ UISystem::UISystem(HWND hWnd)
     /*프로그램과 같은 경로에 있는 특정 폰트를 로드한다.*/
     GetModuleFileNameW(NULL, szProgramPath, MAX_PATH);
     _wsplitpath_s(szProgramPath, szDrive, 8, szDir, MAX_PATH, NULL, 0, NULL, 0);
-    wsprintfW(szFontPath, L"%s%s%s", szDrive, szDir, L"monoMMM_5.ttf");
+    //wsprintfW(szFontPath, L"%s%s%s", szDrive, szDir, L"monoMMM_5.ttf");
+    wsprintfW(szFontPath, L"%s%s%s", szDrive, szDir, L"AGENCYR.TTF");
     AddFontResourceW(szFontPath);
 
     /*D2D 환경 초기화 및 UI시스템 초기화*/
@@ -32,6 +33,7 @@ UISystem::UISystem(HWND hWnd)
 
     /*D2D에서 렌더링될 때, 실수좌표계를 사용함으로 각 픽셀의 중심을 기준으로 렌더해야한다
       정수 좌표계가 아니므로, 픽셀의 중심 (0.5 픽셀씩 +) 기준이 아니면 상이 흐리다.*/
+    //D2DA.pRenTarget->SetTransform(D2D1::Matrix3x2F::Translation(0.f, 0.f));
     D2DA.pRenTarget->SetTransform(D2D1::Matrix3x2F::Translation(0.5f, 0.5f));
 }
 
