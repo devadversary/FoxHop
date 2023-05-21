@@ -85,6 +85,7 @@ public:
     UI_Static_MotionParam Motion;
 
 private:
+    SRWLOCK lock;
     wchar_t szText[UISTATIC_MAX_TEXTLEN];
     PropText* pText;
     PropBox*  pBoxBg;

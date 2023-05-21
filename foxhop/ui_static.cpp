@@ -16,6 +16,7 @@ UI_Static::UI_Static(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, I
     Motion = MotionParam;
     wcscpy_s(szText, ARRAYSIZE(szText), Text);
 
+    InitializeSRWLock(&lock);
     pText = new PropText(pRenderTarget, UISTATIC_MAX_TEXTLEN);
     pBoxBg = new PropBox(pRenderTarget);
     pBoxFrame = new PropBox(pRenderTarget);
@@ -28,6 +29,7 @@ void UI_Static::ResumeFrame(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitFrame) {
         case eStaticMotionPattern::eInitFrame_Default:
             pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
@@ -47,12 +49,14 @@ void UI_Static::ResumeFrame(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Static::PauseFrame(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseFrame) {
         case eStaticMotionPattern::ePauseFrame_Default:
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
@@ -69,14 +73,15 @@ void UI_Static::PauseFrame(unsigned long Delay)
             pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
             break;
         }
-
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Static::ResumeBg(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitBg) {
         case eStaticMotionPattern::eInitBg_Default:
             pBoxBg->Init(uiPos, ALL_ZERO);
@@ -95,14 +100,15 @@ void UI_Static::ResumeBg(unsigned long Delay)
             pBoxBg->SetPos(mi, TRUE, ALL_ZERO, uiPos);
             break;
         }
-
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Static::PauseBg(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseBg) {
         case eStaticMotionPattern::ePauseBg_Default:
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
@@ -120,14 +126,15 @@ void UI_Static::PauseBg(unsigned long Delay)
             pBoxBg->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
             break;
         }
-
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Static::ResumeText(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitText) {
         case eStaticMotionPattern::eInitText_Default:
             pText->Init(pTextFmt, szText, 0, uiPos, ALL_ZERO, wcslen(szText));
@@ -143,12 +150,14 @@ void UI_Static::ResumeText(unsigned long Delay)
             pText->SetLen(mi, TRUE, NULL, wcslen(szText));
             break;
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Static::PauseText(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseText) {
         case eStaticMotionPattern::ePauseText_Default:
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseText);
@@ -160,6 +169,7 @@ void UI_Static::PauseText(unsigned long Delay)
             pText->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
             break;
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 /**
@@ -190,9 +200,11 @@ BOOL UI_Static::update(unsigned long time)
 
     if (uiMotionState == eUIMotionState::eUMS_Hide) return FALSE;
 
+    AcquireSRWLockExclusive(&lock);
     bUpdated |= pBoxBg->update(time);
     bUpdated |= pBoxFrame->update(time);
     bUpdated |= pText->update(time);
+    ReleaseSRWLockExclusive(&lock);
 
     if (!bUpdated) {
         if (uiMotionState == eUIMotionState::eUMS_PlayingHide)
@@ -209,9 +221,11 @@ void UI_Static::render()
 {
     if (uiMotionState == eUIMotionState::eUMS_Hide) return;
 
+    AcquireSRWLockShared(&lock);
     pBoxBg->render(pRenderTarget);
     pBoxFrame->render(pRenderTarget);
     pText->render(pRenderTarget);
+    ReleaseSRWLockShared(&lock);
 }
 
 void UI_Static::SetText(wchar_t* pStr, int nDelay)
@@ -219,7 +233,9 @@ void UI_Static::SetText(wchar_t* pStr, int nDelay)
     MOTION_INFO mi;
 
     if (!pStr) return;
+    AcquireSRWLockExclusive(&lock);
     wcscpy_s(szText, ARRAYSIZE(szText), pStr);
+    ReleaseSRWLockExclusive(&lock);
     ResumeText(nDelay);
 }
 
