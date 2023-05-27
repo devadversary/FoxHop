@@ -17,11 +17,20 @@ enum class eLineChartMotionPattern {
     eInitText_Default,
     ePauseText_Default,
 
+    eInitTotalLine_Default,
+    ePauseTotalLine_Default,
+
     eInitDataOrder_Default,
     ePauseDataOrder_Default,
 
-    eInitChart_Default,
-    ePauseChart_Default,
+    eInitChartGuideLine_Default,
+    ePauseChartGuideLine_Default,
+
+    eInitChartPoint_Default,
+    ePauseChartPoint_Default,
+
+    eInitChartLabel_Default,
+    ePauseChartLabel_Default,
 
     eAdjustData_Default,
 };
@@ -56,12 +65,33 @@ public:
     unsigned long PitchPauseDataOrder;
     unsigned long DelayPauseDataOrder;
 
-    eLineChartMotionPattern MotionInitChart;
-    unsigned long PitchInitChart;
-    unsigned long DelayInitChart;
-    eLineChartMotionPattern MotionPauseChart;
-    unsigned long PitchPauseChart;
-    unsigned long DelayPauseChart;
+    eLineChartMotionPattern MotionInitTotalLine;
+    unsigned long PitchInitTotalLine;
+    unsigned long DelayInitTotalLine;
+    eLineChartMotionPattern MotionPauseTotalLine;
+    unsigned long PitchPauseTotalLine;
+    unsigned long DelayPauseTotalLine;
+
+    eLineChartMotionPattern MotionInitChartGuideLine;
+    unsigned long PitchInitChartGuideLine;
+    unsigned long DelayInitChartGuideLine;
+    eLineChartMotionPattern MotionPauseChartGuideLine;
+    unsigned long PitchPauseChartGuideLine;
+    unsigned long DelayPauseChartGuideLine;
+
+    eLineChartMotionPattern MotionInitChartPoint;
+    unsigned long PitchInitChartPoint;
+    unsigned long DelayInitChartPoint;
+    eLineChartMotionPattern MotionPauseChartPoint;
+    unsigned long PitchPauseChartPoint;
+    unsigned long DelayPauseChartPoint;
+
+    eLineChartMotionPattern MotionInitChartLabel;
+    unsigned long PitchInitChartLabel;
+    unsigned long DelayInitChartLabel;
+    eLineChartMotionPattern MotionPauseChartLabel;
+    unsigned long PitchPauseChartLabel;
+    unsigned long DelayPauseChartLabel;
 
     eLineChartMotionPattern MotionAdjustData;
     unsigned long PitchAdjustData;
@@ -71,6 +101,7 @@ public:
     D2D1_COLOR_F ColorFrame;
     D2D1_COLOR_F ColorBg;
     D2D1_COLOR_F ColorChartLine;
+    D2D1_COLOR_F ColorChartPoint;
     D2D1_COLOR_F ColorGuideLine;
 
 public:
@@ -103,12 +134,33 @@ public:
         PitchPauseDataOrder = 0;
         DelayPauseDataOrder = 0;
 
-        MotionInitChart = eLineChartMotionPattern::eInitChart_Default;
-        PitchInitChart = 0;
-        DelayInitChart = 0;
-        MotionPauseChart = eLineChartMotionPattern::ePauseChart_Default;
-        PitchPauseChart = 0;
-        DelayPauseChart = 0;
+        MotionInitTotalLine = eLineChartMotionPattern::eInitTotalLine_Default;
+        PitchInitTotalLine = 0;
+        DelayInitTotalLine = 0;
+        MotionPauseTotalLine = eLineChartMotionPattern::ePauseTotalLine_Default;
+        PitchPauseTotalLine = 0;
+        DelayPauseTotalLine = 0;
+
+        MotionInitChartGuideLine = eLineChartMotionPattern::eInitChartGuideLine_Default;
+        PitchInitChartGuideLine = 0;
+        DelayInitChartGuideLine = 0;
+        MotionPauseChartGuideLine = eLineChartMotionPattern::ePauseChartGuideLine_Default;
+        PitchPauseChartGuideLine = 0;
+        DelayPauseChartGuideLine = 0;
+
+        MotionInitChartPoint = eLineChartMotionPattern::eInitChartPoint_Default;
+        PitchInitChartPoint = 0;
+        DelayInitChartPoint = 0;
+        MotionPauseChartPoint = eLineChartMotionPattern::ePauseChartPoint_Default;
+        PitchPauseChartPoint = 0;
+        DelayPauseChartPoint = 0;
+
+        MotionInitChartLabel = eLineChartMotionPattern::eInitChartLabel_Default;
+        PitchInitChartLabel = 0;
+        DelayInitChartLabel = 0;
+        MotionPauseChartLabel = eLineChartMotionPattern::ePauseChartLabel_Default;
+        PitchPauseChartLabel = 0;
+        DelayPauseChartLabel = 0;
 
         MotionAdjustData = eLineChartMotionPattern::eAdjustData_Default;
         PitchAdjustData = 0;
@@ -118,6 +170,7 @@ public:
         ColorFrame = { 0.f,0.f,0.f,1.f };
         ColorBg = { 1.f, 1.f, 1.f, 1.f };
         ColorChartLine = { 0,0,0,1 };
+        ColorChartPoint = { 0,0,0,1 };
         ColorGuideLine = { 0.8,0.8,0.8,1 };
     }
 };
@@ -151,6 +204,7 @@ private:
     float IntervalMin;
     float IntervalMax;
     unsigned long SplitCnt;
+    unsigned long PointPixelSize;
     float BaseSplit; /**< 50이면, 이 값을 기준으로 100, 50, 25, 12.5 등의 단위로 구간이 분할된다.*/
     std::vector<float> MainData;
     std::vector<PropLine*> PropLines;
@@ -186,7 +240,7 @@ public: /*반드시 있어야 되는 매서드*/
     void render();
 
 public: /*UI별 옵션 매서드*/
-    void AddValue(float value, float max, float min);
+    void AddValue(float value, float max, float min, wchar_t);
 };
 
 class ChartObject {
@@ -198,14 +252,18 @@ public:
     float Value;
     float ValueMax;
     float ValueMin;
-    PropLine* pLine;
+    PropLine* pGuideLine;
     PropBox*  pBoxPoint;
     PropCircle* pCircle;
-    PropText* pText;
+    PropText* pLabel;
 
 public:
-    void Resumeline(BOOL bMotion, unsigned long Delay);
-    void Pauseline(unsigned long Delay);
+    void ResumeGuideLine(BOOL bMotion, unsigned long Delay);
+    void PauseGuideLine(unsigned long Delay);
+    void ResumePoint(BOOL bMotion, unsigned long Delay);
+    void PausePoint(unsigned long Delay);
+    void ResumeLabel(BOOL bMotion, unsigned long Delay);
+    void PauseLabel(unsigned long Delay);
 
 public:
     ChartObject(UI_LineChart* pParent, ID2D1StrokeStyle* Stroke, unsigned long width, unsigned long height);

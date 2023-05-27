@@ -249,6 +249,31 @@ void UI_LineChart::render()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ChartObject::ChartObject(UI_LineChart* pParent, ID2D1StrokeStyle* Stroke, unsigned long width, unsigned long height)
 {
     pChart = pParent;
@@ -258,10 +283,10 @@ ChartObject::ChartObject(UI_LineChart* pParent, ID2D1StrokeStyle* Stroke, unsign
     ValueMax = 0;
     ValueMin = 0;
     pStroke = Stroke;
-    pLine = new PropLine(pChart->pRenderTarget, pStroke);
+    pGuideLine = new PropLine(pChart->pRenderTarget, pStroke);
     pBoxPoint = new PropBox(pChart->pRenderTarget);
     pCircle = new PropCircle(pChart->pRenderTarget);
-    pText = new PropText(pChart->pRenderTarget, 32);
+    pLabel = new PropText(pChart->pRenderTarget, 32);
 }
 
 ChartObject::~ChartObject()
@@ -279,21 +304,90 @@ BOOL ChartObject::update(unsigned long time)
 {
     BOOL bUpdated;
     
-    bUpdated = pLine->update(time);
+    bUpdated = pGuideLine->update(time);
     bUpdated |= pBoxPoint->update(time);
     bUpdated |= pCircle->update(time);
-    bUpdated |= pText->update(time);
+    bUpdated |= pLabel->update(time);
     return bUpdated;
+}
+
+void ChartObject::ResumeGuideLine(BOOL bMotion, unsigned long Delay)
+{
+    eLineChartMotionPattern patt;
+
+    if (bMotion) patt = pChart->Motion.MotionInitChartGuideLine;
+    else patt = eLineChartMotionPattern::eInitChartGuideLine_Default;
+
+    switch (patt) {
+        case eLineChartMotionPattern::eInitChartGuideLine_Default: {
+            break;
+        }
+    }
+}
+
+void ChartObject::PauseGuideLine(unsigned long Delay)
+{
+    switch (pChart->Motion.MotionPauseChartGuideLine) {
+        case eLineChartMotionPattern::ePauseChartGuideLine_Default: {
+            break;
+        }
+    }
+}
+
+void ChartObject::ResumePoint(BOOL bMotion, unsigned long Delay)
+{
+    eLineChartMotionPattern patt;
+
+    if (bMotion) patt = pChart->Motion.MotionInitChartPoint;
+    else patt = eLineChartMotionPattern::eInitChartPoint_Default;
+
+    switch (patt) {
+        case eLineChartMotionPattern::eInitChartPoint_Default: {
+            break;
+        }
+    }
+}
+
+void ChartObject::PausePoint(unsigned long Delay)
+{
+    switch (pChart->Motion.MotionPauseChartPoint) {
+        case eLineChartMotionPattern::ePauseChartPoint_Default: {
+            break;
+        }
+    }
+}
+
+void ChartObject::ResumeLabel(BOOL bMotion, unsigned long Delay)
+{
+    eLineChartMotionPattern patt;
+
+    if (bMotion) patt = pChart->Motion.MotionInitChartLabel;
+    else patt = eLineChartMotionPattern::eInitChartLabel_Default;
+
+    switch (patt) {
+        case eLineChartMotionPattern::eInitChartLabel_Default: {
+            break;
+        }
+    }
+}
+
+void ChartObject::PauseLabel(unsigned long Delay)
+{
+    switch (pChart->Motion.MotionPauseChartLabel) {
+        case eLineChartMotionPattern::ePauseChartLabel_Default: {
+            break;
+        }
+    }
 }
 
 void ChartObject::render()
 {
     ID2D1RenderTarget* pRT = pChart->pRenderTarget;
 
-    pLine->render(pRT);
+    pGuideLine->render(pRT);
     pCircle->render(pRT);
     pBoxPoint->render(pRT);
-    pText->render(pRT);
+    pLabel->render(pRT);
 }
 
 void ChartObject::pause(unsigned long Delay)
