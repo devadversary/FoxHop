@@ -9,6 +9,7 @@ class PropLine : public PropBase{
 private:
     ComponentMotion       ComMotionMovement;
     ComponentMotion       ComMotionColor;
+    ID2D1StrokeStyle*     pStroke;
     ID2D1SolidColorBrush* Brush;        /**< 해당 오브젝트의 색상 브러시*/
     POSITION              InitPos;       /**< 초기 오브젝트의 포지션*/
     D2D1_COLOR_F          InitColor;     /**< 초기 오브젝트의 RGBA 값*/
@@ -16,7 +17,7 @@ private:
     D2D1_COLOR_F          CurColor;     /**< 현재 오브젝트의 RGBA 값*/
 
 public :
-    PropLine(ID2D1RenderTarget* pRT);
+    PropLine(ID2D1RenderTarget* pRT, ID2D1StrokeStyle* pStroke = NULL);
     ~PropLine();
     void Init(POSITION StartPoint, D2D1_COLOR_F StartColor);
     void addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, POSITION StartPos, POSITION EndPos);

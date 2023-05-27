@@ -259,7 +259,7 @@ private:
     BOOL      MultiSelectMode; /**< FALSE:단일 선택 / TRUE:여러줄 선택 모드*/
     long long DataCount;       /**< 현재 데이터 갯수*/
     float     CurrScrollPixel; /**< 현재 모션 진행중인 스크롤 픽셀 (연속적으로 변함, 렌더링시 사용)*/
-    long long CurrMainIndex;   /**< 현재 렌더링 될 데이터의 시작 인덱스 (4이면, 4,5,6,7...n 이 렌더링된다.)*/
+    long long ViewStartIdx;   /**< 현재 렌더링 될 데이터의 시작 인덱스 (4이면, 4,5,6,7...n 이 렌더링된다.)*/
     long long ScrollPixel;     /**< 스크롤된 픽셀. 최대 스크롤 길이는, 데이터 갯수 x 행 높이*/
     long long MaxScrollPixel;  /**< 데이터 갯수 x 행 높이 = 최대 스크롤가능 픽셀*/
     int       ColCnt;          /**< 열 갯수*/

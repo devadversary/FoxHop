@@ -22,7 +22,7 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     ScrollPixel = 0;
     MaxScrollPixel = 0;
     DataCount = 0;
-    CurrMainIndex = 0;
+    ViewStartIdx = 0;
     PrevSelMainIdx = -1;
     HeaderHgt = HeaderHeight;
     RowHgt = RowHeight ? RowHeight : TEXTSHEET_DEFAULT_ROWHEIGHT;
@@ -132,7 +132,7 @@ void UI_Table::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPa
                 if (pTable->PrevSelMainIdx >= 0) {
                     pTable->MainDataPool[pTable->PrevSelMainIdx].bSelected = FALSE;
                     /*변경 대상이 뷰 영억 안에 있을때엔 모션 재생을 해주어야 함*/
-                    if (IsInRange(pTable->CurrMainIndex, pTable->ViewRowCnt, pTable->PrevSelMainIdx)) {
+                    if (IsInRange(pTable->ViewStartIdx, pTable->ViewRowCnt, pTable->PrevSelMainIdx)) {
                         long long PrevViewRowIdx = pTable->PrevSelMainIdx % pTable->ViewRowCnt;
                         RowObject* pPrevViewRow = pTable->ViewData[PrevViewRowIdx];
                         pPrevViewRow->OnSelectEvent();
@@ -172,8 +172,8 @@ long long UI_Table::DataIdx2ViewRowIdx(long long DataIdx)
 BOOL UI_Table::DataIdxIsInScreen(long long DataIdx)
 {
     if (DataCount <= DataIdx) return FALSE;
-    if (CurrMainIndex > DataIdx) return FALSE;
-    if (CurrMainIndex + ViewRowCnt < DataIdx) return FALSE;
+    if (ViewStartIdx > DataIdx) return FALSE;
+    if (ViewStartIdx + ViewRowCnt < DataIdx) return FALSE;
     return TRUE;
 }
 
@@ -695,14 +695,14 @@ BOOL UI_Table::update(unsigned long time)
     bUpdated = ScrollComp->update(time); /*스크롤 상태 먼저 업데이트*/
     bUpdated |= pBoxFrame->update(time);
 
-    CurrMainIndex = (long long)CurrScrollPixel / RowHgt;
-    ModIndex = CurrMainIndex % ViewRowCnt;
+    ViewStartIdx = (long long)CurrScrollPixel / RowHgt;
+    ModIndex = ViewStartIdx % ViewRowCnt;
     ValidViewRowCnt = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
     MainDataPoolSize = MainDataPool.size();
 
     /*데이터 바인딩*/
     for (int i = 0; i < ValidViewRowCnt; i++) {
-        CurrBindIndex = CurrMainIndex + i;
+        CurrBindIndex = ViewStartIdx + i;
         if (MainDataPoolSize <= CurrBindIndex) break; /*딱뎀상황에선 자투리 접근 X*/
         UpdateIdx = (ModIndex + i) % ViewRowCnt; /*현재 뷰 영역의 인덱스 계산*/
         pViewRow = ViewData[UpdateIdx];
@@ -712,8 +712,9 @@ BOOL UI_Table::update(unsigned long time)
 
     /*뷰 행 업데이트*/
     for (int i = 0; i < ValidViewRowCnt; i++) {
-        UpdateIdx = (ModIndex + i) % ViewRowCnt; /*현재 뷰 영역의 인덱스 계산*/
-        pViewRow = ViewData[UpdateIdx];
+        //UpdateIdx = (ModIndex + i) % ViewRowCnt; /*현재 뷰 영역의 인덱스 계산*/
+        //pViewRow = ViewData[UpdateIdx];
+        pViewRow = ViewData[i];
         bUpdated |= pViewRow->update(time);
     }
 
@@ -759,11 +760,11 @@ void UI_Table::render()
     /* TmpMat._31 는 X, TmpMat._32 는 Y */
     TmpMat.dy -= (float)ModScroll; /* Mod 음수값부터 높이를 차차 더해가며 렌더링*/
     ValidViewRowCnt = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
-    ModIndex = CurrMainIndex% ViewRowCnt;
+    ModIndex = ViewStartIdx% ViewRowCnt;
 
     MainDataPoolSize = MainDataPool.size();
     for (int i = 0; i < PinCount; i++) {
-        if (MainDataPoolSize <= CurrMainIndex + i) break; /*딱뎀시 자투리 X*/
+        if (MainDataPoolSize <= ViewStartIdx + i) break; /*딱뎀시 자투리 X*/
         pRenderTarget->SetTransform(TmpMat);
         idx = (ModIndex + i) % PinCount;
         ViewData[idx]->render(); /*행 렌더링*/
@@ -866,16 +867,12 @@ void RowObject::PauseSelect(BOOL bMotion, unsigned long Delay)
         break;
 
     case eTableMotionPattern::ePauseTableSelect_Linear:
-        //pSelectBox->Init(Pos, pParent->Motion.ColorRowBgSelect);
         mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, pitch);
-        //pSelectBox->addMovementMotion(mi, TRUE, Pos, { Pos.x, Pos.y,0, Pos.y2 });
         pSelectBox->SetPos(mi, TRUE, Pos, { Pos.x, Pos.y,0, Pos.y2 });
         break;
 
     case eTableMotionPattern::ePauseTableSelect_Decel:
-        //pSelectBox->Init(Pos, pParent->Motion.ColorRowBgSelect);
         mi = InitMotionInfo(eMotionForm::eMotion_x3_2, Delay, pitch);
-        //pSelectBox->addMovementMotion(mi, TRUE, Pos, { Pos.x, Pos.y,0, Pos.y2 });
         pSelectBox->SetPos(mi, TRUE, Pos, { Pos.x, Pos.y,0, Pos.y2 });
         break;
     }
@@ -1108,7 +1105,7 @@ BOOL RowObject::update(unsigned long time)
 
 void RowObject::render()
 {
-    ID2D1RenderTarget* pRT = uiSys->D2DA.pRenTarget;
+    ID2D1RenderTarget* pRT = pParent->pRenderTarget;
 
     pBackgroundBox->render(pRT);
     pSelectBox->render(pRT);

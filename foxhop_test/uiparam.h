@@ -5,7 +5,7 @@
 #include "../foxhop/include/ui_button.hpp"
 #include "../foxhop/include/ui_listview.hpp"
 #include "../foxhop/include/ui_static.hpp"
-#include "../foxhop/include/ui_fraggedline.hpp"
+#include "../foxhop/include/ui_line.hpp"
 #include "../foxhop/include/ui_table.hpp"
 #include "../foxhop/include/ui_textinput.hpp"
 
@@ -79,7 +79,7 @@ void UI_ParamSet() {
 	TitleParam.PitchInitBg = 300;
 	TitleParam.MotionInitText = eStaticMotionPattern::eInitText_Typing;
 	TitleParam.DelayInitText = 300;
-	TitleParam.PitchInitText = 300;
+	TitleParam.PitchInitText = 800;
 
 	TitleParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_CollapseLeft;
 	TitleParam.PitchPauseBg = 300;

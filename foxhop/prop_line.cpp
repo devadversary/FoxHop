@@ -1,12 +1,13 @@
 #include "./include/prop_line.hpp"
 
-PropLine::PropLine(ID2D1RenderTarget* pRT)
+PropLine::PropLine(ID2D1RenderTarget* pRT, ID2D1StrokeStyle* pStrokeStyle)
 {
     pRT->CreateSolidColorBrush({0,0,0,0}, &Brush);
     InitPos = {0,0,0,0};
     InitColor = { 0,0,0,0 };
     CurPos = { 0,0,0,0 };
     CurColor = { 0,0,0,0 };
+    pStroke = pStrokeStyle;
 }
 
 PropLine::~PropLine()
@@ -120,5 +121,5 @@ void PropLine::render(ID2D1RenderTarget* pRT)
     Brush->SetColor(CurColor);
     point1 = { CurPos.x, CurPos.y };
     point2 = { CurPos.x2,CurPos.y2 };
-    pRT->DrawLine(point1, point2, Brush);
+    pRT->DrawLine(point1, point2, Brush, 1.0f, pStroke);
 }
