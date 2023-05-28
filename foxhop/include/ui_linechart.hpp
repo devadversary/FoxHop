@@ -24,7 +24,9 @@ enum class eLineChartMotionPattern {
     ePauseDataOrder_Default,
 
     eInitChartGuideLine_Default,
+    eInitChartGuideLine_Expend,
     ePauseChartGuideLine_Default,
+    ePauseChartGuideLine_Collapse,
 
     eInitChartPoint_Default,
     ePauseChartPoint_Default,
@@ -95,9 +97,9 @@ public:
 
     eLineChartMotionPattern MotionAdjustData;
     unsigned long PitchAdjustData;
-    unsigned long DelayAdjustData;
 
     unsigned long PitchScroll;
+    unsigned long PointSize;
     D2D1_COLOR_F ColorFrame;
     D2D1_COLOR_F ColorBg;
     D2D1_COLOR_F ColorChartLine;
@@ -164,9 +166,9 @@ public:
 
         MotionAdjustData = eLineChartMotionPattern::eAdjustData_Default;
         PitchAdjustData = 0;
-        DelayAdjustData = 0;
 
         PitchScroll = 150;
+        PointSize = 16;
         ColorFrame = { 0.f,0.f,0.f,1.f };
         ColorBg = { 1.f, 1.f, 1.f, 1.f };
         ColorChartLine = { 0,0,0,1 };
@@ -177,10 +179,13 @@ public:
 
 class ChartObject;
 
+#define MAX_CHART_LABEL_LEN 16
+
 typedef struct _st_chartdata {
     BOOL MotionPlayed;
     BOOL Selected;
-    float val;
+    float Value;
+    wchar_t Label[MAX_CHART_LABEL_LEN];
 } CHART_DATA;
 
 class UI_LineChart : public UI {
@@ -198,6 +203,7 @@ private:
     unsigned long ViewDataWidth; /*차트 값 하나의 폭*/
     unsigned long ViewDataCnt;
     unsigned long ValidViewDataCnt;
+    unsigned long PinCount;
     long long ViewStartIdx; /**< 현재 뷰의 가장 첫 인덱스*/
     float EnsureMin;
     float EnsureMax;
@@ -206,7 +212,7 @@ private:
     unsigned long SplitCnt;
     unsigned long PointPixelSize;
     float BaseSplit; /**< 50이면, 이 값을 기준으로 100, 50, 25, 12.5 등의 단위로 구간이 분할된다.*/
-    std::vector<float> MainData;
+    std::vector<CHART_DATA> MainData;
     std::vector<PropLine*> PropLines;
     std::vector<ChartObject*> ViewData;
 
@@ -219,8 +225,8 @@ private:
     void PauseFrame(unsigned long Delay);
     void ResumeBg(unsigned long Delay);
     void PauseBg(unsigned long Delay);
-    void ResumeText(unsigned long Delay);
-    void PauseText(unsigned long Delay);
+    void ResumeLabel(unsigned long Delay);
+    void PauseLabel(unsigned long Delay);
     void ResumeDataOrder(unsigned long Delay);
     void PauseDataOrder(unsigned long Delay);
 
@@ -231,8 +237,8 @@ public: /*반드시 있어야 되는 매서드*/
     UI_LineChart(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, IDWriteTextFormat* pTextFmt, unsigned long ChartPixelGap, float EnsureMinVal, float EnsureMaxVal, float BaseSplitVal, unsigned long nSplitCnt, unsigned long Delay, UI_LineChart_MotionParam MotionParam = UI_LineChart_MotionParam());
     ~UI_LineChart();
 
-    void AddValue(float Val, BOOL bAutoScroll);
-    void EditValue(unsigned long long DataIdx, float NewVal);
+    void AddValue(float Val, wchar_t* pLabel, BOOL bAutoScroll);
+    void EditValue(unsigned long long DataIdx, float NewVal, wchar_t* NewLabel);
 
     void resume(int nDelay);
     void pause(int nDelay);
@@ -247,11 +253,14 @@ class ChartObject {
 public:
     UI_LineChart* pChart;
     ID2D1StrokeStyle* pStroke;
+    unsigned long Width;
+    unsigned long Height;
     POSITION Pos;
     long long MainDataIdx; /*이 데이터가 가리키는 MainData 인덱스*/
     float Value;
     float ValueMax;
     float ValueMin;
+    wchar_t LabelText[MAX_CHART_LABEL_LEN];
     PropLine* pGuideLine;
     PropBox*  pBoxPoint;
     PropCircle* pCircle;
@@ -269,7 +278,7 @@ public:
     ChartObject(UI_LineChart* pParent, ID2D1StrokeStyle* Stroke, unsigned long width, unsigned long height);
     ~ChartObject();
 
-    void SetValue(BOOL bMotion, float Value, float Max, float Min);
+    void SetValue(BOOL bMotion, float Value, float Max, float Min, wchar_t* Label);
     BOOL update(unsigned long time);
     void render();
     void pause(unsigned long Delay);

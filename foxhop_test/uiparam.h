@@ -14,6 +14,7 @@ UI_Table_MotionParam TableParam;
 UI_Static_MotionParam TitleParam;
 UI_Static_MotionParam StaticParam;
 UI_Textinput_MotionParam InputParam;
+UI_LineChart_MotionParam ChartParam;
 
 void UI_ParamSet() {
 	ButtonParam.InitMotion = eButtonMotionPattern::eInit_Reload;
@@ -54,6 +55,9 @@ void UI_ParamSet() {
 	TableParam.MotionInitRowText = eTableMotionPattern::eInitRowText_Typing;
 	TableParam.PitchInitRowText = 200;
 	TableParam.GapInitRowText = 50;
+	//TableParam.MotionInitRowText = eTableMotionPattern::eInitRowText_Default;
+	//TableParam.PitchInitRowText = 0;
+	//TableParam.GapInitRowText = 0;
 	TableParam.MotionPauseRowText = eTableMotionPattern::ePauseRowText_FlickRandom;
 	TableParam.PitchPauseRowText = 200;
 	TableParam.GapPauseRowText = 50;
@@ -135,6 +139,21 @@ void UI_ParamSet() {
 	InputParam.ColorText = { 1,1,1,1 };
 	InputParam.ColorCaret = { 0.8,0.8,0.8,1 };
 	InputParam.PitchMoveCaret = 150;
+
+
+	ChartParam.MotionInitChartGuideLine = eLineChartMotionPattern::eInitChartGuideLine_Expend;
+	ChartParam.DelayInitChartGuideLine = 0;
+	ChartParam.PitchInitChartGuideLine = 300;
+	ChartParam.MotionPauseChartGuideLine = eLineChartMotionPattern::eInitChartGuideLine_Expend;
+	ChartParam.DelayPauseChartGuideLine = 0;
+	ChartParam.PitchPauseChartGuideLine = 300;
+
+	ChartParam.ColorBg = ALL_ZERO;
+	ChartParam.ColorFrame = { 1,0,0,1 };
+	ChartParam.ColorChartLine = { 1,1,1,1 };
+	ChartParam.ColorChartPoint = { 0.9, 0.9, 0.9, 1 };
+	ChartParam.ColorGuideLine = { 0.25,0.25,0.25,1 };
+
 }
 
 void UI_ParamSet2() {

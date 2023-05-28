@@ -13,6 +13,7 @@
 #include "../foxhop/include/ui_line.hpp"
 #include "../foxhop/include/ui_table.hpp"
 #include "../foxhop/include/ui_textinput.hpp"
+#include "../foxhop/include/ui_linechart.hpp"
 #include "tree.hpp"
 #include "uiparam.h"
 #include <process.h>
@@ -30,6 +31,8 @@ UI_Table* pTable = NULL;
 UI_Table* pTable2 = NULL;
 UI_Static* pStatic = NULL;
 UI_Textinput* pInput = NULL;
+UI_LineChart* pChart1 = NULL;
+
 
 /**
     @brief 차이 구하기
@@ -144,6 +147,52 @@ unsigned int thread_update_render(void* pTemp)
     return 0;
 }
 
+unsigned long long Filetime2long64(const FILETIME& fileTime)
+{
+    ULARGE_INTEGER largeInteger;
+    largeInteger.LowPart = fileTime.dwLowDateTime;
+    largeInteger.HighPart = fileTime.dwHighDateTime;
+    return largeInteger.QuadPart;
+}
+
+unsigned int thread_sysmon(void* pTemp)
+{
+    UI_Panel* pMainPanel;
+    pMainPanel = uiSys->pMainPanel;
+    FILETIME idleTime, kernelTime, userTime;
+    unsigned long long idle, kernel, user;
+    unsigned long long previdle, prevkernel, prevuser;
+    unsigned long long runtime, totaltime;
+    float percent;
+
+    GetSystemTimes(&idleTime, &kernelTime, &userTime);
+    previdle = Filetime2long64(idleTime);
+    prevkernel = Filetime2long64(kernelTime);
+    prevuser = Filetime2long64(userTime);
+    Sleep(1000);
+    //pChart1->AddValue(98, (wchar_t*)L"", TRUE);
+    while (1) {
+        GetSystemTimes(&idleTime, &kernelTime, &userTime);
+        idle = Filetime2long64(idleTime);
+        kernel = Filetime2long64(kernelTime);
+        user = Filetime2long64(userTime);
+
+        runtime = (kernel - prevkernel) + (user - prevuser);
+        totaltime = (idle - previdle) + runtime;
+
+        percent = (((float)runtime - (float)(idle - previdle)) / (float)totaltime) * 100.f;
+
+        pChart1->AddValue(percent, (wchar_t*)L"", TRUE);
+
+        previdle = idle;
+        prevkernel = kernel;
+        prevuser = user;
+
+        Sleep(1000);
+    }
+    return 0;
+}
+
 void TestTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     UI_Table* pTable = static_cast<UI_Table*>(pUI);
@@ -180,6 +229,7 @@ void TestPauseButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pTitle2->pause(700);
         pInput->pause(300);
         pTable2->pause(300);
+        pChart1->pause(1000);
         break;
     }
 }
@@ -196,6 +246,7 @@ void TestResumeButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pTitle2->resume(700);
         pInput->resume(300);
         pTable2->resume(300);
+        pChart1->resume(1000);
         break;
     }
 }
@@ -212,20 +263,21 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     unsigned int ThreadID;
     IDWriteTextFormat* pFmt;
 
-    switch(Message) {
+    switch (Message) {
     case UIM_CREATE:
         UI_ParamSet();
         TREE_Init(&hTree);
-        pPauseButton = new UI_Button(pUI->uiSys, TestPauseButtonProc, {10,10,100,20}, (wchar_t*)L"UI Pause", 500, ButtonParam);
-        pResumeButton = new UI_Button(pUI->uiSys, TestResumeButtonProc, {120,10,100,20}, (wchar_t*)L"UI Resume", 800, ButtonParam);
+        pPauseButton = new UI_Button(pUI->uiSys, TestPauseButtonProc, { 10,10,100,20 }, (wchar_t*)L"UI Pause", 500, ButtonParam);
+        pResumeButton = new UI_Button(pUI->uiSys, TestResumeButtonProc, { 120,10,100,20 }, (wchar_t*)L"UI Resume", 800, ButtonParam);
         pFmt = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 30, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         //pFmt = pUI->uiSys->CreateTextFmt((wchar_t*)L"monoMMM_5", 19, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         pTitle1 = new UI_Static(pUI->uiSys, NULL, { 10, 40, 450, 40 }, pFmt, (wchar_t*)L"PACKET MONITORING", TitleParam);
         pTitle2 = new UI_Static(pUI->uiSys, NULL, { 470, 40, 230, 40 }, pFmt, (wchar_t*)L"CONNECTION ANALYZE", TitleParam);
-        pTable = new UI_Table(pUI->uiSys, TestTableProc, {10, 90, 450 , 520}, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
-        pStatic = new UI_Static(pUI->uiSys, NULL, {10, 620, 450, 25}, pUI->uiSys->MediumTextForm ,(wchar_t*)L"Done.", StaticParam);
+        pTable = new UI_Table(pUI->uiSys, TestTableProc, { 10, 90, 450 , 520 }, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
+        pStatic = new UI_Static(pUI->uiSys, NULL, { 10, 620, 450, 25 }, pUI->uiSys->MediumTextForm, (wchar_t*)L"Done.", StaticParam);
         pInput = new UI_Textinput(pUI->uiSys, NULL, { 10, 655, 450, 150 }, pUI->uiSys->CreateTextFmt((wchar_t*)L"Consolas", 15, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_NEAR), InputParam);
-        pTable2 = new UI_Table(pUI->uiSys, NULL, {470, 90, 230 , 715}, 2, ColData2, ColWidth2, 30, 25, FALSE, TableParam);
+        pTable2 = new UI_Table(pUI->uiSys, NULL, { 470, 90, 230 , 715 }, 2, ColData2, ColWidth2, 30, 25, FALSE, TableParam);
+        pChart1 = new UI_LineChart(pUI->uiSys, NULL, {710, 90, 700, 200}, pUI->uiSys->SmallTextForm, 50, 0, 100, 50, 5, 0, ChartParam);
         pPanel->RegisterUI(pPauseButton);
         pPanel->RegisterUI(pResumeButton);
         pPanel->RegisterUI(pTitle1);
@@ -234,6 +286,8 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pPanel->RegisterUI(pTable2);
         pPanel->RegisterUI(pStatic);
         pPanel->RegisterUI(pInput);
+        pPanel->RegisterUI(pChart1);
+        _beginthreadex(NULL, NULL, thread_sysmon, 0, 0, &ThreadID);
         _beginthreadex(NULL, NULL, thread_test, 0, 0, &ThreadID);
         _beginthreadex(NULL, NULL, thread_update_render, 0, 0, &ThreadID);
         break;
@@ -254,6 +308,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 
     case WM_SIZE:
         uiSys->D2DA.pRenTarget->Resize({LOWORD(lParam),HIWORD(lParam)});
+        break;
+
+    case WM_MBUTTONDOWN:
+        pChart1->AddValue(15.f, (wchar_t*)L"asd", TRUE);
         break;
 
     case WM_DESTROY:
@@ -282,7 +340,7 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     wc.cbWndExtra = NULL;
     RegisterClass(&wc);
     //hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), NULL, NULL, hInst, NULL);
-    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 725, 855, NULL, NULL, hInst, NULL);
+    hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 1435, 855, NULL, NULL, hInst, NULL);
     AlphaWindow(hWnd, WINDOWMODE_TRANSPARENT);
     ShowWindow(hWnd, TRUE);
     while (GetMessage(&Message, NULL, NULL, NULL)) {
