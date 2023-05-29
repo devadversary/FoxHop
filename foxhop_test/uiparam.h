@@ -143,16 +143,31 @@ void UI_ParamSet() {
 
 	ChartParam.MotionInitChartGuideLine = eLineChartMotionPattern::eInitChartGuideLine_Expend;
 	ChartParam.DelayInitChartGuideLine = 0;
-	ChartParam.PitchInitChartGuideLine = 300;
-	ChartParam.MotionPauseChartGuideLine = eLineChartMotionPattern::eInitChartGuideLine_Expend;
-	ChartParam.DelayPauseChartGuideLine = 0;
-	ChartParam.PitchPauseChartGuideLine = 300;
+	ChartParam.PitchInitChartGuideLine = 500;
+	ChartParam.MotionPauseChartGuideLine = eLineChartMotionPattern::ePauseChartGuideLine_Collapse;
+	ChartParam.DelayPauseChartGuideLine = 200;
+	ChartParam.PitchPauseChartGuideLine = 500;
+
+	ChartParam.MotionInitChartPoint = eLineChartMotionPattern::eInitChartPoint_Flick;
+	ChartParam.DelayInitChartPoint = 200;
+	ChartParam.PitchInitChartPoint = 200;
+	ChartParam.MotionPauseChartPoint = eLineChartMotionPattern::ePauseChartPoint_Flick;
+	ChartParam.DelayPauseChartPoint = 0;
+	ChartParam.PitchPauseChartPoint = 200;
+
+	ChartParam.MotionInitDataOrder = eLineChartMotionPattern::eInitDataOrder_Linear;
+	ChartParam.DelayInitDataOrder = 500;
+	ChartParam.GapInitDataOrder = 80;
+	ChartParam.MotionPauseDataOrder = eLineChartMotionPattern::ePauseDataOrder_Linear;
+	ChartParam.DelayPauseDataOrder = 0;
+	ChartParam.GapPauseDataOrder = 80;
+	ChartParam.PitchScroll = 500;
 
 	ChartParam.ColorBg = ALL_ZERO;
 	ChartParam.ColorFrame = { 1,0,0,1 };
 	ChartParam.ColorChartLine = { 1,1,1,1 };
 	ChartParam.ColorChartPoint = { 0.9, 0.9, 0.9, 1 };
-	ChartParam.ColorGuideLine = { 0.25,0.25,0.25,1 };
+	ChartParam.ColorGuideLine = { 0.3,0.3,0.3,1 };
 
 }
 

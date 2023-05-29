@@ -136,6 +136,7 @@ void UI_LineChart::ResumeFrame(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitFrame) {
         case eLineChartMotionPattern::eInitFrame_Default: {
             pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
@@ -144,6 +145,7 @@ void UI_LineChart::ResumeFrame(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_LineChart::PauseFrame(unsigned long Delay)
@@ -163,6 +165,7 @@ void UI_LineChart::ResumeBg(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitBg) {
         case eLineChartMotionPattern::eInitBg_Default: {
             pBoxBg->Init(uiPos, ALL_ZERO);
@@ -171,12 +174,14 @@ void UI_LineChart::ResumeBg(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_LineChart::PauseBg(unsigned long Delay)
 {
     MOTION_INFO mi;
 
+    AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseBg) {
         case eLineChartMotionPattern::ePauseBg_Default: {
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseBg);
@@ -184,48 +189,81 @@ void UI_LineChart::PauseBg(unsigned long Delay)
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_LineChart::ResumeDataOrder(unsigned long Delay)
 {
+    AcquireSRWLockExclusive(&lock);
+
+    //for (int i = 0; i < PinCount; i++)
+    //    MainData[ViewData[i]->MainDataIdx].MotionPlayed = FALSE;
+
     switch (Motion.MotionInitDataOrder){
         case eLineChartMotionPattern::eInitDataOrder_Default: {
-            for (int i = 0; i < ValidViewDataCnt; i++) ViewData[i]->resume(Delay);
+            for (int i = 0; i < PinCount; i++) {
+                ViewData[i]->resume(Delay);
+                //MainData[ViewData[i]->MainDataIdx].MotionPlayed = TRUE;
+            }
+            break;
+        }
+
+        case eLineChartMotionPattern::eInitDataOrder_Linear: {
+            for (int i = 0; i < PinCount; i++) {
+                unsigned long ModIdx = ViewStartIdx % ViewDataCnt;;
+                ViewData[(ModIdx+i) % PinCount]->resume(Delay + (i*Motion.GapInitDataOrder));
+                //MainData[ViewData[i]->MainDataIdx].MotionPlayed = TRUE;
+            }
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_LineChart::PauseDataOrder(unsigned long Delay)
 {
+    AcquireSRWLockExclusive(&lock);
+
     switch (Motion.MotionPauseDataOrder) {
         case eLineChartMotionPattern::ePauseDataOrder_Default: {
-            for (int i = 0; i < ValidViewDataCnt; i++) ViewData[i]->pause(Delay);
+            for (int i = 0; i < PinCount; i++)
+                ViewData[i]->pause(Delay);
+            break;
+        }
+
+        case eLineChartMotionPattern::ePauseDataOrder_Linear: {
+            for (int i = 0; i < PinCount; i++) {
+                unsigned long ModIdx = ViewStartIdx % ViewDataCnt;
+                ViewData[(ModIdx + i) % PinCount]->pause(Delay + (i * Motion.GapPauseDataOrder));
+            }
             break;
         }
     }
+    ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_LineChart::resume(int nDelay)
 {
+    AcquireSRWLockExclusive(&lock);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
+    ReleaseSRWLockExclusive(&lock);
     ResumeFrame(nDelay + Motion.DelayInitFrame);
     ResumeBg(nDelay + Motion.DelayInitBg);
     //ResumeLabel(nDelay + Motion.DelayInitText);
-    ResumeDataOrder(nDelay + Motion.DelayInitFrame);
+    ResumeDataOrder(nDelay + Motion.DelayInitDataOrder);
 }
 
 void UI_LineChart::pause(int nDelay)
 {
-    uiMotionState = eUIMotionState::eUMS_PlayingHide;
     AcquireSRWLockExclusive(&lock);
+    uiMotionState = eUIMotionState::eUMS_PlayingHide;
     PinCount = ValidViewDataCnt; /*현재의 유효 뷰 갯수 (Resume시엔 PinCount를 따르지 않음)*/
     ScrollComp->clearChannel(); /*스크롤 모션 정지*/
     ReleaseSRWLockExclusive(&lock);
     PauseFrame(nDelay + Motion.DelayPauseFrame);
     PauseBg(nDelay + Motion.DelayPauseBg);
     //PauseLabel(nDelay + Motion.DelayPauseText);
-    PauseDataOrder(nDelay + Motion.DelayPauseFrame);
+    PauseDataOrder(nDelay + Motion.DelayPauseDataOrder);
 }
 
 BOOL UI_LineChart::update(unsigned long time)
@@ -233,7 +271,8 @@ BOOL UI_LineChart::update(unsigned long time)
     BOOL bUpdated;
     BOOL bNeedRangeUpdate = FALSE;
     long long ModIdx;
-    float IntervalMin, IntervalMax; /*구간 최대최솟값*/
+    float TmpMin, TmpMax; /*구간 최대최솟값*/
+    //float IntervalMin, IntervalMax; /*구간 최대최솟값*/
     size_t MainDataCnt;
 
     if (uiMotionState == eUIMotionState::eUMS_Hide) return FALSE;
@@ -267,20 +306,28 @@ BOOL UI_LineChart::update(unsigned long time)
     }
 
     /*바인딩이 일어났다면 최대최소값 갱신*/
-    if (bNeedRangeUpdate) {
+    if (bNeedRangeUpdate && uiMotionState == eUIMotionState::eUMS_Visible) {
         for (int k = 0; k < ValidViewDataCnt; k++) {
-            ViewData[k]->SetValue(TRUE, ViewData[k]->Value, IntervalMax, IntervalMin, ViewData[k]->LabelText);
-            ViewData[k]->ResumeGuideLine(TRUE, 0);
-            ViewData[k]->ResumePoint(TRUE, 0);
+            ChartObject* pObj = ViewData[k];
+            if (MainData[pObj->MainDataIdx].MotionPlayed) {
+                pObj->SetValue(FALSE, ViewData[k]->Value, IntervalMax, IntervalMin, ViewData[k]->LabelText);
+                //pObj->ResumeGuideLine(FALSE, 0);
+                //pObj->ResumePoint(FALSE, 0);
+            }
+            else {
+                pObj->SetValue(TRUE, ViewData[k]->Value, IntervalMax, IntervalMin, ViewData[k]->LabelText);
+                //pObj->ResumeGuideLine(TRUE, Motion.DelayInitChartGuideLine);
+                //pObj->ResumePoint(TRUE, Motion.DelayInitChartPoint);
+                MainData[pObj->MainDataIdx].MotionPlayed = TRUE;
+            }
         }
     }
 
-
     /*뷰 행 업데이트*/
     if (uiMotionState == eUIMotionState::eUMS_PlayingHide)
-        for (int i = 0; i < PinCount; i++) ViewData[i]->update(time);
+        for (int i = 0; i < PinCount; i++) bUpdated |= ViewData[i]->update(time);
     else
-        for (int i = 0; i < ValidViewDataCnt; i++) ViewData[i]->update(time);
+        for (int i = 0; i < ValidViewDataCnt; i++) bUpdated |= ViewData[i]->update(time);
 
     ReleaseSRWLockExclusive(&lock);
 
@@ -412,23 +459,16 @@ void ChartObject::SetValue(BOOL bMotion, float Value, float Max, float Min, wcha
     PointPos.x2 = (float)PointSize;
     PointPos.y2 = (float)PointSize;
 
+    /*
     switch (pChart->Motion.MotionAdjustData) {
     case eLineChartMotionPattern::eAdjustData_Default:
         mi = InitMotionInfo(eMotionForm::eMotion_None, 0, pChart->Motion.PitchAdjustData);
         pBoxPoint->SetPos(mi, TRUE, ALL_ZERO, PointPos);
         break;
     }
-}
-
-BOOL ChartObject::update(unsigned long time)
-{
-    BOOL bUpdated;
-    
-    bUpdated = pGuideLine->update(time);
-    bUpdated |= pBoxPoint->update(time);
-    bUpdated |= pCircle->update(time);
-    bUpdated |= pLabel->update(time);
-    return bUpdated;
+    */
+    ResumeGuideLine(bMotion, bMotion ? pChart->Motion.DelayInitChartGuideLine : 0);
+    ResumePoint(bMotion, bMotion ? pChart->Motion.DelayInitChartPoint : 0);
 }
 
 void ChartObject::ResumeGuideLine(BOOL bMotion, unsigned long Delay)
@@ -455,8 +495,8 @@ void ChartObject::ResumeGuideLine(BOOL bMotion, unsigned long Delay)
 
         case eLineChartMotionPattern::eInitChartGuideLine_Expend: {
             POSITION StartPos = LinePos;
-            StartPos.y += Height / 2;
-            StartPos.y2 = 0;
+            StartPos.y = (Height / 2);
+            StartPos.y2 = (Height / 2);
             pGuideLine->Init(StartPos, ALL_ZERO);
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
             pGuideLine->SetColor(mi, TRUE, ALL_ZERO, pChart->Motion.ColorGuideLine);
@@ -481,19 +521,17 @@ void ChartObject::PauseGuideLine(unsigned long Delay)
     switch (pChart->Motion.MotionPauseChartGuideLine) {
         case eLineChartMotionPattern::ePauseChartGuideLine_Default: {
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, pChart->Motion.PitchPauseChartGuideLine);
-            TmpColor = pChart->Motion.ColorGuideLine;
-            TmpColor.a = 0;
-            pGuideLine->SetColor(mi, TRUE, ALL_ZERO, TmpColor);
+            pGuideLine->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
             break;
         }
 
         case eLineChartMotionPattern::ePauseChartGuideLine_Collapse: {
             POSITION EndPos = LinePos;
-            EndPos.y += Height / 2;
-            EndPos.y2 = 0;
-            mi = InitMotionInfo(eMotionForm::eMotion_x3_2, Delay, pChart->Motion.PitchInitChartGuideLine);
+            EndPos.y = Height / 2;
+            EndPos.y2 = Height / 2;
+            mi = InitMotionInfo(eMotionForm::eMotion_x3_2, Delay, pChart->Motion.PitchPauseChartGuideLine);
             pGuideLine->SetPos(mi, TRUE, ALL_ZERO, EndPos);
-            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay+ pChart->Motion.PitchInitChartGuideLine, 0);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay+ pChart->Motion.PitchPauseChartGuideLine, 0);
             pGuideLine->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
             break;
         }
@@ -525,20 +563,30 @@ void ChartObject::ResumePoint(BOOL bMotion, unsigned long Delay)
             pBoxPoint->SetColor(mi, TRUE, ALL_ZERO, pChart->Motion.ColorChartPoint);
             break;
         }
+
+        case eLineChartMotionPattern::eInitChartPoint_Flick: {
+            pBoxPoint->Init(PointPos, ALL_ZERO);
+            mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay, pChart->Motion.PitchInitChartPoint);
+            pBoxPoint->SetColor(mi, TRUE, ALL_ZERO, pChart->Motion.ColorChartPoint);
+            break;
+        }
     }
 }
 
 void ChartObject::PausePoint(unsigned long Delay)
 {
     MOTION_INFO mi;
-    D2D1_COLOR_F TmpColor;
 
     switch (pChart->Motion.MotionPauseChartPoint) {
         case eLineChartMotionPattern::ePauseChartPoint_Default: {
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, pChart->Motion.PitchPauseChartPoint);
-            TmpColor = pChart->Motion.ColorChartPoint;
-            TmpColor.a = 0;
-            pBoxPoint->SetColor(mi, TRUE, ALL_ZERO, TmpColor);
+            pBoxPoint->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+        }
+
+        case eLineChartMotionPattern::ePauseChartPoint_Flick: {
+            mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay, pChart->Motion.PitchPauseChartPoint);
+            pBoxPoint->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
             break;
         }
     }
@@ -567,16 +615,6 @@ void ChartObject::PauseLabel(unsigned long Delay)
     }
 }
 
-void ChartObject::render()
-{
-    ID2D1RenderTarget* pRT = pChart->pRenderTarget;
-
-    //pCircle->render(pRT);
-    pGuideLine->render(pRT);
-    pBoxPoint->render(pRT);
-    //pLabel->render(pRT);
-}
-
 void ChartObject::pause(unsigned long Delay)
 {
     PauseGuideLine(Delay + pChart->Motion.DelayPauseChartGuideLine);
@@ -587,6 +625,27 @@ void ChartObject::resume(unsigned long Delay)
 {
     ResumeGuideLine(TRUE, Delay + pChart->Motion.DelayInitChartGuideLine);
     ResumePoint(TRUE, Delay + pChart->Motion.DelayInitChartPoint);
+}
+
+BOOL ChartObject::update(unsigned long time)
+{
+    BOOL bUpdated;
+
+    bUpdated = pGuideLine->update(time);
+    bUpdated |= pBoxPoint->update(time);
+    //bUpdated |= pCircle->update(time);
+    //bUpdated |= pLabel->update(time);
+    return bUpdated;
+}
+
+void ChartObject::render()
+{
+    ID2D1RenderTarget* pRT = pChart->pRenderTarget;
+
+    pGuideLine->render(pRT);
+    pBoxPoint->render(pRT);
+    //pCircle->render(pRT);
+    //pLabel->render(pRT);
 }
 
 

@@ -229,7 +229,7 @@ void TestPauseButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pTitle2->pause(700);
         pInput->pause(300);
         pTable2->pause(300);
-        pChart1->pause(1000);
+        pChart1->pause(500);
         break;
     }
 }
@@ -246,7 +246,7 @@ void TestResumeButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pTitle2->resume(700);
         pInput->resume(300);
         pTable2->resume(300);
-        pChart1->resume(1000);
+        pChart1->resume(500);
         break;
     }
 }
@@ -267,10 +267,10 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     case UIM_CREATE:
         UI_ParamSet();
         TREE_Init(&hTree);
-        pPauseButton = new UI_Button(pUI->uiSys, TestPauseButtonProc, { 10,10,100,20 }, (wchar_t*)L"UI Pause", 500, ButtonParam);
-        pResumeButton = new UI_Button(pUI->uiSys, TestResumeButtonProc, { 120,10,100,20 }, (wchar_t*)L"UI Resume", 800, ButtonParam);
         pFmt = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 30, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         //pFmt = pUI->uiSys->CreateTextFmt((wchar_t*)L"monoMMM_5", 19, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+        pPauseButton = new UI_Button(pUI->uiSys, TestPauseButtonProc, { 10,10,100,20 }, (wchar_t*)L"UI Pause", 500, ButtonParam);
+        pResumeButton = new UI_Button(pUI->uiSys, TestResumeButtonProc, { 120,10,100,20 }, (wchar_t*)L"UI Resume", 800, ButtonParam);
         pTitle1 = new UI_Static(pUI->uiSys, NULL, { 10, 40, 450, 40 }, pFmt, (wchar_t*)L"PACKET MONITORING", TitleParam);
         pTitle2 = new UI_Static(pUI->uiSys, NULL, { 470, 40, 230, 40 }, pFmt, (wchar_t*)L"CONNECTION ANALYZE", TitleParam);
         pTable = new UI_Table(pUI->uiSys, TestTableProc, { 10, 90, 450 , 520 }, 3, ColData, ColWidth, 30, 20, FALSE, TableParam);
@@ -341,7 +341,7 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     RegisterClass(&wc);
     //hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), NULL, NULL, hInst, NULL);
     hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 1435, 855, NULL, NULL, hInst, NULL);
-    AlphaWindow(hWnd, WINDOWMODE_TRANSPARENT);
+    //AlphaWindow(hWnd, WINDOWMODE_TRANSPARENT);
     ShowWindow(hWnd, TRUE);
     while (GetMessage(&Message, NULL, NULL, NULL)) {
         TranslateMessage(&Message);

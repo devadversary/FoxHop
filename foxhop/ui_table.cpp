@@ -656,7 +656,9 @@ void UI_Table::PauseRowOrder(unsigned long Delay)
 
 void UI_Table::resume(int nDelay)
 {
+    AcquireSRWLockExclusive(&lock);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
+    ReleaseSRWLockExclusive(&lock);
     ResumeFrame(nDelay + Motion.DelayInitTableFrame);
     ResumeBg(nDelay + Motion.DelayInitTableBg);
     ResumeHeaderBg(nDelay + Motion.DelayInitTableHeaderBg);
@@ -667,8 +669,8 @@ void UI_Table::resume(int nDelay)
 void UI_Table::pause(int nDelay)
 {
     //PinCount = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
-    uiMotionState = eUIMotionState::eUMS_PlayingHide;
     AcquireSRWLockExclusive(&lock);
+    uiMotionState = eUIMotionState::eUMS_PlayingHide;
     ScrollComp->clearChannel(); /*스크롤 모션 정지*/
     ReleaseSRWLockExclusive(&lock);
     PauseFrame(nDelay + Motion.DelayPauseTableFrame);

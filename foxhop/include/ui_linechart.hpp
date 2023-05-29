@@ -17,11 +17,13 @@ enum class eLineChartMotionPattern {
     eInitText_Default,
     ePauseText_Default,
 
-    eInitTotalLine_Default,
-    ePauseTotalLine_Default,
+    eInitChartLine_Default,
+    ePauseChartLine_Default,
 
     eInitDataOrder_Default,
+    eInitDataOrder_Linear,
     ePauseDataOrder_Default,
+    ePauseDataOrder_Linear,
 
     eInitChartGuideLine_Default,
     eInitChartGuideLine_Expend,
@@ -29,7 +31,9 @@ enum class eLineChartMotionPattern {
     ePauseChartGuideLine_Collapse,
 
     eInitChartPoint_Default,
+    eInitChartPoint_Flick,
     ePauseChartPoint_Default,
+    ePauseChartPoint_Flick,
 
     eInitChartLabel_Default,
     ePauseChartLabel_Default,
@@ -61,11 +65,13 @@ public:
     unsigned long DelayPauseText;
 
     eLineChartMotionPattern MotionInitDataOrder;
-    unsigned long PitchInitDataOrder;
+    //unsigned long PitchInitDataOrder;
     unsigned long DelayInitDataOrder;
+    unsigned long GapInitDataOrder;
     eLineChartMotionPattern MotionPauseDataOrder;
-    unsigned long PitchPauseDataOrder;
+    //unsigned long PitchPauseDataOrder;
     unsigned long DelayPauseDataOrder;
+    unsigned long GapPauseDataOrder;
 
     eLineChartMotionPattern MotionInitTotalLine;
     unsigned long PitchInitTotalLine;
@@ -130,16 +136,18 @@ public:
         DelayPauseText = 0;
 
         MotionInitDataOrder = eLineChartMotionPattern::eInitDataOrder_Default;
-        PitchInitDataOrder = 0;
+        //PitchInitDataOrder = 0;
         DelayInitDataOrder = 0;
+        GapInitDataOrder = 0;
         MotionPauseDataOrder = eLineChartMotionPattern::ePauseDataOrder_Default;
-        PitchPauseDataOrder = 0;
+        //PitchPauseDataOrder = 0;
         DelayPauseDataOrder = 0;
+        GapPauseDataOrder = 0;
 
-        MotionInitTotalLine = eLineChartMotionPattern::eInitTotalLine_Default;
+        MotionInitTotalLine = eLineChartMotionPattern::eInitChartLine_Default;
         PitchInitTotalLine = 0;
         DelayInitTotalLine = 0;
-        MotionPauseTotalLine = eLineChartMotionPattern::ePauseTotalLine_Default;
+        MotionPauseTotalLine = eLineChartMotionPattern::ePauseChartLine_Default;
         PitchPauseTotalLine = 0;
         DelayPauseTotalLine = 0;
 
