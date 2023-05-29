@@ -121,6 +121,7 @@ BOOL ComponentMotion::update(unsigned long ElapsedTime)
         case eMotionForm::eMotion_None:      pCh->fCurrent = 1;                   break;
         case eMotionForm::eMotion_Pulse1:    pCh->fCurrent = Preset_Pulse1(x);    break;
         case eMotionForm::eMotion_Pulse2:    pCh->fCurrent = Preset_Pulse2(x);    break;
+        case eMotionForm::eMotion_4Step:     pCh->fCurrent = Preset_4Step(x);     break;
         case eMotionForm::eMotion_Linear1:   pCh->fCurrent = Preset_Linear1(x);   break;
         case eMotionForm::eMotion_Linear2:   pCh->fCurrent = Preset_Linear2(x);   break;
         case eMotionForm::eMotion_x3_1:      pCh->fCurrent = Preset_x3_0to1_1(x); break;

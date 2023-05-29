@@ -155,18 +155,29 @@ void UI_ParamSet() {
 	ChartParam.DelayPauseChartPoint = 0;
 	ChartParam.PitchPauseChartPoint = 200;
 
+	ChartParam.MotionInitChartPointDeco = eLineChartMotionPattern::eInitChartPointDeco_Step;
+	ChartParam.DelayInitChartPointDeco = 100;
+	ChartParam.PitchInitChartPointDeco = 600;
+	ChartParam.MotionPauseChartPointDeco = eLineChartMotionPattern::ePauseChartPoint_Default;
+	ChartParam.DelayPauseChartPointDeco = 0;
+	ChartParam.PitchPauseChartPointDeco = 0;
+
 	ChartParam.MotionInitDataOrder = eLineChartMotionPattern::eInitDataOrder_Linear;
 	ChartParam.DelayInitDataOrder = 500;
 	ChartParam.GapInitDataOrder = 80;
 	ChartParam.MotionPauseDataOrder = eLineChartMotionPattern::ePauseDataOrder_Linear;
 	ChartParam.DelayPauseDataOrder = 0;
 	ChartParam.GapPauseDataOrder = 80;
+
 	ChartParam.PitchScroll = 500;
+	ChartParam.PointDecoMaxRadius = 50;
+	ChartParam.PointDecoMinRadius = 15;
 
 	ChartParam.ColorBg = ALL_ZERO;
 	ChartParam.ColorFrame = { 1,0,0,1 };
 	ChartParam.ColorChartLine = { 1,1,1,1 };
 	ChartParam.ColorChartPoint = { 0.9, 0.9, 0.9, 1 };
+	ChartParam.ColorChartPointDeco = { 0.9, 0.9, 0.9, 1 };
 	ChartParam.ColorGuideLine = { 0.3,0.3,0.3,1 };
 
 }

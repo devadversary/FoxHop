@@ -18,7 +18,9 @@ enum class eLineChartMotionPattern {
     ePauseText_Default,
 
     eInitChartLine_Default,
+    eInitChartLine_Connect,
     ePauseChartLine_Default,
+    ePauseChartLine_Disconnect,
 
     eInitDataOrder_Default,
     eInitDataOrder_Linear,
@@ -34,6 +36,10 @@ enum class eLineChartMotionPattern {
     eInitChartPoint_Flick,
     ePauseChartPoint_Default,
     ePauseChartPoint_Flick,
+
+    eInitChartPointDeco_Default, /**< 장식 없음 (화면에 출력 안됨)*/
+    eInitChartPointDeco_Step,
+    ePauseChartPointDeco_Default, /**< 장식 없음 (화면에 출력 안됨)*/
 
     eInitChartLabel_Default,
     ePauseChartLabel_Default,
@@ -65,20 +71,18 @@ public:
     unsigned long DelayPauseText;
 
     eLineChartMotionPattern MotionInitDataOrder;
-    //unsigned long PitchInitDataOrder;
     unsigned long DelayInitDataOrder;
     unsigned long GapInitDataOrder;
     eLineChartMotionPattern MotionPauseDataOrder;
-    //unsigned long PitchPauseDataOrder;
     unsigned long DelayPauseDataOrder;
     unsigned long GapPauseDataOrder;
 
-    eLineChartMotionPattern MotionInitTotalLine;
-    unsigned long PitchInitTotalLine;
-    unsigned long DelayInitTotalLine;
-    eLineChartMotionPattern MotionPauseTotalLine;
-    unsigned long PitchPauseTotalLine;
-    unsigned long DelayPauseTotalLine;
+    eLineChartMotionPattern MotionInitChartLine;
+    unsigned long PitchInitChartLine;
+    unsigned long DelayInitChartLine;
+    eLineChartMotionPattern MotionPauseChartLine;
+    unsigned long PitchPauseChartLine;
+    unsigned long DelayPauseChartLine;
 
     eLineChartMotionPattern MotionInitChartGuideLine;
     unsigned long PitchInitChartGuideLine;
@@ -94,6 +98,13 @@ public:
     unsigned long PitchPauseChartPoint;
     unsigned long DelayPauseChartPoint;
 
+    eLineChartMotionPattern MotionInitChartPointDeco;
+    unsigned long PitchInitChartPointDeco;
+    unsigned long DelayInitChartPointDeco;
+    eLineChartMotionPattern MotionPauseChartPointDeco;
+    unsigned long PitchPauseChartPointDeco;
+    unsigned long DelayPauseChartPointDeco;
+
     eLineChartMotionPattern MotionInitChartLabel;
     unsigned long PitchInitChartLabel;
     unsigned long DelayInitChartLabel;
@@ -105,11 +116,16 @@ public:
     unsigned long PitchAdjustData;
 
     unsigned long PitchScroll;
+
     unsigned long PointSize;
+    unsigned long PointDecoMaxRadius;
+    unsigned long PointDecoMinRadius;
+
     D2D1_COLOR_F ColorFrame;
     D2D1_COLOR_F ColorBg;
     D2D1_COLOR_F ColorChartLine;
     D2D1_COLOR_F ColorChartPoint;
+    D2D1_COLOR_F ColorChartPointDeco;
     D2D1_COLOR_F ColorGuideLine;
 
 public:
@@ -144,12 +160,12 @@ public:
         DelayPauseDataOrder = 0;
         GapPauseDataOrder = 0;
 
-        MotionInitTotalLine = eLineChartMotionPattern::eInitChartLine_Default;
-        PitchInitTotalLine = 0;
-        DelayInitTotalLine = 0;
-        MotionPauseTotalLine = eLineChartMotionPattern::ePauseChartLine_Default;
-        PitchPauseTotalLine = 0;
-        DelayPauseTotalLine = 0;
+        MotionInitChartLine = eLineChartMotionPattern::eInitChartLine_Default;
+        PitchInitChartLine = 0;
+        DelayInitChartLine = 0;
+        MotionPauseChartLine = eLineChartMotionPattern::ePauseChartLine_Default;
+        PitchPauseChartLine = 0;
+        DelayPauseChartLine = 0;
 
         MotionInitChartGuideLine = eLineChartMotionPattern::eInitChartGuideLine_Default;
         PitchInitChartGuideLine = 0;
@@ -165,6 +181,13 @@ public:
         PitchPauseChartPoint = 0;
         DelayPauseChartPoint = 0;
 
+        MotionInitChartPointDeco = eLineChartMotionPattern::eInitChartPointDeco_Default;
+        PitchInitChartPointDeco = 0;
+        DelayInitChartPointDeco = 0;
+        MotionPauseChartPointDeco = eLineChartMotionPattern::ePauseChartPointDeco_Default;
+        PitchPauseChartPointDeco = 0;
+        DelayPauseChartPointDeco = 0;
+
         MotionInitChartLabel = eLineChartMotionPattern::eInitChartLabel_Default;
         PitchInitChartLabel = 0;
         DelayInitChartLabel = 0;
@@ -177,10 +200,14 @@ public:
 
         PitchScroll = 150;
         PointSize = 16;
+        PointDecoMaxRadius = 0;
+        PointDecoMinRadius = 0;
+
         ColorFrame = { 0.f,0.f,0.f,1.f };
         ColorBg = { 1.f, 1.f, 1.f, 1.f };
         ColorChartLine = { 0,0,0,1 };
         ColorChartPoint = { 0,0,0,1 };
+        ColorChartPointDeco = { 0,0,0,1 };
         ColorGuideLine = { 0.8,0.8,0.8,1 };
     }
 };
@@ -233,8 +260,10 @@ private:
     void PauseFrame(unsigned long Delay);
     void ResumeBg(unsigned long Delay);
     void PauseBg(unsigned long Delay);
-    void ResumeLabel(unsigned long Delay);
-    void PauseLabel(unsigned long Delay);
+    //void ResumeLabel(unsigned long Delay);
+    //void PauseLabel(unsigned long Delay);
+    void ResumeChartLine(unsigned long Delay);
+    void PauseChartLine(unsigned long Delay);
     void ResumeDataOrder(unsigned long Delay);
     void PauseDataOrder(unsigned long Delay);
 
@@ -279,6 +308,8 @@ public:
     void PauseGuideLine(unsigned long Delay);
     void ResumePoint(BOOL bMotion, unsigned long Delay);
     void PausePoint(unsigned long Delay);
+    void ResumePointDeco(BOOL bMotion, unsigned long Delay);
+    void PausePointDeco(unsigned long Delay);
     void ResumeLabel(BOOL bMotion, unsigned long Delay);
     void PauseLabel(unsigned long Delay);
 

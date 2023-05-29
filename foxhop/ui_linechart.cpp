@@ -192,6 +192,32 @@ void UI_LineChart::PauseBg(unsigned long Delay)
     ReleaseSRWLockExclusive(&lock);
 }
 
+void UI_LineChart::ResumeChartLine(unsigned long Delay)
+{
+    MOTION_INFO mi;
+
+    AcquireSRWLockExclusive(&lock);
+    switch (Motion.MotionInitChartLine) {
+        case eLineChartMotionPattern::eInitChartLine_Default: {
+            break;
+        }
+    }
+    ReleaseSRWLockExclusive(&lock);
+}
+
+void UI_LineChart::PauseChartLine(unsigned long Delay)
+{
+    MOTION_INFO mi;
+
+    AcquireSRWLockExclusive(&lock);
+    switch (Motion.MotionPauseChartLine) {
+        case eLineChartMotionPattern::ePauseChartLine_Default: {
+            break;
+        }
+    }
+    ReleaseSRWLockExclusive(&lock);
+}
+
 void UI_LineChart::ResumeDataOrder(unsigned long Delay)
 {
     AcquireSRWLockExclusive(&lock);
@@ -249,6 +275,7 @@ void UI_LineChart::resume(int nDelay)
     ReleaseSRWLockExclusive(&lock);
     ResumeFrame(nDelay + Motion.DelayInitFrame);
     ResumeBg(nDelay + Motion.DelayInitBg);
+    ResumeChartLine(nDelay + Motion.DelayInitChartLine);
     //ResumeLabel(nDelay + Motion.DelayInitText);
     ResumeDataOrder(nDelay + Motion.DelayInitDataOrder);
 }
@@ -262,6 +289,7 @@ void UI_LineChart::pause(int nDelay)
     ReleaseSRWLockExclusive(&lock);
     PauseFrame(nDelay + Motion.DelayPauseFrame);
     PauseBg(nDelay + Motion.DelayPauseBg);
+    PauseChartLine(nDelay + Motion.DelayPauseChartLine);
     //PauseLabel(nDelay + Motion.DelayPauseText);
     PauseDataOrder(nDelay + Motion.DelayPauseDataOrder);
 }
@@ -469,6 +497,7 @@ void ChartObject::SetValue(BOOL bMotion, float Value, float Max, float Min, wcha
     */
     ResumeGuideLine(bMotion, bMotion ? pChart->Motion.DelayInitChartGuideLine : 0);
     ResumePoint(bMotion, bMotion ? pChart->Motion.DelayInitChartPoint : 0);
+    ResumePointDeco(bMotion, bMotion ? pChart->Motion.DelayInitChartPointDeco : 0);
 }
 
 void ChartObject::ResumeGuideLine(BOOL bMotion, unsigned long Delay)
@@ -592,6 +621,53 @@ void ChartObject::PausePoint(unsigned long Delay)
     }
 }
 
+void ChartObject::ResumePointDeco(BOOL bMotion, unsigned long Delay)
+{
+    MOTION_INFO mi;
+    eLineChartMotionPattern patt;
+    unsigned long yHeight;
+    unsigned long PointSize;
+    POSITION PointPos;
+
+    yHeight = Pos.y2 * ((Value - ValueMin) / (ValueMax - ValueMin));
+    PointPos.x = (float)(Width >> 1);
+    PointPos.y = (float)(Height - yHeight);
+    PointPos.r = (float)pChart->Motion.PointDecoMaxRadius;
+
+    if (bMotion) patt = pChart->Motion.MotionInitChartPointDeco;
+    else patt = eLineChartMotionPattern::eInitChartPointDeco_Default;
+
+    switch (patt) {
+        case eLineChartMotionPattern::eInitChartPointDeco_Default: {
+            break;
+        }
+
+        case eLineChartMotionPattern::eInitChartPointDeco_Step: {
+            POSITION EndPos = PointPos;
+            EndPos.r = (float)pChart->Motion.PointDecoMinRadius;
+            pCircle->Init(PointPos, ALL_ZERO, FALSE);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay + pChart->Motion.DelayInitChartPointDeco, 0);
+            pCircle->SetColor(mi, TRUE, ALL_ZERO, pChart->Motion.ColorChartPointDeco);
+            mi = InitMotionInfo(eMotionForm::eMotion_4Step, Delay, pChart->Motion.PitchInitChartPointDeco);
+            pCircle->SetPos(mi, TRUE, ALL_ZERO, EndPos);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay + pChart->Motion.PitchInitChartPointDeco, 0);
+            pCircle->addColorMotion(mi, FALSE, ALL_ZERO, ALL_ZERO);
+            break;
+        }
+    }
+}
+
+void ChartObject::PausePointDeco(unsigned long Delay)
+{
+    MOTION_INFO mi;
+
+    switch (pChart->Motion.MotionPauseChartPoint) {
+        case eLineChartMotionPattern::ePauseChartPointDeco_Default: {
+            break;
+        }
+    }
+}
+
 void ChartObject::ResumeLabel(BOOL bMotion, unsigned long Delay)
 {
     eLineChartMotionPattern patt;
@@ -619,12 +695,14 @@ void ChartObject::pause(unsigned long Delay)
 {
     PauseGuideLine(Delay + pChart->Motion.DelayPauseChartGuideLine);
     PausePoint(Delay + pChart->Motion.DelayPauseChartPoint);
+    PausePointDeco(Delay + pChart->Motion.DelayPauseChartPointDeco);
 }
 
 void ChartObject::resume(unsigned long Delay)
 {
     ResumeGuideLine(TRUE, Delay + pChart->Motion.DelayInitChartGuideLine);
     ResumePoint(TRUE, Delay + pChart->Motion.DelayInitChartPoint);
+    ResumePointDeco(TRUE, Delay + pChart->Motion.DelayInitChartPointDeco);
 }
 
 BOOL ChartObject::update(unsigned long time)
@@ -633,7 +711,7 @@ BOOL ChartObject::update(unsigned long time)
 
     bUpdated = pGuideLine->update(time);
     bUpdated |= pBoxPoint->update(time);
-    //bUpdated |= pCircle->update(time);
+    bUpdated |= pCircle->update(time);
     //bUpdated |= pLabel->update(time);
     return bUpdated;
 }
@@ -644,7 +722,7 @@ void ChartObject::render()
 
     pGuideLine->render(pRT);
     pBoxPoint->render(pRT);
-    //pCircle->render(pRT);
+    pCircle->render(pRT);
     //pLabel->render(pRT);
 }
 
