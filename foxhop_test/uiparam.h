@@ -141,6 +141,13 @@ void UI_ParamSet() {
 	InputParam.PitchMoveCaret = 150;
 
 
+	ChartParam.MotionInitFrame = eLineChartMotionPattern::eInitFrame_Flick;
+	ChartParam.DelayInitFrame = 0;
+	ChartParam.PitchInitFrame = 200;
+	ChartParam.MotionPauseFrame = eLineChartMotionPattern::ePauseFrame_Flick;
+	ChartParam.DelayPauseFrame = 500;
+	ChartParam.PitchPauseFrame = 200;
+
 	ChartParam.MotionInitChartGuideLine = eLineChartMotionPattern::eInitChartGuideLine_Expend;
 	ChartParam.DelayInitChartGuideLine = 0;
 	ChartParam.PitchInitChartGuideLine = 500;

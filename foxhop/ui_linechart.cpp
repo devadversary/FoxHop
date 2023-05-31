@@ -140,7 +140,13 @@ void UI_LineChart::ResumeFrame(unsigned long Delay)
     switch (Motion.MotionInitFrame) {
         case eLineChartMotionPattern::eInitFrame_Default: {
             pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
-            mi = InitMotionInfo(eMotionForm::eMotion_None, Motion.DelayInitFrame, Motion.PitchInitFrame);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitFrame);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorFrame);
+            break;
+        }
+        case eLineChartMotionPattern::eInitFrame_Flick: {
+            pBoxFrame->Init(uiPos, ALL_ZERO, FALSE);
+            mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay, Motion.PitchInitFrame);
             pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorFrame);
             break;
         }
@@ -154,7 +160,12 @@ void UI_LineChart::PauseFrame(unsigned long Delay)
 
     switch (Motion.MotionPauseFrame) {
         case eLineChartMotionPattern::ePauseFrame_Default: {
-            mi = InitMotionInfo(eMotionForm::eMotion_None, Motion.DelayPauseFrame, Motion.PitchPauseFrame);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchPauseFrame);
+            pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+        }
+        case eLineChartMotionPattern::ePauseFrame_Flick: {
+            mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay, Motion.PitchPauseFrame);
             pBoxFrame->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
             break;
         }

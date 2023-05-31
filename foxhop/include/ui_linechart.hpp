@@ -9,7 +9,9 @@
 */
 enum class eLineChartMotionPattern {
     eInitFrame_Default,
+    eInitFrame_Flick,
     ePauseFrame_Default,
+    ePauseFrame_Flick,
 
     eInitBg_Default,
     ePauseBg_Default,
