@@ -152,8 +152,15 @@ void UI_ParamSet() {
 	ChartParam.DelayInitChartPoint = 200;
 	ChartParam.PitchInitChartPoint = 200;
 	ChartParam.MotionPauseChartPoint = eLineChartMotionPattern::ePauseChartPoint_Flick;
-	ChartParam.DelayPauseChartPoint = 0;
+	ChartParam.DelayPauseChartPoint = 200;
 	ChartParam.PitchPauseChartPoint = 200;
+
+	ChartParam.MotionInitChartLine = eLineChartMotionPattern::eInitChartLine_Connect;
+	ChartParam.DelayInitChartLine = 300;
+	ChartParam.PitchInitChartLine = 200;
+	ChartParam.MotionPauseChartLine = eLineChartMotionPattern::ePauseChartLine_Disconnect;
+	ChartParam.DelayPauseChartLine = 0;
+	ChartParam.PitchPauseChartLine = 200;
 
 	ChartParam.MotionInitChartPointDeco = eLineChartMotionPattern::eInitChartPointDeco_Step;
 	ChartParam.DelayInitChartPointDeco = 100;

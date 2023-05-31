@@ -192,32 +192,6 @@ void UI_LineChart::PauseBg(unsigned long Delay)
     ReleaseSRWLockExclusive(&lock);
 }
 
-void UI_LineChart::ResumeChartLine(unsigned long Delay)
-{
-    MOTION_INFO mi;
-
-    AcquireSRWLockExclusive(&lock);
-    switch (Motion.MotionInitChartLine) {
-        case eLineChartMotionPattern::eInitChartLine_Default: {
-            break;
-        }
-    }
-    ReleaseSRWLockExclusive(&lock);
-}
-
-void UI_LineChart::PauseChartLine(unsigned long Delay)
-{
-    MOTION_INFO mi;
-
-    AcquireSRWLockExclusive(&lock);
-    switch (Motion.MotionPauseChartLine) {
-        case eLineChartMotionPattern::ePauseChartLine_Default: {
-            break;
-        }
-    }
-    ReleaseSRWLockExclusive(&lock);
-}
-
 void UI_LineChart::ResumeDataOrder(unsigned long Delay)
 {
     AcquireSRWLockExclusive(&lock);
@@ -275,7 +249,6 @@ void UI_LineChart::resume(int nDelay)
     ReleaseSRWLockExclusive(&lock);
     ResumeFrame(nDelay + Motion.DelayInitFrame);
     ResumeBg(nDelay + Motion.DelayInitBg);
-    ResumeChartLine(nDelay + Motion.DelayInitChartLine);
     //ResumeLabel(nDelay + Motion.DelayInitText);
     ResumeDataOrder(nDelay + Motion.DelayInitDataOrder);
 }
@@ -289,7 +262,6 @@ void UI_LineChart::pause(int nDelay)
     ReleaseSRWLockExclusive(&lock);
     PauseFrame(nDelay + Motion.DelayPauseFrame);
     PauseBg(nDelay + Motion.DelayPauseBg);
-    PauseChartLine(nDelay + Motion.DelayPauseChartLine);
     //PauseLabel(nDelay + Motion.DelayPauseText);
     PauseDataOrder(nDelay + Motion.DelayPauseDataOrder);
 }
@@ -396,6 +368,12 @@ void UI_LineChart::render()
     TmpMat.dy += uiPos.y; /*UI 위치에 맞게 행렬 조정*/
     TmpMat.dx -= (float)ModScroll; /*스크롤된 오프셋 적용 준비*/
     MainDataCnt = MainData.size();
+
+    /*첫 데이터가 아니라면, 이전 데이터와의 선분 렌더링 필요*/
+    if (ViewStartIdx > 0) {
+        unsigned long TmpIdx = (ModIdx - 1) % ValidViewDataCnt;
+    }
+
     for (int i = 0; i < ValidViewDataCnt; i++) {
         unsigned long TmpIdx = (ModIdx + i) % ValidViewDataCnt;
         if (MainDataCnt <= ViewStartIdx + i) break; /*딱뎀시 자투리 X*/
@@ -459,6 +437,7 @@ ChartObject::ChartObject(UI_LineChart* pParent, ID2D1StrokeStyle* Stroke, unsign
     pGuideLine = new PropLine(pChart->pRenderTarget, pStroke);
     pBoxPoint = new PropBox(pChart->pRenderTarget);
     pCircle = new PropCircle(pChart->pRenderTarget);
+    pChartLine = new PropLine(pChart->pRenderTarget);
     pLabel = new PropText(pChart->pRenderTarget, 32);
 }
 
@@ -472,20 +451,14 @@ void ChartObject::SetValue(BOOL bMotion, float Value, float Max, float Min, wcha
 {
     MOTION_INFO mi;
     POSITION PointPos;
-    unsigned long yHeight;
     unsigned long PointSize;
     /*부모의 AddValue로 데이터가 추가되면 update의 bind 작업에의해 무조건 SetValue 가 호출됨*/
 
     ValueMax = Max;
     ValueMin = Min;
-    wcscpy_s(LabelText, MAX_CHART_LABEL_LEN, Label);
     /*Min, Max, Value에 따른 y좌표 구하기*/
-    yHeight = Pos.y2 * ((Value - ValueMin) / (ValueMax - ValueMin));
-    PointSize = pChart->Motion.PointSize;
-    PointPos.x = (float)((Width<<1) - (PointSize<<1));
-    PointPos.y = (float)(yHeight - (PointSize<<1));
-    PointPos.x2 = (float)PointSize;
-    PointPos.y2 = (float)PointSize;
+    PointY = Height - (Pos.y2 * ((Value - ValueMin) / (ValueMax - ValueMin)));
+    wcscpy_s(LabelText, MAX_CHART_LABEL_LEN, Label);
 
     /*
     switch (pChart->Motion.MotionAdjustData) {
@@ -498,6 +471,7 @@ void ChartObject::SetValue(BOOL bMotion, float Value, float Max, float Min, wcha
     ResumeGuideLine(bMotion, bMotion ? pChart->Motion.DelayInitChartGuideLine : 0);
     ResumePoint(bMotion, bMotion ? pChart->Motion.DelayInitChartPoint : 0);
     ResumePointDeco(bMotion, bMotion ? pChart->Motion.DelayInitChartPointDeco : 0);
+    ResumeLine(bMotion, bMotion ? pChart->Motion.DelayInitChartLine : 0);
 }
 
 void ChartObject::ResumeGuideLine(BOOL bMotion, unsigned long Delay)
@@ -571,14 +545,14 @@ void ChartObject::ResumePoint(BOOL bMotion, unsigned long Delay)
 {
     MOTION_INFO mi;
     eLineChartMotionPattern patt;
-    unsigned long yHeight;
     unsigned long PointSize;
     POSITION PointPos;
 
     PointSize = pChart->Motion.PointSize;
-    yHeight = Pos.y2 * ((Value - ValueMin) / (ValueMax - ValueMin));
+    //yHeight = Pos.y2 * ((Value - ValueMin) / (ValueMax - ValueMin));
     PointPos.x = (float)((Width >> 1) - (PointSize >> 1));
-    PointPos.y = (float)((Height - yHeight) - (PointSize >> 1));
+    //PointPos.y = (float)((Height - yHeight) - (PointSize >> 1));
+    PointPos.y = (float)(PointY - (PointSize >> 1));
     PointPos.width = (float)PointSize;
     PointPos.height = (float)PointSize;
 
@@ -668,10 +642,88 @@ void ChartObject::PausePointDeco(unsigned long Delay)
     }
 }
 
+void ChartObject::ResumeLine(BOOL bMotion, unsigned long Delay)
+{
+    MOTION_INFO mi;
+    unsigned long PrevPointY;
+    float PrevValue;
+    POSITION EndPos, StartPos;
+    eLineChartMotionPattern patt;
+
+    if (MainDataIdx == 0) return; /*참조할 "이전 데이터" 가 없음*/
+    if (bMotion) patt = pChart->Motion.MotionInitChartLine;
+    else patt = eLineChartMotionPattern::eInitChartLine_Default;
+
+    PrevValue = pChart->MainData[MainDataIdx - 1].Value;
+    //PointY = Height - (Pos.y2 * ((Value - ValueMin) / (ValueMax - ValueMin)));
+    PrevPointY = Height - (Pos.y2 * ((PrevValue - ValueMin) / (ValueMax - ValueMin)));
+    EndPos.x = (float) 0-(Width / 2);
+    EndPos.y = PrevPointY;
+    EndPos.x2 = Width/2;
+    EndPos.y2 = PointY;
+
+    switch (patt) {
+        case eLineChartMotionPattern::eInitChartLine_Default: {
+            pChartLine->Init(EndPos, ALL_ZERO);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+            pChartLine->SetColor(mi, TRUE, ALL_ZERO, pChart->Motion.ColorChartLine);
+            break;
+        }
+
+        case eLineChartMotionPattern::eInitChartLine_Connect: {
+            StartPos = EndPos;
+            StartPos.x2 = EndPos.x;
+            StartPos.y2 = EndPos.y;
+            pChartLine->Init(StartPos, ALL_ZERO);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+            pChartLine->SetColor(mi, TRUE, ALL_ZERO, pChart->Motion.ColorChartLine);
+            mi = InitMotionInfo(eMotionForm::eMotion_x3_2, Delay, pChart->Motion.PitchInitChartLine);
+            pChartLine->SetPos(mi, TRUE, ALL_ZERO, EndPos);
+            break;
+        }
+    }
+}
+
+void ChartObject::PauseLine(unsigned long Delay)
+{
+    MOTION_INFO mi;
+    unsigned long PrevPointY;
+    float PrevValue;
+    POSITION EndPos, StartPos;
+
+    if (MainDataIdx == 0) return; /*참조할 "이전 데이터" 가 없음*/
+    PrevValue = pChart->MainData[MainDataIdx - 1].Value;
+    //PointY = Height - (Pos.y2 * ((Value - ValueMin) / (ValueMax - ValueMin)));
+    PrevPointY = Height - (Pos.y2 * ((PrevValue - ValueMin) / (ValueMax - ValueMin)));
+    StartPos.x = (float)0 - (Width / 2);
+    StartPos.y = PrevPointY;
+    StartPos.x2 = Width / 2;
+    StartPos.y2 = PointY;
+
+    switch (pChart->Motion.MotionPauseChartLine) {
+        case eLineChartMotionPattern::ePauseChartLine_Default: {
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+            pChartLine->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+        }
+        case eLineChartMotionPattern::ePauseChartLine_Disconnect: {
+            EndPos = StartPos;
+            EndPos.x = StartPos.x2;
+            EndPos.y = StartPos.y2;
+            mi = InitMotionInfo(eMotionForm::eMotion_x3_2, Delay, pChart->Motion.PitchPauseChartLine);
+            pChartLine->SetPos(mi, TRUE, ALL_ZERO, EndPos);
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay+ pChart->Motion.PitchPauseChartLine, 0);
+            pChartLine->SetColor(mi, TRUE, ALL_ZERO, ALL_ZERO);
+            break;
+        }
+    }
+}
+
 void ChartObject::ResumeLabel(BOOL bMotion, unsigned long Delay)
 {
     eLineChartMotionPattern patt;
-
+    
+    if (MainDataIdx == 0) return; /*참조할 "이전 데이터" 가 없음*/
     if (bMotion) patt = pChart->Motion.MotionInitChartLabel;
     else patt = eLineChartMotionPattern::eInitChartLabel_Default;
 
@@ -696,6 +748,7 @@ void ChartObject::pause(unsigned long Delay)
     PauseGuideLine(Delay + pChart->Motion.DelayPauseChartGuideLine);
     PausePoint(Delay + pChart->Motion.DelayPauseChartPoint);
     PausePointDeco(Delay + pChart->Motion.DelayPauseChartPointDeco);
+    PauseLine(Delay + pChart->Motion.DelayPauseChartLine);
 }
 
 void ChartObject::resume(unsigned long Delay)
@@ -703,6 +756,7 @@ void ChartObject::resume(unsigned long Delay)
     ResumeGuideLine(TRUE, Delay + pChart->Motion.DelayInitChartGuideLine);
     ResumePoint(TRUE, Delay + pChart->Motion.DelayInitChartPoint);
     ResumePointDeco(TRUE, Delay + pChart->Motion.DelayInitChartPointDeco);
+    ResumeLine(TRUE, Delay + pChart->Motion.DelayInitChartLine);
 }
 
 BOOL ChartObject::update(unsigned long time)
@@ -710,6 +764,7 @@ BOOL ChartObject::update(unsigned long time)
     BOOL bUpdated;
 
     bUpdated = pGuideLine->update(time);
+    bUpdated |= pChartLine->update(time);
     bUpdated |= pBoxPoint->update(time);
     bUpdated |= pCircle->update(time);
     //bUpdated |= pLabel->update(time);
@@ -721,6 +776,7 @@ void ChartObject::render()
     ID2D1RenderTarget* pRT = pChart->pRenderTarget;
 
     pGuideLine->render(pRT);
+    pChartLine->render(pRT);
     pBoxPoint->render(pRT);
     pCircle->render(pRT);
     //pLabel->render(pRT);

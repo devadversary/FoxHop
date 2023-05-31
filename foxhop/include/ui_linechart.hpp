@@ -226,6 +226,7 @@ typedef struct _st_chartdata {
 class UI_LineChart : public UI {
 public:
     UI_LineChart_MotionParam Motion;
+    std::vector<CHART_DATA> MainData;
 
 private:
     SRWLOCK lock;
@@ -247,7 +248,6 @@ private:
     unsigned long SplitCnt;
     unsigned long PointPixelSize;
     float BaseSplit; /**< 50이면, 이 값을 기준으로 100, 50, 25, 12.5 등의 단위로 구간이 분할된다.*/
-    std::vector<CHART_DATA> MainData;
     std::vector<PropLine*> PropLines;
     std::vector<ChartObject*> ViewData;
 
@@ -255,15 +255,12 @@ private:
     static void DefaultLineChartProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
     void SetScroll(long long TargetScrollPx);
-
     void ResumeFrame(unsigned long Delay);
     void PauseFrame(unsigned long Delay);
     void ResumeBg(unsigned long Delay);
     void PauseBg(unsigned long Delay);
     //void ResumeLabel(unsigned long Delay);
     //void PauseLabel(unsigned long Delay);
-    void ResumeChartLine(unsigned long Delay);
-    void PauseChartLine(unsigned long Delay);
     void ResumeDataOrder(unsigned long Delay);
     void PauseDataOrder(unsigned long Delay);
 
@@ -297,10 +294,12 @@ public:
     float Value;
     float ValueMax;
     float ValueMin;
+    float PointY;
     wchar_t LabelText[MAX_CHART_LABEL_LEN];
     PropLine* pGuideLine;
     PropBox*  pBoxPoint;
     PropCircle* pCircle;
+    PropLine* pChartLine;
     PropText* pLabel;
 
 public:
@@ -310,6 +309,8 @@ public:
     void PausePoint(unsigned long Delay);
     void ResumePointDeco(BOOL bMotion, unsigned long Delay);
     void PausePointDeco(unsigned long Delay);
+    void ResumeLine(BOOL bMotion, unsigned long Delay);
+    void PauseLine(unsigned long Delay);
     void ResumeLabel(BOOL bMotion, unsigned long Delay);
     void PauseLabel(unsigned long Delay);
 
