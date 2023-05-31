@@ -6,7 +6,7 @@ UI_Static::UI_Static(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, I
     uiSys = pUISys;
     pRenderTarget = pUISys->D2DA.pRenTarget;
     Focusable = FALSE;
-    uiMotionState = eUIMotionState::eUMS_PlayingVisible;
+    uiMotionState = eUIMotionState::eUMS_Hide;
 
     DefaultHandler = DefaultStaticProc;
     MessageHandler = pfnCallback;
@@ -20,7 +20,7 @@ UI_Static::UI_Static(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, I
     pText = new PropText(pRenderTarget, UISTATIC_MAX_TEXTLEN);
     pBoxBg = new PropBox(pRenderTarget);
     pBoxFrame = new PropBox(pRenderTarget);
-    resume(0);
+    //resume(0);
 }
 
 UI_Static::~UI_Static() {}

@@ -5,7 +5,7 @@ UI_Textinput::UI_Textinput(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
     uiSys = pUISys;
     pRenderTarget = pUISys->D2DA.pRenTarget;
     Focusable = TRUE;
-    uiMotionState = eUIMotionState::eUMS_PlayingVisible;
+    uiMotionState = eUIMotionState::eUMS_Hide;
 
     DefaultHandler = DefaultTextinputProc;
     MessageHandler = pfnCallback;
@@ -27,7 +27,7 @@ UI_Textinput::UI_Textinput(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
     pBoxFrame = new PropBox(pRenderTarget);
     pBoxCaret = new PropBox(pRenderTarget);
     pTextLayout = new PropTextLayout(pRenderTarget, pTextFormat, pUISys->D2DA.pDWFactory, uiPos.x2, uiPos.y2);
-    resume(0);
+    //resume(0);
 }
 
 UI_Textinput::~UI_Textinput()

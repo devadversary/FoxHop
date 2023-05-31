@@ -14,7 +14,7 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     DefaultHandler = DefaultTableProc;
     MessageHandler = pfnCallback;
     uiPos = Pos;
-    uiMotionState = eUIMotionState::eUMS_PlayingVisible;
+    uiMotionState = eUIMotionState::eUMS_Hide;
 
     /*하위 클래스 멤버 셋팅*/
     MultiSelectMode = MultiSelect;
@@ -58,7 +58,7 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     for (int i = 0; i < ColCnt; i++) ppTextHdr[i] = new PropText(pRenderTarget, 512);
     pBoxFrame = new PropBox(pRenderTarget);
 
-    resume(0);
+    //resume(0);
     DefaultHandler(this, UIM_CREATE, NULL, NULL); /*UI생성 메세지 전송*/
 }
 

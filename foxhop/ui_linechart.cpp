@@ -9,7 +9,7 @@ UI_LineChart::UI_LineChart(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
     uiSys = pUISys;
     pRenderTarget = pUISys->D2DA.pRenTarget;
     Focusable = FALSE;
-    uiMotionState = eUIMotionState::eUMS_PlayingVisible;
+    uiMotionState = eUIMotionState::eUMS_Hide;
 
     DefaultHandler = DefaultLineChartProc;
     MessageHandler = pfnCallback;
@@ -45,7 +45,7 @@ UI_LineChart::UI_LineChart(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
 
     pBoxBg = new PropBox(pRenderTarget);
     pBoxFrame = new PropBox(pRenderTarget);
-    resume(Delay);
+    //resume(Delay);
 }
 
 UI_LineChart::~UI_LineChart()
@@ -479,10 +479,10 @@ void ChartObject::SetValue(BOOL bMotion, float Value, float Max, float Min, wcha
         break;
     }
     */
+    ResumeLine(bMotion, bMotion ? pChart->Motion.DelayInitChartLine : 0);
     ResumeGuideLine(bMotion, bMotion ? pChart->Motion.DelayInitChartGuideLine : 0);
     ResumePoint(bMotion, bMotion ? pChart->Motion.DelayInitChartPoint : 0);
     ResumePointDeco(bMotion, bMotion ? pChart->Motion.DelayInitChartPointDeco : 0);
-    ResumeLine(bMotion, bMotion ? pChart->Motion.DelayInitChartLine : 0);
 }
 
 void ChartObject::ResumeGuideLine(BOOL bMotion, unsigned long Delay)

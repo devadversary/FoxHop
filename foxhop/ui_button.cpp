@@ -19,8 +19,8 @@ UI_Button::UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, w
     MText          = new PropText(pRenderTarget, MAX_BUTTONNAME-1);
     Motion         = MotionParam;
 
-    InputMotion(eButtonAction::eAction_Init, nDelay, NULL);
-    uiMotionState = eUIMotionState::eUMS_PlayingVisible;
+    uiMotionState = eUIMotionState::eUMS_Hide;
+    //InputMotion(eButtonAction::eAction_Init, nDelay, NULL);
     DefaultHandler(this, UIM_CREATE, NULL, NULL); /*UI积己 皋技瘤 傈价*/
 }
 
