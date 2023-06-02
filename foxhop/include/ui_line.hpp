@@ -54,23 +54,19 @@ public:
     unsigned long        DelayPauseNode;
 
     eLineMotionPattern   MotionInitLineOrder;
-    unsigned long        PitchInitLineOrder;
     unsigned long        DelayInitLineOrder;
     unsigned long        GapInitLineOrder;
     unsigned long        RandNoiseInitLineOrder;
     eLineMotionPattern   MotionPauseLineOrder;
-    unsigned long        PitchPauseLineOrder;
     unsigned long        DelayPauseLineOrder;
     unsigned long        GapPauseLineOrder;
     unsigned long        RandNoisePauseLineOrder;
 
     eLineMotionPattern   MotionInitNodeOrder;
-    unsigned long        PitchInitNodeOrder;
     unsigned long        DelayInitNodeOrder;
     unsigned long        GapInitNodeOrder;
     unsigned long        RandNoiseInitNodeOrder;
     eLineMotionPattern   MotionPauseNodeOrder;
-    unsigned long        PitchPauseNodeOrder;
     unsigned long        DelayPauseNodeOrder;
     unsigned long        GapPauseNodeOrder;
     unsigned long        RandNoisePauseNodeOrder;
@@ -96,23 +92,19 @@ public:
         DelayPauseNode = 0;
 
         MotionInitLineOrder = eLineMotionPattern::eInitLineOrder_Default;
-        PitchInitLineOrder = 0;
         DelayInitLineOrder = 0;
         GapInitLineOrder = 0;
         RandNoiseInitLineOrder = 0;
         MotionPauseLineOrder = eLineMotionPattern::ePauseLineOrder_Default;
-        PitchPauseLineOrder = 0;
         DelayPauseLineOrder = 0;
         GapPauseLineOrder = 0;
         RandNoisePauseLineOrder = 0;
 
         MotionInitNodeOrder = eLineMotionPattern::eInitNodeOrder_Default;
-        PitchInitNodeOrder = 0;
         DelayInitNodeOrder = 0;
         GapInitNodeOrder = 0;
         RandNoiseInitNodeOrder = 0;
         MotionPauseNodeOrder = eLineMotionPattern::ePauseNodeOrder_Default;
-        PitchPauseNodeOrder = 0;
         DelayPauseNodeOrder = 0;
         GapPauseNodeOrder = 0;
         RandNoisePauseNodeOrder = 0;

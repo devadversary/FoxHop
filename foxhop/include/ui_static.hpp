@@ -19,6 +19,7 @@ enum class eStaticMotionPattern {
     ePauseBg_CollapseLeft,
 
     eInitText_Default,
+    eInitText_Flick,
     eInitText_Typing,
     ePauseText_Default,
     ePauseText_Flick,

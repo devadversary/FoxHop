@@ -449,7 +449,7 @@ ChartObject::ChartObject(UI_LineChart* pParent, ID2D1StrokeStyle* Stroke, unsign
     pBoxPoint = new PropBox(pChart->pRenderTarget);
     pCircle = new PropCircle(pChart->pRenderTarget);
     pChartLine = new PropLine(pChart->pRenderTarget);
-    pLabel = new PropText(pChart->pRenderTarget, 32);
+    //pLabel = new PropText(pChart->pRenderTarget, 32);
 }
 
 ChartObject::~ChartObject()

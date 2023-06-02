@@ -8,14 +8,66 @@
 #include "../foxhop/include/ui_table.hpp"
 #include "../foxhop/include/ui_textinput.hpp"
 
+UI_Static_MotionParam IntroStaticParam;
+UI_Static_MotionParam IntroStaticParam2;
+UI_Static_MotionParam IntroStaticParam3;
+UI_Line_MotionParam IntroLineParam;
+
 UI_Button_MotionParam ButtonParam;
 UI_Table_MotionParam TableParam;
 UI_Static_MotionParam TitleParam;
 UI_Static_MotionParam StaticParam;
 UI_Textinput_MotionParam InputParam;
 UI_LineChart_MotionParam ChartParam;
-
 void UI_ParamSet() {
+	IntroStaticParam.ColorBg = { 1, 0, 0, 0.7 };
+	IntroStaticParam.ColorFrame = ALL_ZERO;
+	IntroStaticParam.ColorText = {1,1,1,1};
+
+	IntroStaticParam.MotionInitBg = eStaticMotionPattern::eInitBg_ExpendRight;
+	IntroStaticParam.PitchInitBg = 500;
+	IntroStaticParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_CollapseLeft;
+	IntroStaticParam.PitchPauseBg = 500;
+	IntroStaticParam.DelayPauseBg = 300;
+
+	IntroStaticParam.MotionInitText = eStaticMotionPattern::eInitText_Typing;
+	IntroStaticParam.DelayInitText = 500;
+	IntroStaticParam.PitchInitText = 500;
+	IntroStaticParam.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
+	IntroStaticParam.DelayPauseText = 0;
+	IntroStaticParam.PitchPauseText = 220;
+
+	IntroStaticParam2 = IntroStaticParam;
+	IntroStaticParam2.ColorBg = ALL_ZERO;
+	IntroStaticParam2.MotionInitBg = eStaticMotionPattern::eInitBg_Default;
+	IntroStaticParam2.MotionPauseBg = eStaticMotionPattern::ePauseBg_Default;
+	IntroStaticParam2.MotionInitText = eStaticMotionPattern::eInitText_Flick;
+	IntroStaticParam2.DelayInitText = 0;
+	IntroStaticParam2.PitchInitText = 200;
+	IntroStaticParam2.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
+	IntroStaticParam2.DelayPauseText = 0;
+	IntroStaticParam2.PitchPauseText = 200;
+
+	IntroLineParam.ColorLine = { 1,1,1,1 };
+	IntroLineParam.ColorNode = { 1,1,1,1 };
+	IntroLineParam.PointSize = 6;
+
+	IntroLineParam.MotionInitLine = eLineMotionPattern::eInitLine_Connect;
+	IntroLineParam.PitchInitLine = 250;
+	IntroLineParam.MotionPauseLine = eLineMotionPattern::ePauseLine_Disconnect;
+	IntroLineParam.PitchPauseLine = 250;
+
+	IntroLineParam.MotionInitNode = eLineMotionPattern::eInitNode_Flick;
+	IntroLineParam.PitchInitNode = 200;
+	IntroLineParam.MotionPauseNode = eLineMotionPattern::ePauseNode_Flick;
+	IntroLineParam.PitchPauseNode = 200;
+
+	IntroLineParam.MotionInitLineOrder = eLineMotionPattern::eInitLineOrder_Linear;
+	IntroLineParam.GapInitLineOrder = 250;
+	IntroLineParam.MotionPauseLineOrder = eLineMotionPattern::ePauseLineOrder_Linear;
+	IntroLineParam.GapPauseLineOrder = 250;
+
+
 	ButtonParam.InitMotion = eButtonMotionPattern::eInit_Reload;
 	ButtonParam.InitPitch = 700;
 	ButtonParam.ClickMotion = eButtonMotionPattern::eClick_Flash;
@@ -54,9 +106,6 @@ void UI_ParamSet() {
 	TableParam.MotionInitRowText = eTableMotionPattern::eInitRowText_Typing;
 	TableParam.PitchInitRowText = 200;
 	TableParam.GapInitRowText = 50;
-	//TableParam.MotionInitRowText = eTableMotionPattern::eInitRowText_Default;
-	//TableParam.PitchInitRowText = 0;
-	//TableParam.GapInitRowText = 0;
 	TableParam.MotionPauseRowText = eTableMotionPattern::ePauseRowText_FlickRandom;
 	TableParam.PitchPauseRowText = 200;
 	TableParam.GapPauseRowText = 50;

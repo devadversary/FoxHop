@@ -22,9 +22,9 @@ private:
     int                   MaxLen;       /**< 문자열 최대 길이*/
 
 public:
-    PropText(ID2D1RenderTarget* pRT, int MaxLength);
+    PropText(ID2D1RenderTarget* pRT, int MaxLength, IDWriteTextFormat* pTexFmt);
     ~PropText();
-    void Init(IDWriteTextFormat* pTexFmt, wchar_t* pText, int nTextLen, POSITION StartPos, D2D1_COLOR_F StartColor, int StartLen);
+    void Init(wchar_t* pText, int nTextLen, POSITION StartPos, D2D1_COLOR_F StartColor, int StartLen);
     void addMovementMotion(MOTION_INFO MotionInfo, BOOL bAppend, POSITION StartPos, POSITION EndPos);
     void addColorMotion(MOTION_INFO MotionInfo, BOOL bAppend, D2D1_COLOR_F StartColor, D2D1_COLOR_F EndColor);
     void addLenMotion(MOTION_INFO MotionInfo, BOOL bAppend, int nStartLen, int nEndLen);

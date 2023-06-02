@@ -128,7 +128,7 @@ void UI_Panel::render()
 */
 void UI_Panel::RegisterPanel(UI_Panel* pPanel)
 {
-    PanelList.push_back(pPanel);
+    PanelList.emplace_back(pPanel);
 }
 
 /**
@@ -136,7 +136,7 @@ void UI_Panel::RegisterPanel(UI_Panel* pPanel)
 */
 void UI_Panel::RegisterUI(UI* pUI)
 {
-    UIList.push_back(pUI);
+    UIList.emplace_back(pUI);
 }
 
 /**

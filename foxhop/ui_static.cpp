@@ -17,7 +17,7 @@ UI_Static::UI_Static(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, I
     wcscpy_s(szText, ARRAYSIZE(szText), Text);
 
     InitializeSRWLock(&lock);
-    pText = new PropText(pRenderTarget, UISTATIC_MAX_TEXTLEN);
+    pText = new PropText(pRenderTarget, UISTATIC_MAX_TEXTLEN, pTextFmt);
     pBoxBg = new PropBox(pRenderTarget);
     pBoxFrame = new PropBox(pRenderTarget);
     //resume(0);
@@ -137,13 +137,19 @@ void UI_Static::ResumeText(unsigned long Delay)
     AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitText) {
         case eStaticMotionPattern::eInitText_Default:
-            pText->Init(pTextFmt, szText, 0, uiPos, ALL_ZERO, wcslen(szText));
-            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitText);
+            pText->Init(szText, 0, uiPos, ALL_ZERO, wcslen(szText));
+            mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
+            pText->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorText);
+            break;
+
+        case eStaticMotionPattern::eInitText_Flick:
+            pText->Init(szText, 0, uiPos, ALL_ZERO, wcslen(szText));
+            mi = InitMotionInfo(eMotionForm::eMotion_Pulse1, Delay, Motion.PitchInitText);
             pText->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorText);
             break;
 
         case eStaticMotionPattern::eInitText_Typing:
-            pText->Init(pTextFmt, szText, 0, uiPos, ALL_ZERO, 0);
+            pText->Init(szText, 0, uiPos, ALL_ZERO, 0);
             mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
             pText->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorText);
             mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Motion.PitchInitText);

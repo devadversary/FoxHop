@@ -18,13 +18,14 @@ UI_Line::UI_Line(UISystem* pUISys, POSITION* pPoints, size_t nPointCnt, ID2D1Str
     InitializeSRWLock(&lock);
 
     if (nPointCnt < 3) Closure = FALSE; /*폐도형은 정점이 3개 이상일때만.*/
-
+    for (int i = 0; i < PointCnt; i++) Points.emplace_back(pPoints[i]);
     /*폐도형 모드일땐 (다각형) 선 갯수와 노드 갯수는 같음*/
     for (int i = 1; i < PointCnt; i++) {
         pLines.emplace_back(new PropLine(pRenderTarget, Stroke));
         pNodes.emplace_back(new PropBox(pRenderTarget));
     }
-    if (!Closure) pNodes.emplace_back(new PropBox(pRenderTarget));
+    pNodes.emplace_back(new PropBox(pRenderTarget));
+    if (Closure) pLines.emplace_back(new PropLine(pRenderTarget, Stroke));
 
 }
 
@@ -186,78 +187,90 @@ void UI_Line::PauseNode(unsigned long PointIdx, unsigned long Delay)
 
 void UI_Line::ResumeLineOrder(unsigned long Delay)
 {
-    AcquireSRWLockExclusive(&lock);
+    //AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitLineOrder) {
         case eLineMotionPattern::eInitLineOrder_Default: {
             for (int i = 0; i < PointCnt; i++) ResumeLine(i, Delay);
+            break;
         }
 
         case eLineMotionPattern::eInitLineOrder_Linear: {
             for (int i = 0; i < PointCnt; i++) ResumeLine(i, Delay + (i * Motion.GapInitLineOrder));
+            break;
         }
 
         case eLineMotionPattern::eInitLineOrder_Rand: {
             for (int i = 0; i < PointCnt; i++) ResumeLine(i, Delay + (i * Motion.GapInitLineOrder) + (rand() % Motion.RandNoiseInitLineOrder));
+            break;
         }
     }
-    ReleaseSRWLockExclusive(&lock);
+    //ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Line::PauseLineOrder(unsigned long Delay)
 {
-    AcquireSRWLockExclusive(&lock);
+    //AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseLineOrder) {
-        case eLineMotionPattern::eInitLineOrder_Default: {
+        case eLineMotionPattern::ePauseLineOrder_Default: {
             for (int i = 0; i < PointCnt; i++) PauseLine(i, Delay);
+            break;
         }
 
-        case eLineMotionPattern::eInitLineOrder_Linear: {
+        case eLineMotionPattern::ePauseLineOrder_Linear: {
             for (int i = 0; i < PointCnt; i++) PauseLine(i, Delay + (i * Motion.GapPauseLineOrder));
+            break;
         }
 
-        case eLineMotionPattern::eInitLineOrder_Rand: {
+        case eLineMotionPattern::ePauseLineOrder_Rand: {
             for (int i = 0; i < PointCnt; i++) PauseLine(i, Delay + (i * Motion.GapPauseLineOrder) + (rand() % Motion.RandNoisePauseLineOrder));
+            break;
         }
     }
-    ReleaseSRWLockExclusive(&lock);
+    //ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Line::ResumeNodeOrder(unsigned long Delay)
 {
-    AcquireSRWLockExclusive(&lock);
+    //AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionInitNodeOrder) {
-        case eLineMotionPattern::eInitLineOrder_Default: {
+        case eLineMotionPattern::eInitNodeOrder_Default: {
             for (int i = 0; i < PointCnt; i++) ResumeNode(i, Delay);
+            break;
         }
 
-        case eLineMotionPattern::eInitLineOrder_Linear: {
+        case eLineMotionPattern::eInitNodeOrder_Linear: {
             for (int i = 0; i < PointCnt; i++) ResumeNode(i, Delay + (i * Motion.GapInitNodeOrder));
+            break;
         }
 
-        case eLineMotionPattern::eInitLineOrder_Rand: {
+        case eLineMotionPattern::eInitNodeOrder_Rand: {
             for (int i = 0; i < PointCnt; i++) ResumeNode(i, Delay + (i * Motion.GapInitNodeOrder) + (rand() % Motion.RandNoiseInitNodeOrder));
+            break;
         }
     }
-    ReleaseSRWLockExclusive(&lock);
+    //ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Line::PauseNodeOrder(unsigned long Delay)
 {
-    AcquireSRWLockExclusive(&lock);
+    //AcquireSRWLockExclusive(&lock);
     switch (Motion.MotionPauseNodeOrder) {
-        case eLineMotionPattern::eInitLineOrder_Default: {
+        case eLineMotionPattern::ePauseNodeOrder_Default: {
             for (int i = 0; i < PointCnt; i++) PauseNode(i, Delay);
+            break;
         }
 
-        case eLineMotionPattern::eInitLineOrder_Linear: {
+        case eLineMotionPattern::ePauseNodeOrder_Linear: {
             for (int i = 0; i < PointCnt; i++) PauseNode(i, Delay + (i * Motion.GapPauseNodeOrder));
+            break;
         }
 
-        case eLineMotionPattern::eInitLineOrder_Rand: {
+        case eLineMotionPattern::ePauseNodeOrder_Rand: {
             for (int i = 0; i < PointCnt; i++) PauseNode(i, Delay + (i * Motion.GapPauseNodeOrder) + (rand() % Motion.RandNoisePauseNodeOrder));
+            break;
         }
     }
-    ReleaseSRWLockExclusive(&lock);
+    //ReleaseSRWLockExclusive(&lock);
 }
 
 void UI_Line::resume(int nDelay)

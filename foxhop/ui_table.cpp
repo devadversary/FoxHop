@@ -55,7 +55,7 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     }
 
     pBoxHeader = new PropBox(pRenderTarget);
-    for (int i = 0; i < ColCnt; i++) ppTextHdr[i] = new PropText(pRenderTarget, 512);
+    for (int i = 0; i < ColCnt; i++) ppTextHdr[i] = new PropText(pRenderTarget, 512, uiSys->MediumTextForm);
     pBoxFrame = new PropBox(pRenderTarget);
 
     //resume(0);
@@ -506,7 +506,7 @@ void UI_Table::ResumeHeaderText(unsigned long Delay)
                 TmpPos.x = uiPos.x + WidthOffset;
                 TmpPos.x2 = ColWidth[i];
                 WidthOffset += ColWidth[i];
-                ppTextHdr[i]->Init(uiSys->MediumTextForm, ColName[i], 0, TmpPos, ALL_ZERO, wcslen(ColName[i]));
+                ppTextHdr[i]->Init(ColName[i], 0, TmpPos, ALL_ZERO, wcslen(ColName[i]));
                 mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, Motion.PitchInitTableHeaderText);
                 ppTextHdr[i]->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorHeaderText);
             }
@@ -529,7 +529,7 @@ void UI_Table::ResumeHeaderText(unsigned long Delay)
                 StartPos.x += 30;
                 DelayOffset = Delay + Motion.GapInitTableHeaderText*i;
 
-                ppTextHdr[i]->Init(uiSys->MediumTextForm, ColName[i], TextLen, StartPos, ALL_ZERO, TextLen);
+                ppTextHdr[i]->Init(ColName[i], TextLen, StartPos, ALL_ZERO, TextLen);
                 mi = InitMotionInfo(eMotionForm::eMotion_Linear1, DelayOffset, Motion.PitchInitTableHeaderText);
                 ppTextHdr[i]->SetColor(mi, TRUE, ALL_ZERO, Motion.ColorHeaderText);
                 ppTextHdr[i]->SetPos(mi, TRUE, ALL_ZERO, EndPos);
@@ -796,7 +796,7 @@ RowObject::RowObject(UISystem* pUISys, UI_Table* pParentTable, POSITION pos, uns
     ppColLine = (PropLine**)malloc(sizeof(PropLine*) * ColCnt);
     if (!ppText || !ppColLine) return;
     for (int i = 0; i < ColCnt; i++) {
-        ppText[i] = new PropText(pParent->pRenderTarget, 512);
+        ppText[i] = new PropText(pParent->pRenderTarget, 512, uiSys->MediumTextForm);
         ppColLine[i] = new PropLine(pParent->pRenderTarget);
     }
     pBackgroundBox = new PropBox(pParent->pRenderTarget);
@@ -970,7 +970,7 @@ void RowObject::ResumeText(BOOL bMotion, unsigned long Delay)
                 TmpPos = { (float)CurrentX, 0, (float)pWidth[i], Pos.y2 };
                 CurrentX += pWidth[i];
                 TextLen = wcslen(pStr);
-                ppText[i]->Init(uiSys->MediumTextForm, pStr, TextLen, TmpPos, pParent->Motion.ColorRowText, 0);
+                ppText[i]->Init(pStr, TextLen, TmpPos, pParent->Motion.ColorRowText, 0);
                 mi = InitMotionInfo(eMotionForm::eMotion_None, Delay, 0);
                 ppText[i]->addLenMotion(mi, TRUE, 0, TextLen);
             }
@@ -986,7 +986,7 @@ void RowObject::ResumeText(BOOL bMotion, unsigned long Delay)
                 CurrentX += pWidth[i];
                 TextLen = wcslen(pStr);
 
-                ppText[i]->Init(uiSys->MediumTextForm, pStr, TextLen, TmpPos, pParent->Motion.ColorRowText, 0);
+                ppText[i]->Init(pStr, TextLen, TmpPos, pParent->Motion.ColorRowText, 0);
                 mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay+(i*MotionGap), pParent->Motion.PitchInitRowText);
                 ppText[i]->addLenMotion(mi, FALSE, 0, TextLen);
             }
