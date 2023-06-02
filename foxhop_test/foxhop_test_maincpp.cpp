@@ -289,6 +289,15 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         _beginthreadex(NULL, NULL, thread_sysmon, 0, 0, &ThreadID);
         _beginthreadex(NULL, NULL, thread_test, 0, 0, &ThreadID);
         _beginthreadex(NULL, NULL, thread_update_render, 0, 0, &ThreadID);
+        pPauseButton->resume(700);
+        pResumeButton->resume(1000);
+        pTable->resume(0);
+        pStatic->resume(200);
+        pTitle1->resume(500);
+        pTitle2->resume(700);
+        pInput->resume(300);
+        pTable2->resume(300);
+        pChart1->resume(500);
         break;
     }
 }
