@@ -139,23 +139,19 @@ unsigned int thread_test(void* pTemp)
 
 unsigned int thread_scene_intro(void* pTemp)
 {
-    Sleep(1700);
+    Sleep(1400);
     pIntroLine->resume(0);
-    //AcquireSRWLockExclusive(&lock);
-    pIntroText->resume(300);
+    pIntroText->resume(600);
     pIntroText2->resume(1800);
-    //ReleaseSRWLockExclusive(&lock);
     Sleep(2000);
-    //AcquireSRWLockExclusive(&lock);
-    pIntroText->pause(1000);
-    pIntroText2->pause(1500);
-    pIntroText3->resume(2000);
-    pIntroText4->resume(2500);
+    pIntroText->pause(1500);
+    pIntroText2->pause(2000);
+    pIntroText3->resume(2500);
+    pIntroText4->resume(2800);
     Sleep(4000);
     pIntroLine->pause(0);
     pIntroText3->pause(500);
     pIntroText4->pause(800);
-    //ReleaseSRWLockExclusive(&lock);
     return 0;
 }
 
@@ -283,7 +279,7 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pFmtIntro = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 80, DWRITE_TEXT_ALIGNMENT_CENTER, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         //pFmt = pUI->uiSys->CreateTextFmt((wchar_t*)L"monoMMM_5", 19, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         pIntroText = new UI_Static(pUI->uiSys, NULL, {480, 420, 960, 120}, pFmtIntro, (wchar_t*)L"2 0 2 3 / 6 / 6  -  6 6 6", IntroStaticParam);
-        pIntroText2 = new UI_Static(pUI->uiSys, NULL, {480, 540, 960, 120}, pFmtIntro, (wchar_t*)L"C O M E   B A C K", IntroStaticParam2);
+        pIntroText2 = new UI_Static(pUI->uiSys, NULL, {480, 540, 960, 120}, pFmtIntro, (wchar_t*)L"C O M E   B A C K", IntroStaticParam3);
         pIntroText3 = new UI_Static(pUI->uiSys, NULL, {480, 420, 960, 120}, pFmtIntro, (wchar_t*)L"F O X H O P - L I B R A R Y", IntroStaticParam2);
         pIntroText4 = new UI_Static(pUI->uiSys, NULL, {480, 540, 960, 120}, pFmtIntro, (wchar_t*)L"p r o t o t y p e", IntroStaticParam2);
         pIntroLine = new UI_Line(pUI->uiSys, IntroLineVertex, 4, NULL, TRUE, IntroLineParam);

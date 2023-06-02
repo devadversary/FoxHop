@@ -19,6 +19,8 @@ UI_Static_MotionParam TitleParam;
 UI_Static_MotionParam StaticParam;
 UI_Textinput_MotionParam InputParam;
 UI_LineChart_MotionParam ChartParam;
+UI_Line_MotionParam LineParam;
+
 void UI_ParamSet() {
 	IntroStaticParam.ColorBg = { 1, 0, 0, 0.7 };
 	IntroStaticParam.ColorFrame = ALL_ZERO;
@@ -48,6 +50,11 @@ void UI_ParamSet() {
 	IntroStaticParam2.DelayPauseText = 0;
 	IntroStaticParam2.PitchPauseText = 200;
 
+	IntroStaticParam3 = IntroStaticParam2;
+	IntroStaticParam3.ColorText = { 1,0.2,0.2,1 };
+	IntroStaticParam3.PitchInitText = 220;
+	IntroStaticParam3.PitchPauseText = 220;
+
 	IntroLineParam.ColorLine = { 1,1,1,1 };
 	IntroLineParam.ColorNode = { 1,1,1,1 };
 	IntroLineParam.PointSize = 6;
@@ -58,14 +65,33 @@ void UI_ParamSet() {
 	IntroLineParam.PitchPauseLine = 250;
 
 	IntroLineParam.MotionInitNode = eLineMotionPattern::eInitNode_Flick;
-	IntroLineParam.PitchInitNode = 200;
+	IntroLineParam.PitchInitNode = 220;
 	IntroLineParam.MotionPauseNode = eLineMotionPattern::ePauseNode_Flick;
-	IntroLineParam.PitchPauseNode = 200;
+	IntroLineParam.PitchPauseNode = 220;
 
 	IntroLineParam.MotionInitLineOrder = eLineMotionPattern::eInitLineOrder_Linear;
 	IntroLineParam.GapInitLineOrder = 250;
 	IntroLineParam.MotionPauseLineOrder = eLineMotionPattern::ePauseLineOrder_Linear;
 	IntroLineParam.GapPauseLineOrder = 250;
+
+	LineParam.ColorLine = { 1,1,1,1 };
+	LineParam.ColorNode = { 1,1,1,1 };
+	LineParam.PointSize = 6;
+
+	LineParam.MotionInitLine = eLineMotionPattern::eInitLine_Flick;
+	LineParam.PitchInitLine = 200;
+	LineParam.MotionPauseLine = eLineMotionPattern::ePauseLine_Flick;
+	LineParam.PitchPauseLine = 200;
+
+	LineParam.MotionInitNode = eLineMotionPattern::eInitNode_Flick;
+	LineParam.PitchInitNode = 220;
+	LineParam.MotionPauseNode = eLineMotionPattern::ePauseNode_Flick;
+	LineParam.PitchPauseNode = 220;
+
+	LineParam.MotionInitLineOrder = eLineMotionPattern::eInitLineOrder_Linear;
+	LineParam.GapInitLineOrder = 250;
+	LineParam.MotionPauseLineOrder = eLineMotionPattern::ePauseLineOrder_Linear;
+	LineParam.GapPauseLineOrder = 250;
 
 
 	ButtonParam.InitMotion = eButtonMotionPattern::eInit_Reload;
