@@ -90,6 +90,7 @@ class UI_Button : public UI {
 public :
     UI_Button_MotionParam Motion;
 private:
+    IDWriteTextFormat* pTextFmt;
     PropBox*  MBoxFace;      /**< 전경 모션 박스*/
     PropBox*  MBoxHighlight; /**< 하이라이트 모션 박스*/
     PropText* MText;         /**< 모션 박스 기본 텍스트*/
@@ -101,7 +102,7 @@ private:
     static void DefaultButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
 public:
-    UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay, UI_Button_MotionParam MotionParam = UI_Button_MotionParam());
+    UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, IDWriteTextFormat* pTexFmt, wchar_t* pText, int nDelay, UI_Button_MotionParam MotionParam = UI_Button_MotionParam());
     ~UI_Button();
 
     void pause(int nDelay);

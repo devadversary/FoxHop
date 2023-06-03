@@ -1,7 +1,7 @@
 #include "./include/ui_button.hpp"
 #include "./include/ui_system.hpp"
 
-UI_Button::UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, wchar_t* pText, int nDelay, UI_Button_MotionParam MotionParam)
+UI_Button::UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, IDWriteTextFormat* pTexFmt, wchar_t* pText, int nDelay, UI_Button_MotionParam MotionParam)
 {
     uiSys          = pUISys;
     pRenderTarget  = pUISys->D2DA.pRenTarget;
@@ -13,12 +13,12 @@ UI_Button::UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, w
     wcscpy_s(szText, ARRAYSIZE(szText), pText);
     uiPos          = Pos;
     nTextLen       = (int)wcslen(szText);
+    pTextFmt       = pTexFmt;
 
     MBoxFace       = new PropBox(pRenderTarget);
     MBoxHighlight  = new PropBox(pRenderTarget);
-    MText          = new PropText(pRenderTarget, MAX_BUTTONNAME-1, uiSys->ButtonTextForm);
+    MText          = new PropText(pRenderTarget, MAX_BUTTONNAME-1, pTextFmt);
     Motion         = MotionParam;
-
     uiMotionState = eUIMotionState::eUMS_Hide;
     //InputMotion(eButtonAction::eAction_Init, nDelay, NULL);
     DefaultHandler(this, UIM_CREATE, NULL, NULL); /*UI积己 皋技瘤 傈价*/

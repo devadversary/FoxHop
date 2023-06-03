@@ -23,6 +23,7 @@
     <ClCompile Include="tree.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="etc.h" />
     <ClInclude Include="tree.hpp" />
     <ClInclude Include="uiparam.h" />
   </ItemGroup>

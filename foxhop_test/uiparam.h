@@ -13,10 +13,14 @@ UI_Static_MotionParam IntroStaticParam2;
 UI_Static_MotionParam IntroStaticParam3;
 UI_Line_MotionParam IntroLineParam;
 
+UI_Static_MotionParam MainTitleParam;
+UI_Static_MotionParam SubTitleParam;
+
 UI_Button_MotionParam ButtonParam;
 UI_Table_MotionParam TableParam;
-UI_Static_MotionParam TitleParam;
+UI_Static_MotionParam LabelParam;
 UI_Static_MotionParam StaticParam;
+UI_Static_MotionParam TimerParam;
 UI_Textinput_MotionParam InputParam;
 UI_LineChart_MotionParam ChartParam;
 UI_Line_MotionParam LineParam;
@@ -27,9 +31,9 @@ void UI_ParamSet() {
 	IntroStaticParam.ColorText = {1,1,1,1};
 
 	IntroStaticParam.MotionInitBg = eStaticMotionPattern::eInitBg_ExpendRight;
-	IntroStaticParam.PitchInitBg = 500;
+	IntroStaticParam.PitchInitBg = 400;
 	IntroStaticParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_CollapseLeft;
-	IntroStaticParam.PitchPauseBg = 500;
+	IntroStaticParam.PitchPauseBg = 400;
 	IntroStaticParam.DelayPauseBg = 300;
 
 	IntroStaticParam.MotionInitText = eStaticMotionPattern::eInitText_Typing;
@@ -54,6 +58,9 @@ void UI_ParamSet() {
 	IntroStaticParam3.ColorText = { 1,0.2,0.2,1 };
 	IntroStaticParam3.PitchInitText = 220;
 	IntroStaticParam3.PitchPauseText = 220;
+
+	MainTitleParam = IntroStaticParam2;
+	SubTitleParam = IntroStaticParam2;
 
 	IntroLineParam.ColorLine = { 1,1,1,1 };
 	IntroLineParam.ColorNode = { 1,1,1,1 };
@@ -88,10 +95,19 @@ void UI_ParamSet() {
 	LineParam.MotionPauseNode = eLineMotionPattern::ePauseNode_Flick;
 	LineParam.PitchPauseNode = 220;
 
-	LineParam.MotionInitLineOrder = eLineMotionPattern::eInitLineOrder_Linear;
-	LineParam.GapInitLineOrder = 250;
-	LineParam.MotionPauseLineOrder = eLineMotionPattern::ePauseLineOrder_Linear;
-	LineParam.GapPauseLineOrder = 250;
+	LineParam.MotionInitLineOrder = eLineMotionPattern::eInitLineOrder_Rand;
+	LineParam.GapInitLineOrder = 200;
+	LineParam.RandNoiseInitLineOrder = 200;
+	LineParam.MotionPauseLineOrder = eLineMotionPattern::ePauseLineOrder_Rand;
+	LineParam.GapPauseLineOrder = 200;
+	LineParam.RandNoisePauseLineOrder = 200;
+
+	LineParam.MotionInitNodeOrder = eLineMotionPattern::eInitNodeOrder_Rand;
+	LineParam.GapInitNodeOrder = 200;
+	LineParam.RandNoiseInitNodeOrder = 200;
+	LineParam.MotionPauseNodeOrder = eLineMotionPattern::ePauseNodeOrder_Rand;
+	LineParam.GapPauseNodeOrder = 200;
+	LineParam.RandNoisePauseNodeOrder = 200;
 
 
 	ButtonParam.InitMotion = eButtonMotionPattern::eInit_Reload;
@@ -153,21 +169,21 @@ void UI_ParamSet() {
 	TableParam.ColorRowText = { 1,1,1,1 };
 	TableParam.ColorRowTextSelect = { 0,0,0,1 };
 
-	TitleParam.MotionInitBg = eStaticMotionPattern::eInitBg_ExpendRight;
-	TitleParam.PitchInitBg = 300;
-	TitleParam.MotionInitText = eStaticMotionPattern::eInitText_Typing;
-	TitleParam.DelayInitText = 300;
-	TitleParam.PitchInitText = 800;
+	LabelParam.MotionInitBg = eStaticMotionPattern::eInitBg_ExpendRight;
+	LabelParam.PitchInitBg = 300;
+	LabelParam.MotionInitText = eStaticMotionPattern::eInitText_Typing;
+	LabelParam.DelayInitText = 300;
+	LabelParam.PitchInitText = 800;
 
-	TitleParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_CollapseLeft;
-	TitleParam.PitchPauseBg = 300;
-	TitleParam.DelayPauseBg = 300;
-	TitleParam.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
-	TitleParam.PitchPauseText = 150;
+	LabelParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_CollapseLeft;
+	LabelParam.PitchPauseBg = 300;
+	LabelParam.DelayPauseBg = 300;
+	LabelParam.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
+	LabelParam.PitchPauseText = 150;
 
-	TitleParam.ColorBg = { 0.3, 0.3, 0.3, 0.5 };
-	TitleParam.ColorFrame = { 0,0,0,0 };
-	TitleParam.ColorText = { 1,1,1,1 };
+	LabelParam.ColorBg = { 1,1,1, 0.65 };
+	LabelParam.ColorFrame = { 0,0,0,0 };
+	LabelParam.ColorText = { 0,0,0,1 };
 
 	StaticParam.MotionInitFrame = eStaticMotionPattern::eInitFrame_ExpendCenter;
 	StaticParam.PitchInitFrame = 400;
@@ -191,8 +207,15 @@ void UI_ParamSet() {
 	StaticParam.DelayPauseText = 0;
 
 	StaticParam.ColorFrame = { 0.8,0,0,0.8 };
-	StaticParam.ColorBg = { 0.7,0,0,0.5 };
+	StaticParam.ColorBg = { 0.5,0,0,0.5 };
 	StaticParam.ColorText = { 1,1,1,1 };
+
+	TimerParam.ColorBg = ALL_ZERO;
+	TimerParam.ColorFrame = ALL_ZERO;
+	TimerParam.ColorText = {1,1,1,1};
+
+	TimerParam.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
+	TimerParam.PitchPauseText = 200;
 
 	InputParam.MotionInitFrame = eTextinputMotionPattern::eInitFrame_ExpendLR;
 	InputParam.PitchInitFrame = 500;
@@ -333,21 +356,21 @@ void UI_ParamSet2() {
 	TableParam.ColorRowText = { 0,0,0,1 };
 	TableParam.ColorRowTextSelect = { 1,1,1,1 };
 
-	TitleParam.MotionInitBg = eStaticMotionPattern::eInitBg_ExpendRight;
-	TitleParam.PitchInitBg = 300;
-	TitleParam.MotionInitText = eStaticMotionPattern::eInitText_Typing;
-	TitleParam.DelayInitText = 300;
-	TitleParam.PitchInitText = 300;
+	LabelParam.MotionInitBg = eStaticMotionPattern::eInitBg_ExpendRight;
+	LabelParam.PitchInitBg = 300;
+	LabelParam.MotionInitText = eStaticMotionPattern::eInitText_Typing;
+	LabelParam.DelayInitText = 300;
+	LabelParam.PitchInitText = 300;
 
-	TitleParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_CollapseLeft;
-	TitleParam.PitchPauseBg = 300;
-	TitleParam.DelayPauseBg = 300;
-	TitleParam.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
-	TitleParam.PitchPauseText = 150;
+	LabelParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_CollapseLeft;
+	LabelParam.PitchPauseBg = 300;
+	LabelParam.DelayPauseBg = 300;
+	LabelParam.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
+	LabelParam.PitchPauseText = 150;
 
-	TitleParam.ColorBg = { 0.25,0.3,0.5,1 };
-	TitleParam.ColorFrame = { 0,0,0,0 };
-	TitleParam.ColorText = { 1,1,1,1 };
+	LabelParam.ColorBg = { 0.25,0.3,0.5,1 };
+	LabelParam.ColorFrame = { 0,0,0,0 };
+	LabelParam.ColorText = { 1,1,1,1 };
 
 	StaticParam.MotionInitFrame = eStaticMotionPattern::eInitFrame_ExpendCenter;
 	StaticParam.PitchInitFrame = 400;

@@ -15,12 +15,14 @@
 #include "../foxhop/include/ui_linechart.hpp"
 #include "tree.hpp"
 #include "uiparam.h"
+#include "etc.h"
 #include <process.h>
 #pragma comment (lib,"ws2_32.lib")
 #pragma comment (lib, "../bin/debug/foxhop.lib")
 #define CLASSNAME TEXT("TestModule")
-
-TREE hTree;
+#define U(x) (x*60)
+TREE hTreeTx;
+TREE hTreeRx;
 UISystem* uiSys = NULL;
 SRWLOCK lock;
 
@@ -29,6 +31,25 @@ UI_Static* pIntroText2 = NULL; /*COME BACK*/
 UI_Static* pIntroText3 = NULL; /*FOXHOP UI Library*/
 UI_Static* pIntroText4 = NULL; /*Prototype*/
 UI_Line* pIntroLine = NULL;
+UI_Line* pTopLine = NULL;
+UI_Static* pTitleMain = NULL;
+UI_Static* pTitleSub = NULL;
+UI_Line* pBotLine = NULL;
+UI_Static* pLabelPacketMon = NULL;
+UI_Static* pLabelAnalyiseTx = NULL;
+UI_Static* pLabelAnalyiseRx = NULL;
+UI_Static* pLabelTimer = NULL;
+UI_Table* pTablePacket = NULL;
+UI_Table* pTableTx = NULL;
+UI_Table* pTableRx = NULL;
+UI_Static* pStaticPacketSel = NULL;
+UI_Button* pButtonConnInfo = NULL;
+UI_Button* pButtonDetailInfo = NULL;
+UI_Button* pButtonOutro = NULL;
+
+UI_LineChart* pChart1 = NULL;
+UI_Textinput* pInput = NULL;
+
 
 UI_Button* pPauseButton = NULL;
 UI_Button* pResumeButton = NULL;
@@ -37,8 +58,6 @@ UI_Static* pTitle2 = NULL;
 UI_Table* pTable = NULL;
 UI_Table* pTable2 = NULL;
 UI_Static* pStatic = NULL;
-UI_Textinput* pInput = NULL;
-UI_LineChart* pChart1 = NULL;
 
 
 /**
@@ -72,7 +91,7 @@ typedef struct _st_ipcount
     wchar_t CountStr[16];
 }IP_COUNT;
 
-unsigned int thread_test(void* pTemp)
+unsigned int thread_packetcapture(void* pTemp)
 {
     SOCKET sock;
     SOCKADDR_IN saddr = { 0, };
@@ -80,10 +99,13 @@ unsigned int thread_test(void* pTemp)
     SOCKADDR_IN peer = {0,};
     int peersize = sizeof(SOCKADDR);
     int rx;
+    IPv4* iphdr;
 
     wchar_t* Num;
-    wchar_t* ipStr;
+    wchar_t* srcip;
+    wchar_t* dstip;
     wchar_t* DataLen;
+    wchar_t* Protocol;
     wchar_t tmpData[1234];
     int nPacket = 0;
     char hostname[1024];
@@ -101,6 +123,7 @@ unsigned int thread_test(void* pTemp)
     bind(sock, (SOCKADDR*)&saddr, sizeof(SOCKADDR));
     int err = WSAGetLastError();
     WSAIoctl(sock, SIO_RCVALL, &enable, sizeof(enable), 0 , 0 , &wrt, 0 , 0);
+    iphdr = (IPv4*)buffer;
     while(1){
         rx = recvfrom(sock, (char*)buffer, sizeof(buffer), NULL, (SOCKADDR*)&peer, &peersize);
         if (rx <= 0) {
@@ -110,48 +133,56 @@ unsigned int thread_test(void* pTemp)
         nPacket++;
         wsprintfW(tmpData, L"%06d", nPacket);
         Num = _wcsdup(tmpData);
-        mbstowcs(tmpData, inet_ntoa(peer.sin_addr), ARRAYSIZE(tmpData));
-        ipStr = _wcsdup(tmpData);
+        mbstowcs(tmpData, inet_ntoa(*(IN_ADDR*)&iphdr->SrcAddr), ARRAYSIZE(tmpData));
+        srcip = _wcsdup(tmpData);
+        mbstowcs(tmpData, inet_ntoa(*(IN_ADDR*)&iphdr->DstAddr), ARRAYSIZE(tmpData));
+        dstip = _wcsdup(tmpData);
         wsprintfW(tmpData, L"%d", rx);
         DataLen = _wcsdup(tmpData);
-        pTable->AddData(TRUE, TRUE, Num, ipStr, DataLen);
+        switch (iphdr->Protocol) {
+        case IPPROTO_TCP: Protocol = _wcsdup(L"TCP"); break;
+        case IPPROTO_UDP: Protocol = _wcsdup(L"UDP"); break;
+        case IPPROTO_ICMP: Protocol = _wcsdup(L"ICMP"); break;
+        case IPPROTO_SCTP: Protocol = _wcsdup(L"SCTP"); break;
+        default: Protocol = (wchar_t*)L"???";
+        }
+        pTablePacket->AddData(TRUE, TRUE, Num, srcip, dstip, DataLen, Protocol);
 
-        pNode = TREE_Search(&hTree, &peer.sin_addr, sizeof(peer.sin_addr));
+        pNode = TREE_Search(&hTreeTx, &iphdr->SrcAddr, sizeof(iphdr->SrcAddr));
         if (!pNode) {
             IP_COUNT* pCount = (IP_COUNT*)malloc(sizeof(IP_COUNT));
             wchar_t* CountStr;
 
-            pCount->TableIdx = hTree.nElements;
+            pCount->TableIdx = hTreeTx.nElements;
             pCount->Count = 0;
-            pNode = TREE_Input(&hTree, &peer.sin_addr, sizeof(peer.sin_addr), pCount);
+            pNode = TREE_Input(&hTreeTx, &iphdr->SrcAddr, sizeof(iphdr->SrcAddr), pCount);
             wsprintf(pCount->CountStr, L"%d", pCount->Count);
-            pTable2->AddData(TRUE, FALSE, ipStr, pCount->CountStr);
+            pTableTx->AddData(TRUE, FALSE, srcip, pCount->CountStr);
         }
         pInfo = (IP_COUNT*)pNode->pParam;
         pInfo->Count++;
         wsprintf(pInfo->CountStr, L"%d", pInfo->Count);
-        pTable2->EditData(FALSE, pInfo->TableIdx, ipStr, pInfo->CountStr);
-        pTable2->HighlightData(pInfo->TableIdx, {0.55,1,0.45,1});
+        pTableTx->EditData(FALSE, pInfo->TableIdx, srcip, pInfo->CountStr);
+        pTableTx->HighlightData(pInfo->TableIdx, {0.55,1,0.45,1}); /*초록이*/
+
+        pNode = TREE_Search(&hTreeRx, &iphdr->DstAddr, sizeof(iphdr->DstAddr));
+        if (!pNode) {
+            IP_COUNT* pCount = (IP_COUNT*)malloc(sizeof(IP_COUNT));
+            wchar_t* CountStr;
+
+            pCount->TableIdx = hTreeRx.nElements;
+            pCount->Count = 0;
+            pNode = TREE_Input(&hTreeRx, &iphdr->DstAddr, sizeof(iphdr->DstAddr), pCount);
+            wsprintf(pCount->CountStr, L"%d", pCount->Count);
+            pTableRx->AddData(TRUE, FALSE, dstip, pCount->CountStr);
+        }
+        pInfo = (IP_COUNT*)pNode->pParam;
+        pInfo->Count++;
+        wsprintf(pInfo->CountStr, L"%d", pInfo->Count);
+        pTableRx->EditData(FALSE, pInfo->TableIdx, dstip, pInfo->CountStr);
+        pTableRx->HighlightData(pInfo->TableIdx, {0.35,0.35,1,1}); /*파랑이*/
 
     }
-    return 0;
-}
-
-unsigned int thread_scene_intro(void* pTemp)
-{
-    Sleep(1400);
-    pIntroLine->resume(0);
-    pIntroText->resume(600);
-    pIntroText2->resume(1800);
-    Sleep(2000);
-    pIntroText->pause(1500);
-    pIntroText2->pause(2000);
-    pIntroText3->resume(2500);
-    pIntroText4->resume(2800);
-    Sleep(4000);
-    pIntroLine->pause(0);
-    pIntroText3->pause(500);
-    pIntroText4->pause(800);
     return 0;
 }
 
@@ -162,7 +193,7 @@ unsigned int thread_update_render(void* pTemp)
 
     while (1) {
         uiSys->D2DA.pRenTarget->BeginDraw();
-        uiSys->D2DA.pRenTarget->Clear({ 0,0,0,0.7 });
+        uiSys->D2DA.pRenTarget->Clear({ 0,0,0,0.8 });
         //uiSys->D2DA.pRenTarget->Clear({ 1,1,1,1 });
         pMainPanel->update(GetElapse());
         pMainPanel->render();
@@ -178,6 +209,15 @@ unsigned long long Filetime2long64(const FILETIME& fileTime)
     largeInteger.LowPart = fileTime.dwLowDateTime;
     largeInteger.HighPart = fileTime.dwHighDateTime;
     return largeInteger.QuadPart;
+}
+
+unsigned int thread_sysmon(void* pTemp)
+{
+    while (1) {
+        Sleep(1);
+        GetSystemTime;
+        //pLabelTimer->SetText();
+    }
 }
 
 unsigned int thread_sysmon(void* pTemp)
@@ -217,6 +257,51 @@ unsigned int thread_sysmon(void* pTemp)
     return 0;
 }
 
+
+
+unsigned int thread_scene_intro(void* pTemp)
+{
+    unsigned int ThreadID;
+
+    Sleep(1400);
+    pIntroLine->resume(0);
+    pIntroText->resume(600);
+    pIntroText2->resume(1800);
+    Sleep(2000);
+    pIntroText->pause(1500);
+    pIntroText2->pause(2000);
+    pIntroText3->resume(2500);
+    pIntroText4->resume(2800);
+    Sleep(4000);
+    pIntroLine->pause(0);
+    pIntroText3->pause(800);
+    pIntroText4->pause(1100);
+
+    pTopLine->resume(0);
+    pBotLine->resume(0);
+    pTitleMain->resume(1000);
+    pTitleSub->resume(1600);
+
+    pLabelPacketMon->resume(1200);
+    pLabelAnalyiseTx->resume(1200);
+    pLabelAnalyiseRx->resume(1200);
+    pTablePacket->resume(400);
+    pStaticPacketSel->resume(600);
+    pTableTx->resume(700);
+    pTableRx->resume(1000);
+
+    pButtonConnInfo->resume(2000);
+    pButtonDetailInfo->resume(2200);
+    pButtonOutro->resume(2400);
+    pLabelTimer->resume(500);
+
+    Sleep(1500);
+    _beginthreadex(NULL, NULL, thread_sysmon, 0, 0, &ThreadID);
+    _beginthreadex(NULL, NULL, thread_packetcapture, 0, 0, &ThreadID);
+    return 0;
+}
+
+
 void TestTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     UI_Table* pTable = static_cast<UI_Table*>(pUI);
@@ -224,11 +309,13 @@ void TestTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 
     switch (Message) {
     case UIM_TABLE_SELECT:
-        wsprintfW(Noti, L"Line %d Selected. : %s", (int)lParam, ((wchar_t**)wParam)[1]);
+        wsprintfW(Noti, L"Line %d Selected. : %s -> %s", (int)lParam, ((wchar_t**)wParam)[1], ((wchar_t**)wParam)[2]);
+        pStaticPacketSel->SetText(Noti);
         break;
 
     case UIM_TABLE_UNSELECT:
         wsprintfW(Noti, L"Line %d Unselected.", (int)lParam);
+        pStaticPacketSel->SetText(Noti);
         break;
 
     case UIM_FOCUS:
@@ -239,7 +326,7 @@ void TestTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     }
 }
 
-void TestPauseButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
+void TestConnInfoButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     UI_Button* pButton = static_cast<UI_Button*>(pUI);
 
@@ -249,7 +336,17 @@ void TestPauseButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     }
 }
 
-void TestResumeButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
+void TestDetailInfoButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+    UI_Button* pButton = static_cast<UI_Button*>(pUI);
+
+    switch (Message) {
+    case WM_LBUTTONUP:
+        break;
+    }
+}
+
+void TestOutroButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     UI_Button* pButton = static_cast<UI_Button*>(pUI);
 
@@ -270,24 +367,77 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     unsigned int AnalyseColWidth[3] = {150, 80};
     unsigned int ThreadID;
     IDWriteTextFormat* pFmtIntro;
-    IDWriteTextFormat* pFmt;
-    static POSITION IntroLineVertex[4] = { {480, 420, 0, 0}, {1440, 420, 0, 0}, {1440, 660, 0, 0}, {480, 660, 0, 0} };
+    IDWriteTextFormat* pFmtTitle;
+    IDWriteTextFormat* pFmtTimer;
+    IDWriteTextFormat* pFmtTitleSub;
+    IDWriteTextFormat* pFmtButton;
+    static POSITION IntroLineVertex[] = { {480, 420,}, {1440, 420,}, {1440, 660,}, {480, 660,} };
+    static POSITION TopLineVertex[] = { {U(1),U(2),}, {U(5),U(2),}, {U(7),U(2),}, {U(20),U(2),}, {U(28),U(2),}, {U(31),U(2),} };
+    static POSITION BotLineVertex[] = { {U(31),U(16),},{U(24),U(16),},{U(19),U(16),}, {U(1),U(16),} };
+    //static POSITION BotLineVertex[] = { {480, 420, 0, 0}, {1440, 420, 0, 0}, {1440, 660, 0, 0}, {480, 660, 0, 0} };
     switch (Message) {
     case UIM_CREATE:
         UI_ParamSet();
-        TREE_Init(&hTree);
+        TREE_Init(&hTreeTx);
+        TREE_Init(&hTreeRx);
         pFmtIntro = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 80, DWRITE_TEXT_ALIGNMENT_CENTER, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+        pFmtTitle = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 80, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+        pFmtTitleSub = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 40, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+        pFmtTimer = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 50, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+        pFmtButton = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 30, DWRITE_TEXT_ALIGNMENT_CENTER, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
         //pFmt = pUI->uiSys->CreateTextFmt((wchar_t*)L"monoMMM_5", 19, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-        pIntroText = new UI_Static(pUI->uiSys, NULL, {480, 420, 960, 120}, pFmtIntro, (wchar_t*)L"2 0 2 3 / 6 / 6  -  6 6 6", IntroStaticParam);
-        pIntroText2 = new UI_Static(pUI->uiSys, NULL, {480, 540, 960, 120}, pFmtIntro, (wchar_t*)L"C O M E   B A C K", IntroStaticParam3);
-        pIntroText3 = new UI_Static(pUI->uiSys, NULL, {480, 420, 960, 120}, pFmtIntro, (wchar_t*)L"F O X H O P - L I B R A R Y", IntroStaticParam2);
-        pIntroText4 = new UI_Static(pUI->uiSys, NULL, {480, 540, 960, 120}, pFmtIntro, (wchar_t*)L"p r o t o t y p e", IntroStaticParam2);
-        pIntroLine = new UI_Line(pUI->uiSys, IntroLineVertex, 4, NULL, TRUE, IntroLineParam);
-        pPanel->RegisterUI(pIntroText);
+        pIntroText = new UI_Static(pUI->uiSys, NULL, {U(8), U(7), U(16), U(2)}, pFmtIntro, (wchar_t*)L"2 0 2 3 / 6 / 6  -  6 6 6", IntroStaticParam);
+        pIntroText2 = new UI_Static(pUI->uiSys, NULL, { U(8), U(9), U(16), U(2) }, pFmtIntro, (wchar_t*)L"C O M E   B A C K", IntroStaticParam3);
+        pIntroText3 = new UI_Static(pUI->uiSys, NULL, { U(8), U(7), U(16), U(2) }, pFmtIntro, (wchar_t*)L"F O X H O P - L I B R A R Y", IntroStaticParam2);
+        pIntroText4 = new UI_Static(pUI->uiSys, NULL, { U(8), U(9), U(16), U(2) }, pFmtIntro, (wchar_t*)L"p r o t o t y p e", IntroStaticParam2);
+        pIntroLine = new UI_Line(pUI->uiSys, IntroLineVertex, ARRAYSIZE(IntroLineVertex), NULL, TRUE, IntroLineParam);
+
+        pTitleMain = new UI_Static(pUI->uiSys, NULL, { U(1), U(0), U(5), U(2) }, pFmtTitle, (wchar_t*)L"Foxhop.lib", MainTitleParam);
+        pTitleSub = new UI_Static(pUI->uiSys, NULL, { U(5.5), U(1), U(3), U(1) }, pFmtTitleSub, (wchar_t*)L"Demo play", SubTitleParam);
+        pTopLine = new UI_Line(pUI->uiSys, TopLineVertex, ARRAYSIZE(TopLineVertex), NULL, TRUE, LineParam);
+        pBotLine = new UI_Line(pUI->uiSys, BotLineVertex, ARRAYSIZE(BotLineVertex), NULL, TRUE, LineParam);
+        
+        pLabelPacketMon = new UI_Static(pUI->uiSys, NULL, { U(1), U(2.5), U(19), U(1)}, pFmtTitleSub, (wchar_t*)L"DATA FLOW MONITORING .", LabelParam);
+        pTablePacket = new UI_Table(pUI->uiSys, TestTableProc, {U(1),U(3.5),U(19),U(11)}, ARRAYSIZE(PacketDumpCols), PacketDumpCols, PacketDumpColWIdth, 30, 20, FALSE, TableParam);
+        pStaticPacketSel = new UI_Static(pUI->uiSys, NULL, { U(1), U(14.5), U(19), U(0.5) }, pUI->uiSys->MediumTextForm, (wchar_t*)L"Done.", StaticParam);
+
+        pLabelAnalyiseTx = new UI_Static(pUI->uiSys, NULL, { U(21), U(2.5), U(10), U(1)}, pFmtTitleSub, (wchar_t*)L"TX Analyze .", LabelParam);
+        pTableTx = new UI_Table(pUI->uiSys, NULL, { U(21), U(3.5), U(10), U(5) }, ARRAYSIZE(AnalyseCol), AnalyseCol, AnalyseColWidth, 30, 20, FALSE, TableParam);
+
+        pLabelAnalyiseRx = new UI_Static(pUI->uiSys, NULL, { U(21), U(9), U(10), U(1) }, pFmtTitleSub, (wchar_t*)L"RX Analyze .", LabelParam);
+        pTableRx = new UI_Table(pUI->uiSys, NULL, { U(21), U(10), U(10), U(5) }, ARRAYSIZE(AnalyseCol), AnalyseCol, AnalyseColWidth, 30, 20, FALSE, TableParam);
+
+        pButtonConnInfo = new UI_Button(pUI->uiSys, TestConnInfoButtonProc, { U(1), U(16.5), U(4), U(1)}, pFmtButton, (wchar_t*)L"Connection Analyse", 0, ButtonParam);
+        pButtonDetailInfo = new UI_Button(pUI->uiSys, TestDetailInfoButtonProc, { U(6), U(16.5), U(4), U(1) }, pFmtButton, (wchar_t*)L"Detail Information", 0, ButtonParam);
+        pButtonOutro = new UI_Button(pUI->uiSys, TestOutroButtonProc, { U(11), U(16.5), U(4), U(1) }, pFmtButton, (wchar_t*)L"Finale", 0, ButtonParam);
+        pLabelTimer = new UI_Static(pUI->uiSys, NULL, { U(23), U(16), U(8), U(2) }, pFmtTimer, (wchar_t*)L"", TimerParam);
+        pPanel->RegisterUI(pIntroText); /*인트로용 임시 UI*/
         pPanel->RegisterUI(pIntroText2);
         pPanel->RegisterUI(pIntroText3);
         pPanel->RegisterUI(pIntroText4);
         pPanel->RegisterUI(pIntroLine);
+
+        pPanel->RegisterUI(pTitleMain); /*메인 UI*/
+        pPanel->RegisterUI(pTitleSub);
+        pPanel->RegisterUI(pTopLine);
+        pPanel->RegisterUI(pBotLine);
+        
+        pPanel->RegisterUI(pLabelPacketMon);
+        pPanel->RegisterUI(pTablePacket);
+        pPanel->RegisterUI(pStaticPacketSel);
+        pPanel->RegisterUI(pLabelAnalyiseTx);
+        pPanel->RegisterUI(pTableTx);
+        pPanel->RegisterUI(pLabelAnalyiseRx);
+        pPanel->RegisterUI(pTableRx);
+
+        pPanel->RegisterUI(pButtonConnInfo);
+        pPanel->RegisterUI(pButtonDetailInfo);
+        pPanel->RegisterUI(pButtonOutro);
+        pPanel->RegisterUI(pLabelTimer);
+
+
+
         _beginthreadex(NULL, NULL, thread_scene_intro, 0, 0, &ThreadID);
         _beginthreadex(NULL, NULL, thread_update_render, 0, 0, &ThreadID);
 #if 0
@@ -371,6 +521,7 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     wc.cbWndExtra = NULL;
     RegisterClass(&wc);
     //hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), NULL, NULL, hInst, NULL);
+    //hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 1920, 1080, NULL, NULL, hInst, NULL);
     hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP, 0, 0, 1920, 1080, NULL, NULL, hInst, NULL);
     AlphaWindow(hWnd, WINDOWMODE_TRANSPARENT);
     ShowWindow(hWnd, TRUE);
