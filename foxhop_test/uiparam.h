@@ -23,6 +23,8 @@ UI_Static_MotionParam StaticParam;
 UI_Static_MotionParam TimerParam;
 UI_Textinput_MotionParam InputParam;
 UI_LineChart_MotionParam ChartParam;
+UI_Static_MotionParam DescMainParam;
+UI_Static_MotionParam DescSubParam;
 UI_Line_MotionParam LineParam;
 
 void UI_ParamSet() {
@@ -209,6 +211,30 @@ void UI_ParamSet() {
 	StaticParam.ColorFrame = { 0.8,0,0,0.8 };
 	StaticParam.ColorBg = { 0.5,0,0,0.5 };
 	StaticParam.ColorText = { 1,1,1,1 };
+
+	DescMainParam.ColorBg = { 0.7, 0, 0, 1 };
+	DescMainParam.ColorText = { 1,1,1,1 };
+	DescMainParam.MotionInitBg = eStaticMotionPattern::eInitBg_ExpendRight;
+	DescMainParam.PitchInitBg = 300;
+	DescMainParam.DelayInitBg = 0;
+	DescMainParam.MotionInitText = eStaticMotionPattern::eInitText_Typing;
+	DescMainParam.PitchInitText = 300;
+	DescMainParam.DelayInitText = 300;
+	DescMainParam.MotionPauseBg = eStaticMotionPattern::ePauseBg_CollapseLeft;
+	DescMainParam.PitchPauseBg = 300;
+	DescMainParam.DelayPauseBg = 0;
+	DescMainParam.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
+	DescMainParam.PitchPauseText = 200;
+	DescMainParam.DelayPauseText = 300;
+
+	DescSubParam.ColorBg = ALL_ZERO;
+	DescSubParam.ColorText = { 1,1,1,1 };
+	DescSubParam.MotionInitText = eStaticMotionPattern::eInitText_Flick;
+	DescSubParam.PitchInitText = 200;
+	DescSubParam.DelayInitText = 0;
+	DescSubParam.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
+	DescSubParam.PitchPauseText = 200;
+	DescSubParam.DelayPauseText = 0;
 
 	TimerParam.ColorBg = ALL_ZERO;
 	TimerParam.ColorFrame = ALL_ZERO;

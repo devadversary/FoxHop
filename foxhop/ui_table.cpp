@@ -463,8 +463,6 @@ void UI_Table::PauseHeaderBg(unsigned long Delay)
 
             EndPos.y2 = HeaderHgt;
             EndPos.x2 = 0;
-            StartPos.y2 = HeaderHgt;
-            pBoxHeader->Init(StartPos, Motion.ColorHeaderBg);
             mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Motion.PitchInitTableHeaderBg);
             pBoxHeader->SetPos(mi, TRUE, ALL_ZERO, EndPos);
             break;
@@ -477,10 +475,6 @@ void UI_Table::PauseHeaderBg(unsigned long Delay)
             EndPos.y2 = HeaderHgt;
             EndPos.x = uiPos.x + uiPos.x2;
             EndPos.x2 = 0;
-
-            StartPos.y2 = HeaderHgt;
-
-            pBoxHeader->Init(StartPos, Motion.ColorHeaderBg);
             mi = InitMotionInfo(eMotionForm::eMotion_Linear1, Delay, Motion.PitchInitTableHeaderBg);
             pBoxHeader->SetPos(mi, TRUE, ALL_ZERO, EndPos);
             break;
