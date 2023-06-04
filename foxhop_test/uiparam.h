@@ -241,7 +241,6 @@ void UI_ParamSet() {
 	TimerParam.ColorBg = ALL_ZERO;
 	TimerParam.ColorFrame = ALL_ZERO;
 	TimerParam.ColorText = {1,1,1,1};
-
 	TimerParam.MotionPauseText = eStaticMotionPattern::ePauseText_Flick;
 	TimerParam.PitchPauseText = 200;
 

@@ -111,5 +111,5 @@ public: /*반드시 있어야 되는 매서드*/
     void render();
 
 public: /*UI별 옵션 매서드*/
-    void SetText(wchar_t* pStr, int nDelay = 0);
+    void SetText(wchar_t* pStr, int nDelay = 0, BOOL bForce = FALSE);
 };

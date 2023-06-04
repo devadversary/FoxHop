@@ -220,15 +220,6 @@ unsigned long long Filetime2long64(const FILETIME& fileTime)
     return largeInteger.QuadPart;
 }
 
-unsigned int thread_timer(void* pTemp)
-{
-    while (1) {
-        Sleep(1);
-        GetSystemTime;
-        //pLabelTimer->SetText();
-    }
-    return 0;
-}
 
 unsigned int thread_sysmon(void* pTemp)
 {
@@ -272,7 +263,19 @@ unsigned int thread_sysmon(void* pTemp)
     return 0;
 }
 
+unsigned int thread_timer(void* pTemp)
+{
+    SYSTEMTIME t;
+    wchar_t buffer[32];
 
+    while (1) {
+        GetLocalTime(&t);
+        wsprintf(buffer, L"%02d:%02d:%02d.%03d", t.wHour, t.wMinute, t.wSecond, t.wMilliseconds);
+        pLabelTimer->SetText(buffer, 0, TRUE);
+        Sleep(1);
+    }
+    return 0;
+}
 
 unsigned int thread_scene_intro(void* pTemp)
 {
@@ -313,6 +316,7 @@ unsigned int thread_scene_intro(void* pTemp)
     Sleep(1500);
     _beginthreadex(NULL, NULL, thread_sysmon, 0, 0, &ThreadID);
     _beginthreadex(NULL, NULL, thread_packetcapture, 0, 0, &ThreadID);
+    _beginthreadex(NULL, NULL, thread_timer, 0, 0, &ThreadID);
     return 0;
 }
 
@@ -454,6 +458,7 @@ void TestOutroButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pTitleSub->pause(1700);
         pTopLine->pause(1500);
         pBotLine->pause(1500);
+        pLabelTimer->pause(1500);
         pButtonConnInfo->pause(1500);
         pButtonDetailInfo->pause(1700);
         pButtonOutro->pause(1900);
@@ -496,7 +501,8 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pFmtIntro = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 80, DWRITE_TEXT_ALIGNMENT_CENTER, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         pFmtTitle = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 80, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_FAR);
         pFmtTitleSub = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 40, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-        pFmtTimer = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 50, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+        //pFmtTimer = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 50, DWRITE_TEXT_ALIGNMENT_TRAILING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+        pFmtTimer = pUI->uiSys->CreateTextFmt((wchar_t*)L"Consolas", 50, DWRITE_TEXT_ALIGNMENT_TRAILING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         pFmtButton = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 30, DWRITE_TEXT_ALIGNMENT_CENTER, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         pFmtDescMain = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 20, DWRITE_TEXT_ALIGNMENT_TRAILING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         pFmtDescSub = pUI->uiSys->CreateTextFmt((wchar_t*)L"Agency FB", 20, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);

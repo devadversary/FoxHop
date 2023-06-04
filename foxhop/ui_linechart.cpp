@@ -115,7 +115,6 @@ void UI_LineChart::AddValue(float Val, wchar_t* pLabel, BOOL bAutoScroll)
     DataCnt = MainData.size();
     ValidViewDataCnt = ViewDataCnt > DataCnt ? DataCnt : ViewDataCnt;
     ReleaseSRWLockExclusive(&lock);
-
     if (uiMotionState != eUIMotionState::eUMS_Visible) return;
     if (bAutoScroll) SetScroll(DataCnt * ViewDataWidth);
 }
@@ -285,7 +284,6 @@ BOOL UI_LineChart::update(unsigned long time)
     BOOL bNeedRangeUpdate = FALSE;
     long long ModIdx;
     float TmpMin, TmpMax; /*구간 최대최솟값*/
-    //float IntervalMin, IntervalMax; /*구간 최대최솟값*/
     size_t MainDataCnt;
 
     if (uiMotionState == eUIMotionState::eUMS_Hide) return FALSE;
@@ -294,7 +292,6 @@ BOOL UI_LineChart::update(unsigned long time)
     bUpdated = ScrollComp->update(time);
     bUpdated |= pBoxFrame->update(time);
     bUpdated |= pBoxBg->update(time);
-    //bUpdated |= p->update(time);
 
     ViewStartIdx = (long long)CurrentScroll / ViewDataWidth;
     ModIdx = ViewStartIdx % ViewDataCnt;
@@ -324,13 +321,9 @@ BOOL UI_LineChart::update(unsigned long time)
             ChartObject* pObj = ViewData[k];
             if (MainData[pObj->MainDataIdx].MotionPlayed) {
                 pObj->SetValue(FALSE, ViewData[k]->Value, IntervalMax, IntervalMin, ViewData[k]->LabelText);
-                //pObj->ResumeGuideLine(FALSE, 0);
-                //pObj->ResumePoint(FALSE, 0);
             }
             else {
                 pObj->SetValue(TRUE, ViewData[k]->Value, IntervalMax, IntervalMin, ViewData[k]->LabelText);
-                //pObj->ResumeGuideLine(TRUE, Motion.DelayInitChartGuideLine);
-                //pObj->ResumePoint(TRUE, Motion.DelayInitChartPoint);
                 MainData[pObj->MainDataIdx].MotionPlayed = TRUE;
             }
         }

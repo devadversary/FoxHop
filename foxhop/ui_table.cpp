@@ -29,6 +29,7 @@ UI_Table::UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, uns
     ScrollComp = new ComponentMotion;
     Motion = MotionParam;
     PinCount = 0;
+    ValidViewDataCnt = 0;
 
     /* 열 정보 셋팅 */
     if (!ColumnCount) ColumnCount = 1; /*최소 1개의 열은 필요함*/
@@ -208,7 +209,7 @@ void UI_Table::AddData(BOOL bMotion, BOOL bAutoScroll, wchar_t* ...)
     Row.bTextMotionPlayed = bMotion ? FALSE : TRUE;
     MainDataPool.emplace_back(Row);
     DataCount++;
-
+    ValidViewDataCnt = ViewRowCnt > DataCount ? DataCount : ViewRowCnt;
     TmpScrollPx = (DataCount * RowHgt) - ClientHeight;
     if (TmpScrollPx <= 0) MaxScrollPixel = 0; /*음수는 없다.*/
     else MaxScrollPixel = TmpScrollPx;
@@ -241,7 +242,8 @@ void UI_Table::EditData(BOOL bMotion, unsigned long long RowIdx, wchar_t* ...)
 
     if (DataIdxIsInScreen(RowIdx)) {
         pRow = ViewData[vidx];
-        pRow->SetText(MainDataPool[RowIdx].ppData, ColCnt);
+        if (uiMotionState == eUIMotionState::eUMS_Visible)
+            pRow->SetText(MainDataPool[RowIdx].ppData, ColCnt);
     }
     ReleaseSRWLockExclusive(&lock);
 }
@@ -665,6 +667,7 @@ void UI_Table::pause(int nDelay)
     //PinCount = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
     AcquireSRWLockExclusive(&lock);
     uiMotionState = eUIMotionState::eUMS_PlayingHide;
+    PinCount = ValidViewDataCnt; /*현재의 유효 뷰 갯수 (Resume시엔 PinCount를 따르지 않음)*/
     ScrollComp->clearChannel(); /*스크롤 모션 정지*/
     ReleaseSRWLockExclusive(&lock);
     PauseFrame(nDelay + Motion.DelayPauseTableFrame);
@@ -678,7 +681,6 @@ void UI_Table::pause(int nDelay)
 BOOL UI_Table::update(unsigned long time)
 {
     RowObject* pViewRow;
-    int ValidViewRowCnt;
     int UpdateIdx;
     long long ModIndex, CurrBindIndex;
     BOOL bUpdated = FALSE;
@@ -693,25 +695,29 @@ BOOL UI_Table::update(unsigned long time)
 
     ViewStartIdx = (long long)CurrScrollPixel / RowHgt;
     ModIndex = ViewStartIdx % ViewRowCnt;
-    ValidViewRowCnt = DataCount < ViewRowCnt ? DataCount : ViewRowCnt;
     MainDataPoolSize = MainDataPool.size();
 
     /*데이터 바인딩*/
-    for (int i = 0; i < ValidViewRowCnt; i++) {
+    for (int i = 0; i < ValidViewDataCnt; i++) {
         CurrBindIndex = ViewStartIdx + i;
         if (MainDataPoolSize <= CurrBindIndex) break; /*딱뎀상황에선 자투리 접근 X*/
         UpdateIdx = (ModIndex + i) % ViewRowCnt; /*현재 뷰 영역의 인덱스 계산*/
         pViewRow = ViewData[UpdateIdx];
         pViewRow->OnBind(CurrBindIndex, ColWidth);
     }
-    PinCount = ValidViewRowCnt;
 
     /*뷰 행 업데이트*/
-    for (int i = 0; i < ValidViewRowCnt; i++) {
-        //UpdateIdx = (ModIndex + i) % ViewRowCnt; /*현재 뷰 영역의 인덱스 계산*/
-        //pViewRow = ViewData[UpdateIdx];
-        pViewRow = ViewData[i];
-        bUpdated |= pViewRow->update(time);
+    if (uiMotionState == eUIMotionState::eUMS_PlayingHide) {
+        for (int i = 0; i < PinCount; i++) {
+            pViewRow = ViewData[i];
+            bUpdated |= pViewRow->update(time);
+        }
+    }
+    else {
+        for (int i = 0; i < ValidViewDataCnt; i++) {
+            pViewRow = ViewData[i];
+            bUpdated |= pViewRow->update(time);
+        }
     }
 
     /*헤더 업데이트*/
@@ -759,10 +765,10 @@ void UI_Table::render()
     ModIndex = ViewStartIdx% ViewRowCnt;
 
     MainDataPoolSize = MainDataPool.size();
-    for (int i = 0; i < PinCount; i++) {
+    for (int i = 0; i < ValidViewDataCnt; i++) {
         if (MainDataPoolSize <= ViewStartIdx + i) break; /*딱뎀시 자투리 X*/
         pRenderTarget->SetTransform(TmpMat);
-        idx = (ModIndex + i) % PinCount;
+        idx = (ModIndex + i) % ValidViewDataCnt;
         ViewData[idx]->render(); /*행 렌더링*/
         TmpMat.dy += (float)RowHgt;
     }

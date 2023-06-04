@@ -234,7 +234,7 @@ void UI_Static::render()
     ReleaseSRWLockShared(&lock);
 }
 
-void UI_Static::SetText(wchar_t* pStr, int nDelay)
+void UI_Static::SetText(wchar_t* pStr, int nDelay, BOOL bForce)
 {
     MOTION_INFO mi;
 
@@ -242,7 +242,12 @@ void UI_Static::SetText(wchar_t* pStr, int nDelay)
     AcquireSRWLockExclusive(&lock);
     wcscpy_s(szText, ARRAYSIZE(szText), pStr);
     ReleaseSRWLockExclusive(&lock);
-    ResumeText(nDelay);
+    if (bForce) {
+        AcquireSRWLockExclusive(&lock);
+        pText->SetText(szText);
+        ReleaseSRWLockExclusive(&lock);
+    }
+    else ResumeText(nDelay);
 }
 
 /**
