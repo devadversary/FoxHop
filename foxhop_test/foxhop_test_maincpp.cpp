@@ -61,6 +61,12 @@ UI_Static* pLabelProtocol = NULL;
 UI_Static* pLabelProtocolDesc = NULL;
 UI_Textinput* pTextInput = NULL;
 
+UI_Line* pOutroLine1 = NULL;
+UI_Line* pOutroLine2 = NULL;
+UI_Static* pOutroText1 = NULL;
+UI_Static* pOutroText2 = NULL;
+UI_Static* pOutroText3 = NULL;
+UI_Static* pOutroText4 = NULL;
 
 /**
     @brief 차이 구하기
@@ -310,6 +316,25 @@ unsigned int thread_scene_intro(void* pTemp)
     return 0;
 }
 
+unsigned int thread_scene_outro(void* pTemp)
+{
+    Sleep(500);
+    pOutroLine1->resume(0);
+    pOutroLine2->resume(200);
+    pOutroText1->resume(200);
+    pOutroText2->resume(600);
+    Sleep(3000);
+    pOutroText1->pause(0);
+    pOutroText2->pause(300);
+    pOutroText3->resume(300);
+    pOutroText4->resume(900);
+    Sleep(3000);
+    pOutroText3->pause(0);
+    pOutroText4->pause(500);
+    pOutroLine1->pause(300);
+    pOutroLine2->pause(600);
+    return 0;
+}
 
 void TestTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -398,6 +423,7 @@ void TestDetailInfoButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lPara
 void TestOutroButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     UI_Button* pButton = static_cast<UI_Button*>(pUI);
+    unsigned int ThreadID;
 
     switch (Message) {
     case WM_LBUTTONUP:
@@ -431,6 +457,7 @@ void TestOutroButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pButtonConnInfo->pause(1500);
         pButtonDetailInfo->pause(1700);
         pButtonOutro->pause(1900);
+        _beginthreadex(NULL, NULL, thread_scene_outro, 0, 0, &ThreadID);
         break;
     }
 }
@@ -453,9 +480,11 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
     IDWriteTextFormat* pFmtDescMain;
     IDWriteTextFormat* pFmtDescSub;
     IDWriteTextFormat* pFmtTextInput;
-    static POSITION IntroLineVertex[] = { {480, 420,}, {1440, 420,}, {1440, 660,}, {480, 660,} };
+    static POSITION IntroLineVertex[] = { {U(8),U(7),}, {U(24), U(7),}, {U(24), U(11),}, {U(8), U(11),}};
     static POSITION TopLineVertex[] = { {U(1),U(2),}, {U(5),U(2),}, {U(7),U(2),}, {U(20),U(2),}, {U(28),U(2),}, {U(31),U(2),} };
     static POSITION BotLineVertex[] = { {U(31),U(16),},{U(24),U(16),},{U(19),U(16),}, {U(1),U(16),} };
+    static POSITION OutroLineVertex1[] = { {U(8),U(7)}, {U(24),U(7),}, {U(24),U(9)}};
+    static POSITION OutroLineVertex2[] = { {U(24),U(11),}, {U(8),U(11),}, {U(8),U(9),} };
 
     //static POSITION BotLineVertex[] = { {480, 420, 0, 0}, {1440, 420, 0, 0}, {1440, 660, 0, 0}, {480, 660, 0, 0} };
     switch (Message) {
@@ -515,6 +544,13 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pLabelProtocolDesc = new UI_Static(pUI->uiSys, NULL, { U(29), U(10.5), U(2), U(0.5) }, pFmtDescSub, (wchar_t*)L"", DescSubParam);
         pTextInput = new UI_Textinput(pUI->uiSys, NULL, {U(21),U(11.5), U(10), U(3.5)}, pFmtTextInput, InputParam);
 
+        pOutroText1 = new UI_Static(pUI->uiSys, NULL, { U(8), U(7), U(16), U(2) }, pFmtIntro, (wchar_t*)L"F o x h o p   U I  L i b r a r y", IntroStaticParam2);
+        pOutroText2 = new UI_Static(pUI->uiSys, NULL, { U(8), U(9), U(16), U(2) }, pFmtIntro, (wchar_t*)L"C + + B a s e d", IntroStaticParam2);
+        pOutroText3 = new UI_Static(pUI->uiSys, NULL, { U(8), U(7), U(16), U(2) }, pFmtIntro, (wchar_t*)L"G i t h u b   R e p o .", IntroStaticParam2);
+        pOutroText4 = new UI_Static(pUI->uiSys, NULL, { U(8), U(9), U(16), U(2) }, pFmtIntro, (wchar_t*)L"C O M M I N G   S O O N", IntroStaticParam2);
+        pOutroLine1 = new UI_Line(pUI->uiSys, OutroLineVertex1, ARRAYSIZE(OutroLineVertex1), NULL, FALSE, IntroLineParam);
+        pOutroLine2 = new UI_Line(pUI->uiSys, OutroLineVertex2, ARRAYSIZE(OutroLineVertex2), NULL, FALSE, IntroLineParam);
+
         pPanel->RegisterUI(pIntroText); /*인트로용 임시 UI*/
         pPanel->RegisterUI(pIntroText2);
         pPanel->RegisterUI(pIntroText3);
@@ -553,6 +589,12 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pPanel->RegisterUI(pLabelProtocolDesc);
         pPanel->RegisterUI(pTextInput);
 
+        pPanel->RegisterUI(pOutroText1);
+        pPanel->RegisterUI(pOutroText2);
+        pPanel->RegisterUI(pOutroText3);
+        pPanel->RegisterUI(pOutroText4);
+        pPanel->RegisterUI(pOutroLine1);
+        pPanel->RegisterUI(pOutroLine2);
 
 
 

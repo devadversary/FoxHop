@@ -114,6 +114,8 @@ void UI_ParamSet() {
 
 	ButtonParam.InitMotion = eButtonMotionPattern::eInit_Reload;
 	ButtonParam.InitPitch = 700;
+	ButtonParam.PauseMotion = eButtonMotionPattern::ePause_Flick;
+	ButtonParam.PausePitch = 200;
 	ButtonParam.ClickMotion = eButtonMotionPattern::eClick_Flash;
 	ButtonParam.ClickPitch = 1000;
 	ButtonParam.FaceColor = { 0.7,0,0,0.6 };

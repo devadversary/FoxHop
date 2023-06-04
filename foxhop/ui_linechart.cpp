@@ -255,6 +255,7 @@ void UI_LineChart::PauseDataOrder(unsigned long Delay)
 
 void UI_LineChart::resume(int nDelay)
 {
+    if (uiMotionState == eUIMotionState::eUMS_Visible) return;
     AcquireSRWLockExclusive(&lock);
     uiMotionState = eUIMotionState::eUMS_PlayingVisible;
     ReleaseSRWLockExclusive(&lock);
@@ -266,6 +267,7 @@ void UI_LineChart::resume(int nDelay)
 
 void UI_LineChart::pause(int nDelay)
 {
+    if (uiMotionState == eUIMotionState::eUMS_Hide) return;
     AcquireSRWLockExclusive(&lock);
     uiMotionState = eUIMotionState::eUMS_PlayingHide;
     PinCount = ValidViewDataCnt; /*현재의 유효 뷰 갯수 (Resume시엔 PinCount를 따르지 않음)*/
