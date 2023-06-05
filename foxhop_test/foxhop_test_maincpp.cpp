@@ -329,7 +329,7 @@ unsigned int thread_scene_outro(void* pTemp)
     pOutroText2->resume(600);
     Sleep(3000);
     pOutroText1->pause(0);
-    pOutroText2->pause(300);
+    pOutroText2->pause(150);
     pOutroText3->resume(300);
     pOutroText4->resume(900);
     Sleep(3000);
@@ -688,6 +688,7 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nSh
     RegisterClass(&wc);
     //hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), NULL, NULL, hInst, NULL);
     //hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_OVERLAPPEDWINDOW, 0, 0, 1920, 1080, NULL, NULL, hInst, NULL);
+    //hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP, 0, 0, 1920, 1080, NULL, NULL, hInst, NULL);
     hWnd = CreateWindow(CLASSNAME, CLASSNAME, WS_POPUP, 0, 0, 1920, 1080, NULL, NULL, hInst, NULL);
     AlphaWindow(hWnd, WINDOWMODE_TRANSPARENT);
     ShowWindow(hWnd, TRUE);

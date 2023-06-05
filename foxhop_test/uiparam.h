@@ -216,6 +216,7 @@ void UI_ParamSet() {
 
 	DescMainParam.ColorBg = { 0.7, 0, 0, 1 };
 	DescMainParam.ColorText = { 1,1,1,1 };
+	DescMainParam.ColorFrame = ALL_ZERO;
 	DescMainParam.MotionInitBg = eStaticMotionPattern::eInitBg_ExpendRight;
 	DescMainParam.PitchInitBg = 300;
 	DescMainParam.DelayInitBg = 0;
@@ -231,6 +232,7 @@ void UI_ParamSet() {
 
 	DescSubParam.ColorBg = ALL_ZERO;
 	DescSubParam.ColorText = { 1,1,1,1 };
+	DescSubParam.ColorFrame = ALL_ZERO;
 	DescSubParam.MotionInitText = eStaticMotionPattern::eInitText_Flick;
 	DescSubParam.PitchInitText = 200;
 	DescSubParam.DelayInitText = 0;
