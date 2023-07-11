@@ -14,7 +14,7 @@ Direct2D / C++ / WinAPI 기반의 모션 그래픽 UI 라이브러리 입니다.
 
 *****
 ## Initialize & Usage
-UISystem 클래스를 초기화 하고 메인 패널을 만들어야 한다.
+UISystem 클래스를 초기화 하고 메인 패널을 만들어야 합니다.
 
 ```cpp
 #include <ui_system.hpp>
