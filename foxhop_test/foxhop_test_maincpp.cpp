@@ -11,6 +11,7 @@
 #include "../foxhop/include/ui_static.hpp"
 #include "../foxhop/include/ui_line.hpp"
 #include "../foxhop/include/ui_table.hpp"
+#include "../foxhop/include/ui_datatable.hpp"
 #include "../foxhop/include/ui_textinput.hpp"
 #include "../foxhop/include/ui_linechart.hpp"
 #include "tree.hpp"
@@ -602,8 +603,6 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
         pPanel->RegisterUI(pOutroLine1);
         pPanel->RegisterUI(pOutroLine2);
 
-
-
         _beginthreadex(NULL, NULL, thread_scene_intro, 0, 0, &ThreadID);
         _beginthreadex(NULL, NULL, thread_update_render, 0, 0, &ThreadID);
 #if 0
@@ -645,12 +644,12 @@ void MainPanelProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     static UI_Panel* pMainPanel = NULL;
-    static unsigned int ThreadID;
-    if (pMainPanel) uiSys->SendUIMessage(pMainPanel, Message, wParam, lParam);
+    //if (pMainPanel) uiSys->SendUIMessage(pMainPanel, Message, wParam, lParam);
+    if (pMainPanel) pMainPanel->DefaultHandler(pMainPanel, Message, wParam, lParam);
 
     switch (Message) {
     case WM_CREATE:
-        uiSys = new UISystem(hWnd);        
+        uiSys = new UISystem(hWnd);
         pMainPanel = uiSys->InitMainPanel(hWnd, MainPanelProc);
         break;
 

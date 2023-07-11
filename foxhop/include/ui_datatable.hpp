@@ -8,17 +8,17 @@ class UISystem; /*UI시스템 클래스의 전방선언*/
 /**
     @brief 테이블이 관리할 행 데이터
 */
-typedef struct _st_TableRow
+typedef struct _st_DataTableRow
 {
     bool      bSelected; /**< 행 선택 여부*/
     bool      bTextMotionPlayed; /**< 모션이 진행 되었는지 여부*/
     wchar_t** ppData;    /**< 데이터 */
-} TABLE_ROW;
+} DATATABLE_ROW;
 
 /**
     @brief 테이블 모션 타입 상수
 */
-enum class eTableMotionPattern {
+enum class eDataTableMotionPattern {
     eInitTableFrame_Default = 0,
     eInitTableFrame_Flick,
     eInitTableFrame_ExpendAllDirFlick,
@@ -66,79 +66,79 @@ enum class eTableMotionPattern {
     eInitRowHighlight_Blink,
 };
 
-class RowObject;
+class DataTableRowObject;
 
-class UI_Table_MotionParam {
+class UI_DataTable_MotionParam {
 public:
-    eTableMotionPattern MotionInitTableFrame;
+    eDataTableMotionPattern MotionInitTableFrame;
     unsigned long PitchInitTableFrame;
     unsigned long DelayInitTableFrame;
-    eTableMotionPattern MotionPauseTableFrame;
+    eDataTableMotionPattern MotionPauseTableFrame;
     unsigned long PitchPauseTableFrame;
     unsigned long DelayPauseTableFrame;
 
-    eTableMotionPattern MotionInitTableBg;
+    eDataTableMotionPattern MotionInitTableBg;
     unsigned long PitchInitTableBg;
     unsigned long DelayInitTableBg;
-    eTableMotionPattern MotionPauseTableBg;
+    eDataTableMotionPattern MotionPauseTableBg;
     unsigned long PitchPauseTableBg;
     unsigned long DelayPauseTableBg;
 
-    eTableMotionPattern MotionInitTableHeaderBg;
+    eDataTableMotionPattern MotionInitTableHeaderBg;
     unsigned long PitchInitTableHeaderBg;
     unsigned long DelayInitTableHeaderBg;
-    eTableMotionPattern MotionPauseTableHeaderBg;
+    eDataTableMotionPattern MotionPauseTableHeaderBg;
     unsigned long PitchPauseTableHeaderBg;
     unsigned long DelayPauseTableHeaderBg;
 
-    eTableMotionPattern MotionInitTableHeaderText;
+    eDataTableMotionPattern MotionInitTableHeaderText;
     unsigned long PitchInitTableHeaderText;
     unsigned long DelayInitTableHeaderText;
     unsigned long GapInitTableHeaderText;
     unsigned long RangeInitTableHeaderText;
-    eTableMotionPattern MotionPauseTableHeaderText;
+    eDataTableMotionPattern MotionPauseTableHeaderText;
     unsigned long PitchPauseTableHeaderText;
     unsigned long DelayPauseTableHeaderText;
     unsigned long GapPauseTableHeaderText;
     unsigned long RangePauseTableHeaderText;
 
-    eTableMotionPattern MotionInitTableRowOrder;
+    eDataTableMotionPattern MotionInitTableRowOrder;
     unsigned long PitchInitTableRowOrder;
     unsigned long DelayInitTableRowOrder;
     unsigned long GapInitTableRowOrder;
     unsigned long RangeInitTableRowOrder;
-    eTableMotionPattern MotionPauseTableRowOrder;
+    eDataTableMotionPattern MotionPauseTableRowOrder;
     unsigned long PitchPauseTableRowOrder;
     unsigned long DelayPauseTableRowOrder;
     unsigned long GapPauseTableRowOrder;
     unsigned long RangePauseTableRowOrder;
 
-    eTableMotionPattern MotionInitRowSelect;
+    eDataTableMotionPattern MotionInitRowSelect;
     unsigned long PitchInitRowSelect;
     unsigned long DelayInitRowSelect;
-    eTableMotionPattern MotionPauseRowSelect; /*unselect*/
+    eDataTableMotionPattern MotionPauseRowSelect; /*unselect*/
     unsigned long PitchPauseRowSelect;
     unsigned long DelayPauseRowSelect;
 
-    eTableMotionPattern MotionInitRowText;
+    eDataTableMotionPattern MotionInitRowText;
     unsigned long PitchInitRowText;
     unsigned long DelayInitRowText;
     unsigned long GapInitRowText; /*텍스트간 딜레이 간격 (좌->우)*/
     unsigned long RangeInitRowText; /*랜덤 모션시 딜레이 범위*/
-    eTableMotionPattern MotionPauseRowText;
+    eDataTableMotionPattern MotionPauseRowText;
     unsigned long PitchPauseRowText;
     unsigned long DelayPauseRowText;
     unsigned long GapPauseRowText; /*텍스트간 딜레이 간격 (좌->우)*/
     unsigned long RangePauseRowText; /*랜덤 모션시 딜레이 범위*/
 
-    eTableMotionPattern MotionInitRowBg;
+    eDataTableMotionPattern MotionInitRowBg;
     unsigned long PitchInitRowBg;
     unsigned long DelayInitRowBg;
-    eTableMotionPattern MotionPauseRowBg;
+    eDataTableMotionPattern MotionPauseRowBg;
     unsigned long PitchPauseRowBg;
     unsigned long DelayPauseRowBg;
 
-    eTableMotionPattern MotionInitRowHighlight;
+    eDataTableMotionPattern MotionInitRowHighlight;
     unsigned long PitchInitRowHighlight;
 
     unsigned long PitchScroll;
@@ -157,72 +157,72 @@ public:
     D2D1_COLOR_F  ColorRowTextSelect;
 
 public:
-    UI_Table_MotionParam() {
-        MotionInitTableFrame = eTableMotionPattern::eInitTableFrame_Default;
+    UI_DataTable_MotionParam() {
+        MotionInitTableFrame = eDataTableMotionPattern::eInitTableFrame_Default;
         PitchInitTableFrame = 0;
         DelayInitTableFrame = 0;
-        MotionPauseTableFrame = eTableMotionPattern::ePauseTableFrame_Default;
+        MotionPauseTableFrame = eDataTableMotionPattern::ePauseTableFrame_Default;
         PitchPauseTableFrame = 0;
         DelayPauseTableFrame = 0;
 
-        MotionInitTableBg = eTableMotionPattern::eInitTableBg_Default;
+        MotionInitTableBg = eDataTableMotionPattern::eInitTableBg_Default;
         PitchInitTableBg = 0;
         DelayInitTableBg = 0;
-        MotionPauseTableBg = eTableMotionPattern::ePauseTableBg_Default;
+        MotionPauseTableBg = eDataTableMotionPattern::ePauseTableBg_Default;
         PitchPauseTableBg = 0;
         DelayPauseTableBg = 0;
 
-        MotionInitTableHeaderBg = eTableMotionPattern::eInitTableHeaderBg_Default;
+        MotionInitTableHeaderBg = eDataTableMotionPattern::eInitTableHeaderBg_Default;
         PitchInitTableHeaderBg = 0;
         DelayInitTableHeaderBg = 0;
-        MotionPauseTableHeaderBg = eTableMotionPattern::ePauseTableHeaderBg_Default;
+        MotionPauseTableHeaderBg = eDataTableMotionPattern::ePauseTableHeaderBg_Default;
         PitchPauseTableHeaderBg = 0;
         DelayPauseTableHeaderBg = 0;
 
-        MotionInitTableHeaderText = eTableMotionPattern::eInitTableHeaderText_Default;
+        MotionInitTableHeaderText = eDataTableMotionPattern::eInitTableHeaderText_Default;
         PitchInitTableHeaderText = 0;
         DelayInitTableHeaderText = 0;
-        MotionPauseTableHeaderText = eTableMotionPattern::ePauseTableHeaderText_Default;
+        MotionPauseTableHeaderText = eDataTableMotionPattern::ePauseTableHeaderText_Default;
         PitchPauseTableHeaderText = 0;
         DelayPauseTableHeaderText = 0;
 
-        MotionInitTableRowOrder = eTableMotionPattern::eInitTableRowOrder_Default;
+        MotionInitTableRowOrder = eDataTableMotionPattern::eInitTableRowOrder_Default;
         PitchInitTableRowOrder = 0;
         DelayInitTableRowOrder = 0;
         GapInitTableRowOrder = 0;
         RangeInitTableRowOrder = 0;
-        MotionPauseTableRowOrder = eTableMotionPattern::ePauseTableRowOrder_Default;
+        MotionPauseTableRowOrder = eDataTableMotionPattern::ePauseTableRowOrder_Default;
         PitchPauseTableRowOrder = 0;
         DelayPauseTableRowOrder = 0;
         GapPauseTableRowOrder = 0;
         RangePauseTableRowOrder = 0;
 
-        MotionInitRowSelect = eTableMotionPattern::eInitTableSelect_Default;
+        MotionInitRowSelect = eDataTableMotionPattern::eInitTableSelect_Default;
         PitchInitRowSelect = 0;
         DelayInitRowSelect = 0;
-        MotionPauseRowSelect = eTableMotionPattern::ePauseTableSelect_Default;
+        MotionPauseRowSelect = eDataTableMotionPattern::ePauseTableSelect_Default;
         PitchPauseRowSelect = 0;
         DelayPauseRowSelect = 0;
 
-        MotionInitRowText = eTableMotionPattern::eInitRowText_Default;
+        MotionInitRowText = eDataTableMotionPattern::eInitRowText_Default;
         PitchInitRowText = 0;
         DelayInitRowText = 0;
         GapInitRowText = 0;
         RangeInitRowText = 0;
-        MotionPauseRowText = eTableMotionPattern::ePauseRowText_Default;
+        MotionPauseRowText = eDataTableMotionPattern::ePauseRowText_Default;
         PitchPauseRowText = 0;
         DelayPauseRowText = 0;
         GapPauseRowText = 0;
         RangePauseRowText = 0;
 
-        MotionInitRowBg = eTableMotionPattern::eInitRowBg_Default;
+        MotionInitRowBg = eDataTableMotionPattern::eInitRowBg_Default;
         PitchInitRowBg = 0;
         DelayInitRowBg = 0;
-        MotionPauseRowBg = eTableMotionPattern::ePauseRowBg_Default;
+        MotionPauseRowBg = eDataTableMotionPattern::ePauseRowBg_Default;
         PitchPauseRowBg = 0;
         DelayPauseRowBg = 0;
 
-        MotionInitRowHighlight = eTableMotionPattern::eInitRowHighlight_Blink;
+        MotionInitRowHighlight = eDataTableMotionPattern::eInitRowHighlight_Blink;
         PitchInitRowHighlight = 200;
 
         PitchScroll = 200;
@@ -240,21 +240,22 @@ public:
         ColorRowTextSelect = { 1.f, 1.f, 1.f, 1.f };
     }
 };
+
 /**
     @brief 테이블 클래스
 */
-class UI_Table : public UI {
+class UI_DataTable : public UI {
 public:
-    std::vector<TABLE_ROW>  MainDataPool; /**< 갖고있는 모든 데이터*/
-    UI_Table_MotionParam Motion;
+    std::vector<DATATABLE_ROW>  MainDataPool; /**< 갖고있는 모든 데이터*/
+    UI_DataTable_MotionParam Motion;
 
 private:
     SRWLOCK lock;
     ComponentMotion* ScrollComp;   /**< 스크롤 모션 진행을 위한 컴포넌트*/
-    PropBox*  pBoxHeader;
+    PropBox* pBoxHeader;
     PropText** ppTextHdr;
-    PropBox*  pBoxFrame;
-    std::vector<RowObject*> ViewData;     /**< 화면에 보일 행 데이터 (화면 크기만큼만 생성)*/
+    PropBox* pBoxFrame;
+    std::vector<DataTableRowObject*> ViewData;     /**< 화면에 보일 행 데이터 (화면 크기만큼만 생성)*/
     POINT     MousePt;         /**< 마우스 위치*/
     BOOL      MultiSelectMode; /**< FALSE:단일 선택 / TRUE:여러줄 선택 모드*/
     long long DataCount;       /**< 현재 데이터 갯수*/
@@ -265,7 +266,7 @@ private:
     long long MaxScrollPixel;  /**< 데이터 갯수 x 행 높이 = 최대 스크롤가능 픽셀*/
     int       ColCnt;          /**< 열 갯수*/
     wchar_t** ColName;         /**< 열 이름*/
-    int*      ColWidth;        /**< 열 가로폭 픽셀*/
+    int* ColWidth;        /**< 열 가로폭 픽셀*/
     int       HeaderHgt;       /**< 헤더 높이 픽셀*/
     int       RowHgt;          /**< 행 높이 픽셀*/
     int       ClientHeight;    /**< 헤더 높이를 제외한 순수 테이블 영역 높이*/
@@ -274,13 +275,13 @@ private:
     long long PinCount;
 private:
     static void DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
-    
+
     void ResumeFrame(unsigned long Delay);
     void PauseFrame(unsigned long Delay);
 
     void ResumeBg(unsigned long Delay);
     void PauseBg(unsigned long Delay);
-    
+
     void ResumeHeaderBg(unsigned long Delay);
     void PauseHeaderBg(unsigned long Delay);
 
@@ -301,8 +302,8 @@ private:
     void SetViewRowHighlight();
 
 public:
-    UI_Table(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, unsigned int ColumnCount, wchar_t** ColumnNameList, unsigned int* ColumnWidth, unsigned int HeaderHeight, unsigned int RowHeight, BOOL MultiSelect, UI_Table_MotionParam MotionParam = UI_Table_MotionParam());
-    ~UI_Table() {};
+    UI_DataTable(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, unsigned int ColumnCount, wchar_t** ColumnNameList, unsigned int* ColumnWidth, unsigned int HeaderHeight, unsigned int RowHeight, BOOL MultiSelect, UI_DataTable_MotionParam MotionParam = UI_DataTable_MotionParam());
+    ~UI_DataTable() {};
 
     void pause(int nDelay);
     void resume(int nDelay);
@@ -322,25 +323,25 @@ public: /*UI별 옵션 매서드*/
 /**
     @brief 테이블이 화면에 렌더링할 행 데이터
 */
-class RowObject : public UI {
-public: 
+class DataTableRowObject : public UI {
+public:
     unsigned long long MainDataIdx = -1;   /**< 이 뷰행이 가리키는 MainDataPool 데이터의 인덱스*/
 
 private:
-    UI_Table*  pParent;
+    UI_DataTable* pParent;
     POSITION   Pos;
     PropText** ppText;
     PropLine** ppColLine;      /**< 열 구분선*/
-    PropBox*   pBackgroundBox; /**< 배경색*/
-    PropBox*   pSelectBox;     /**< 선택 색상*/
-    PropBox*   pHighlightBox;  /**< 하이라이트 색 (내용변경 등의 모션에 응용 가능)*/
-    wchar_t**  ppRealData;
-    int*       pWidth;
+    PropBox* pBackgroundBox; /**< 배경색*/
+    PropBox* pSelectBox;     /**< 선택 색상*/
+    PropBox* pHighlightBox;  /**< 하이라이트 색 (내용변경 등의 모션에 응용 가능)*/
+    wchar_t** ppRealData;
+    int* pWidth;
     int        nColumn;        /**< 열 갯수*/
 
 public:
-    RowObject(UISystem* pUISys, UI_Table* pParentTable, POSITION pos, unsigned int ColCnt);
-    ~RowObject();
+    DataTableRowObject(UISystem* pUISys, UI_DataTable* pParentTable, POSITION pos, unsigned int ColCnt);
+    ~DataTableRowObject();
     void SetSelectBox(BOOL bSel, D2D1_COLOR_F Color, BOOL bMotion);
     void SetHighlight(D2D1_COLOR_F Color);
     void SetTextColor(D2D1_COLOR_F Color, BOOL bMotion);
