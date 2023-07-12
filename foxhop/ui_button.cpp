@@ -1,7 +1,7 @@
 #include "./include/ui_button.hpp"
 #include "./include/ui_system.hpp"
 
-UI_Button::UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, IDWriteTextFormat* pTexFmt, wchar_t* pText, int nDelay, UI_Button_MotionParam MotionParam)
+UI_Button::UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, IDWriteTextFormat* pTexFmt, wchar_t* pText, UI_Button_MotionParam MotionParam)
 {
     uiSys          = pUISys;
     pRenderTarget  = pUISys->D2DA.pRenTarget;

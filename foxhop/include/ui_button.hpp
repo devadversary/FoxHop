@@ -102,7 +102,7 @@ private:
     static void DefaultButtonProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
 public:
-    UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, IDWriteTextFormat* pTexFmt, wchar_t* pText, int nDelay, UI_Button_MotionParam MotionParam = UI_Button_MotionParam());
+    UI_Button(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION Pos, IDWriteTextFormat* pTexFmt, wchar_t* pText, UI_Button_MotionParam MotionParam = UI_Button_MotionParam());
     ~UI_Button();
 
     void pause(int nDelay);
