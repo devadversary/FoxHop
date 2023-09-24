@@ -274,7 +274,7 @@ private:
     long long PrevSelMainIdx;  /**< 이전에 선택했던 실 데이터 인덱스 (음수이면 미선택)*/
     long long PinCount;
 private:
-    static void DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
+    static void DefaultDataTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam);
 
     void ResumeFrame(unsigned long Delay);
     void PauseFrame(unsigned long Delay);

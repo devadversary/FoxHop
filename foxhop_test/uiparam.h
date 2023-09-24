@@ -266,7 +266,6 @@ void UI_ParamSet() {
 	InputParam.ColorCaret = { 0.8,0.8,0.8,1 };
 	InputParam.PitchMoveCaret = 150;
 
-
 	ChartParam.MotionInitFrame = eLineChartMotionPattern::eInitFrame_Flick;
 	ChartParam.DelayInitFrame = 0;
 	ChartParam.PitchInitFrame = 200;

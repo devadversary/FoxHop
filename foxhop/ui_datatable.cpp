@@ -11,7 +11,7 @@ UI_DataTable::UI_DataTable(UISystem* pUISys, pfnUIHandler pfnCallback, POSITION 
     uiSys = pUISys;
     pRenderTarget = pUISys->D2DA.pRenTarget;
     Focusable = TRUE;
-    DefaultHandler = DefaultTableProc;
+    DefaultHandler = DefaultDataTableProc;
     MessageHandler = pfnCallback;
     uiPos = Pos;
     uiMotionState = eUIMotionState::eUMS_Hide;
@@ -80,7 +80,7 @@ static BOOL IsInRange(long long x, long long dx, long long test)
     @brief 기본 텍스트 리스트뷰 메세지 핸들러
     @remark 사용자 지정 프로시저는 기본 핸들러 실행 후 호출된다.
 */
-void UI_DataTable::DefaultTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
+void UI_DataTable::DefaultDataTableProc(UI* pUI, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     UI_DataTable* pTable = static_cast<UI_DataTable*>(pUI);
     pfnUIHandler UserHandler = pUI->MessageHandler;
